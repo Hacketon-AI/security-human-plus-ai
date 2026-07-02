@@ -1,0 +1,98 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "securescope-backend"
+version = "0.0.0"
+description = "SecureScope control plane: authorized defensive security testing platform"
+requires-python = ">=3.12"
+# Runtime dependencies are limited to what the foundation actually uses.
+# RabbitMQ broker selection, Redis result backend, and S3 evidence storage
+# remain unwired; Redis result backend is intentionally NOT a dependency —
+# the worker reports via the worker-finished hook, not a Celery result.
+dependencies = [
+    "fastapi>=0.115",
+    "pydantic>=2.7",
+    "pydantic-settings>=2.3",
+    "sqlalchemy[asyncio]>=2.0.30",
+    "asyncpg>=0.29",
+    "alembic>=1.13",
+    # DNS TXT ownership verification (asset_verifications module) resolves a
+    # dedicated verification record; dnspython is the maintained DNS library.
+    "dnspython>=2.6",
+    # Celery publisher for validation dispatch (RabbitMQ is the intended
+    # broker; the URL is supplied at runtime via SECURESCOPE_CELERY_BROKER_URL).
+    # The worker consumer is NOT implemented here — see the rollout plan in
+    # docs/validation-dispatch-broker-design.md.
+    "celery>=5.4",
+    "opentelemetry-api>=1.25",
+    "opentelemetry-sdk>=1.25",
+    "opentelemetry-instrumentation-fastapi>=0.46b0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff>=0.6",
+    "mypy>=1.11",
+    "pytest>=8.2",
+    "pytest-asyncio>=0.24",
+    "httpx>=0.27",
+    # Integration tests run against a real PostgreSQL via Testcontainers, never
+    # an in-memory substitute. psycopg is the container readiness driver; the
+    # application and tests connect with asyncpg.
+    "testcontainers[postgres]>=4.0",
+    "psycopg[binary]>=3.1",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 88
+src = ["app", "tests"]
+
+[tool.ruff.lint]
+# E/F pycodestyle+pyflakes, I import sort, UP pyupgrade, B bugbear,
+# S flake8-bandit (security), ASYNC async pitfalls, RUF ruff-specific.
+select = ["E", "F", "I", "UP", "B", "S", "ASYNC", "RUF"]
+
+[tool.ruff.lint.flake8-bugbear]
+# FastAPI's dependency-injection markers are designed to be called in argument
+# defaults; that is the framework idiom, not a B008 mutable-default mistake.
+extend-immutable-calls = ["fastapi.Depends", "fastapi.Header", "fastapi.Query"]
+
+[tool.ruff.lint.per-file-ignores]
+# Tests may use assert (S101) and inline fixture credentials (S105/S106);
+# migrations are generated and not import-sorted.
+"tests/**" = ["S101", "S105", "S106"]
+"migrations/**" = ["E501", "I001"]
+
+[tool.mypy]
+python_version = "3.12"
+plugins = ["pydantic.mypy"]
+strict = true
+warn_unreachable = true
+warn_redundant_casts = true
+no_implicit_reexport = true
+# Generated Alembic migrations are not held to strict typing.
+[[tool.mypy.overrides]]
+module = "migrations.*"
+ignore_errors = true
+
+# OpenTelemetry instrumentation packages do not all ship type information.
+[[tool.mypy.overrides]]
+module = "opentelemetry.instrumentation.*"
+ignore_missing_imports = true
+
+# Celery does not ship a py.typed marker; the publisher runtime is the only
+# module that imports it, behind a typed Protocol seam (CelerySendTask).
+[[tool.mypy.overrides]]
+module = "celery"
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+addopts = "-ra --strict-markers --strict-config"

@@ -1,0 +1,293 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+/* ============================================================
+   SecureScope — Enterprise Cyber Command Center Theme
+   Dark graphite / deep navy base, cyan + electric-blue accents,
+   controlled green, amber, red, slate. Premium SOC look.
+   ============================================================ */
+
+:root {
+  --radius: 0.375rem; /* sharp technical corners */
+
+  /* Base surfaces — near-black, graphite, blue-black */
+  --background: #060912;          /* deep void */
+  --foreground: #E2E8F0;          /* slate-200 */
+  --card: #0C1320;                /* blue-black panel */
+  --card-foreground: #E2E8F0;
+  --popover: #0E1626;
+  --popover-foreground: #E2E8F0;
+
+  --primary: #22D3EE;             /* cyan accent */
+  --primary-foreground: #051018;
+  --secondary: #111A2B;           /* charcoal */
+  --secondary-foreground: #CBD5E1;
+  --muted: #0F1726;
+  --muted-foreground: #64748B;    /* slate-500 */
+  --accent: #0E1A2E;
+  --accent-foreground: #93C5FD;
+  --destructive: #EF4444;
+  --border: #1E2A40;              /* fine technical border */
+  --input: #16223A;
+  --ring: #22D3EE;
+
+  --chart-1: #22D3EE;
+  --chart-2: #10B981;
+  --chart-3: #F59E0B;
+  --chart-4: #EF4444;
+  --chart-5: #64748B;
+
+  /* SecureScope semantic tokens */
+  --ss-cyan: #22D3EE;
+  --ss-cyan-glow: rgba(34, 211, 238, 0.45);
+  --ss-blue: #3B82F6;
+  --ss-blue-glow: rgba(59, 130, 246, 0.4);
+  --ss-green: #10B981;
+  --ss-green-glow: rgba(16, 185, 129, 0.4);
+  --ss-amber: #F59E0B;
+  --ss-amber-glow: rgba(245, 158, 11, 0.4);
+  --ss-red: #EF4444;
+  --ss-red-glow: rgba(239, 68, 68, 0.4);
+  --ss-yellow: #FACC15;
+  --ss-slate: #64748B;
+  --ss-bluegray: #7C8AA3;
+
+  --ss-surface-1: #0A111E;       /* darkest */
+  --ss-surface-2: #0E1626;       /* panel */
+  --ss-surface-3: #131E33;       /* raised */
+  --ss-surface-4: #1A2740;       /* hover */
+  --ss-grid: rgba(34, 211, 238, 0.06);
+  --ss-grid-strong: rgba(34, 211, 238, 0.1);
+  --ss-hairline: rgba(148, 163, 184, 0.12);
+  --ss-hairline-strong: rgba(148, 163, 184, 0.22);
+
+  --sidebar: #0C1320;
+  --sidebar-foreground: #E2E8F0;
+  --sidebar-primary: #22D3EE;
+  --sidebar-primary-foreground: #051018;
+  --sidebar-accent: #131E33;
+  --sidebar-accent-foreground: #E2E8F0;
+  --sidebar-border: #1E2A40;
+  --sidebar-ring: #22D3EE;
+}
+
+.dark {
+  --background: #060912;
+  --foreground: #E2E8F0;
+  --card: #0C1320;
+  --card-foreground: #E2E8F0;
+  --popover: #0E1626;
+  --popover-foreground: #E2E8F0;
+  --primary: #22D3EE;
+  --primary-foreground: #051018;
+  --secondary: #111A2B;
+  --secondary-foreground: #CBD5E1;
+  --muted: #0F1726;
+  --muted-foreground: #64748B;
+  --accent: #0E1A2E;
+  --accent-foreground: #93C5FD;
+  --destructive: #EF4444;
+  --border: #1E2A40;
+  --input: #16223A;
+  --ring: #22D3EE;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+    border-color: var(--ss-hairline);
+  }
+  html, body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-feature-settings: "cv11", "ss01", "ss03";
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    background-image:
+      linear-gradient(var(--ss-grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--ss-grid) 1px, transparent 1px);
+    background-size: 48px 48px;
+    background-position: -1px -1px;
+  }
+}
+
+/* ============================================================
+   SecureScope utility layers
+   ============================================================ */
+
+@layer components {
+  /* Glass panels — layered SOC surfaces */
+  .ss-panel {
+    background: linear-gradient(180deg, rgba(19, 30, 51, 0.55) 0%, rgba(12, 19, 32, 0.85) 100%);
+    border: 1px solid var(--ss-hairline-strong);
+    border-radius: var(--radius);
+    backdrop-filter: blur(8px);
+  }
+  .ss-panel-raised {
+    background: linear-gradient(180deg, rgba(26, 39, 64, 0.6) 0%, rgba(14, 22, 38, 0.9) 100%);
+    border: 1px solid var(--ss-hairline-strong);
+    border-radius: var(--radius);
+  }
+  .ss-panel-flat {
+    background: rgba(10, 17, 30, 0.6);
+    border: 1px solid var(--ss-hairline);
+    border-radius: var(--radius);
+  }
+  .ss-hairline-t { border-top: 1px solid var(--ss-hairline); }
+  .ss-hairline-b { border-bottom: 1px solid var(--ss-hairline); }
+  .ss-hairline-l { border-left: 1px solid var(--ss-hairline); }
+  .ss-hairline-r { border-right: 1px solid var(--ss-hairline); }
+  .ss-hairline-strong-b { border-bottom: 1px solid var(--ss-hairline-strong); }
+
+  /* Mono references — only for IDs/targets/technical values */
+  .ss-mono {
+    font-family: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-feature-settings: "zero", "ss01";
+    letter-spacing: -0.01em;
+  }
+  .ss-mono-xs { font-family: var(--font-geist-mono), ui-monospace, monospace; font-size: 11px; letter-spacing: -0.01em; }
+
+  /* Section eyebrow label */
+  .ss-eyebrow {
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--muted-foreground);
+  }
+
+  /* Glow for active states only */
+  .ss-glow-cyan { box-shadow: 0 0 0 1px rgba(34,211,238,0.4), 0 0 18px -2px var(--ss-cyan-glow); }
+  .ss-glow-green { box-shadow: 0 0 0 1px rgba(16,185,129,0.4), 0 0 18px -2px var(--ss-green-glow); }
+  .ss-glow-amber { box-shadow: 0 0 0 1px rgba(245,158,11,0.45), 0 0 18px -2px var(--ss-amber-glow); }
+  .ss-glow-red { box-shadow: 0 0 0 1px rgba(239,68,68,0.45), 0 0 18px -2px var(--ss-red-glow); }
+
+  .ss-text-cyan { color: var(--ss-cyan); }
+  .ss-text-blue { color: var(--ss-blue); }
+  .ss-text-green { color: var(--ss-green); }
+  .ss-text-amber { color: var(--ss-amber); }
+  .ss-text-red { color: var(--ss-red); }
+  .ss-text-yellow { color: var(--ss-yellow); }
+  .ss-text-slate { color: var(--ss-slate); }
+  .ss-text-bluegray { color: var(--ss-bluegray); }
+
+  /* Technical grid background for hero/login areas */
+  .ss-grid-bg {
+    background-color: #060912;
+    background-image:
+      linear-gradient(rgba(34,211,238,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(34,211,238,0.05) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+  .ss-grid-bg-fine {
+    background-image:
+      linear-gradient(rgba(148,163,184,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(148,163,184,0.04) 1px, transparent 1px);
+    background-size: 16px 16px;
+  }
+
+  /* Radial vignette for login */
+  .ss-vignette {
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 0%, rgba(34,211,238,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 80% at 100% 100%, rgba(59,130,246,0.06) 0%, transparent 60%),
+      #060912;
+  }
+
+  /* Pulse animation for executing nodes */
+  .ss-pulse-cyan { animation: ss-pulse-cyan 1.8s ease-in-out infinite; }
+  .ss-pulse-green { animation: ss-pulse-green 2.2s ease-in-out infinite; }
+  .ss-pulse-amber { animation: ss-pulse-amber 2.4s ease-in-out infinite; }
+  @keyframes ss-pulse-cyan {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(34,211,238,0.5); }
+    50% { box-shadow: 0 0 0 6px rgba(34,211,238,0); }
+  }
+  @keyframes ss-pulse-green {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(16,185,129,0.5); }
+    50% { box-shadow: 0 0 0 6px rgba(16,185,129,0); }
+  }
+  @keyframes ss-pulse-amber {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(245,158,11,0.5); }
+    50% { box-shadow: 0 0 0 6px rgba(245,158,11,0); }
+  }
+
+  /* Animated dashed flow line for pipelines */
+  .ss-flow-line {
+    background-image: linear-gradient(90deg, rgba(34,211,238,0.6) 50%, transparent 50%);
+    background-size: 8px 1px;
+    background-repeat: repeat-x;
+    animation: ss-flow 0.9s linear infinite;
+  }
+  @keyframes ss-flow {
+    to { background-position: 16px 0; }
+  }
+
+  /* Scan-line / initializing loader */
+  .ss-scan {
+    background: linear-gradient(90deg, transparent, rgba(34,211,238,0.18), transparent);
+    background-size: 50% 100%;
+    animation: ss-scan 1.4s linear infinite;
+  }
+  @keyframes ss-scan {
+    0% { background-position: -50% 0; }
+    100% { background-position: 150% 0; }
+  }
+
+  /* Custom scrollbar */
+  .ss-scroll::-webkit-scrollbar { width: 8px; height: 8px; }
+  .ss-scroll::-webkit-scrollbar-track { background: transparent; }
+  .ss-scroll::-webkit-scrollbar-thumb { background: #1E2A40; border-radius: 4px; }
+  .ss-scroll::-webkit-scrollbar-thumb:hover { background: #2A3A55; }
+
+  /* Connector tick marks on lifecycle rails */
+  .ss-rail-tick {
+    background-image: linear-gradient(90deg, var(--ss-hairline-strong) 1px, transparent 1px);
+    background-size: 8px 100%;
+  }
+}
+
+/* Tabular numerics for counters */
+.tnum { font-variant-numeric: tabular-nums; }
