@@ -1,6 +1,11 @@
 """Validation-execution domain errors."""
 
-from app.platform.errors import ConflictError, DomainValidationError, NotFoundError
+from app.platform.errors import (
+    AuthenticationRequiredError,
+    ConflictError,
+    DomainValidationError,
+    NotFoundError,
+)
 
 
 class ValidationExecutionNotFound(NotFoundError):
@@ -71,6 +76,18 @@ class WorkerCredentialIssuanceFailed(ConflictError):
     internal reason are never carried in the message or the API response."""
 
     code = "worker_credential_issuance_failed"
+
+
+class WorkerKillSwitchAuthenticationFailed(AuthenticationRequiredError):
+    """The kill-switch poll presented a missing or wrong ``kill_switch_token``.
+
+    The poll authenticates on the opaque ``kill_switch_token`` the control plane
+    froze into the execution specification (see ``scan-authorization.md``), not
+    the per-execution worker credential. A missing header and a token mismatch
+    are intentionally indistinguishable — both surface as one 401, and the token
+    value is never echoed."""
+
+    code = "worker_kill_switch_authentication_failed"
 
 
 class ValidationDispatchNotConfigured(ConflictError):

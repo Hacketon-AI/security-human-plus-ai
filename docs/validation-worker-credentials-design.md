@@ -430,12 +430,57 @@ not relax any of them.
      services, routers, dispatcher, or `app.main`; and `app.main` /
      router / service / dispatcher do not import the bootstrap.
 
-     Still deferred to operational wiring: a **production**
-     `WorkerBootstrapSecretSource` (the container-env or credential-
-     service side-channel per option 1 below) and the deployment that
-     runs the Celery worker process. The dev/test source proves the
-     boundary end-to-end; production storage is a drop-in replacement
-     behind the same Protocol.
+   - **Step 4C — production container-env secret source** *(landed)*:
+     `EnvironmentWorkerCredentialSource` (in
+     `app/modules/validation_executions/worker_credential_env_source.py`)
+     is the production `WorkerBootstrapSecretSource` per **option 1**
+     (container env) below. A per-execution container is launched with
+     the credential injected as three environment variables —
+     `SECURESCOPE_WORKER_CREDENTIAL_TOKEN` (raw token, wrapped in
+     `SecretStr` the instant it is read),
+     `SECURESCOPE_WORKER_CREDENTIAL_EXECUTION_ID` (the execution the
+     container was launched for), and
+     `SECURESCOPE_WORKER_CREDENTIAL_EXPIRES_AT` (timezone-aware ISO-8601,
+     mirroring the grant so the source refuses an already-dead credential
+     without a DB read). `resolve(execution_id)` fails closed on every
+     non-happy case with a typed outcome carrying no token: empty request
+     → `invalid_reference`; incomplete env or an env scoped to a
+     *different* execution → `missing` (a container secret can never
+     authenticate another run); unparseable/naive expiry →
+     `source_unavailable`; `now >= expires_at` → `expired`; otherwise
+     `found`. It is **consume-once in-process** (a `Lock`-guarded flag), so
+     a broker redelivery handled by the same worker process cannot re-read
+     the token — mirroring the dev registry. Cross-execution isolation
+     ultimately comes from the per-execution container (fresh container →
+     fresh env → fresh token). Import purity matches the registry/bootstrap
+     (stdlib + pure contract + platform clock + `SecretStr` only), pinned by
+     an AST test.
+
+   - **Step 4D — production hook-delivery transport** *(landed)*:
+     `HttpxWorkerResultTransport` (in
+     `app/modules/validation_executions/worker_result_transport.py`) is the
+     concrete `WorkerResultTransport` the worker uses to POST the
+     `worker-started` / `worker-finished` hooks to the control plane. It is
+     the delivery-side counterpart to the scanner's `HttpxTransportClient`,
+     but for first-party traffic: one bounded (default 10 s), redirect-free,
+     TLS-verified (`verify=True`, `trust_env=False`) JSON `POST` that reads
+     the **status code only** — the response body is streamed and closed
+     unread, so nothing flows back into the worker. `httpx` is imported
+     lazily (worker-only dependency; never in the API import graph).
+     `build_worker_client_factory(base_url, ...)` returns the
+     `WorkerClientFactory` the bootstrap injects: it binds the control-plane
+     `base_url` and this transport, and stamps the per-execution
+     `SecretStr` token onto each client via the `X-Worker-Authorization`
+     header — the token is never logged here. Import purity is pinned by an
+     AST test.
+
+     Still deferred to operational wiring: the **deployment** that launches
+     the per-execution worker container / Celery worker process, injects the
+     `SECURESCOPE_WORKER_CREDENTIAL_*` variables, and constructs
+     `build_run_validation_task_with_handoff_source(source=…,
+     client_factory=…)` from the two pieces above. The **option 2**
+     credential-service source remains a future drop-in behind the same
+     Protocol; nothing else changes to adopt it.
 5. **Production enablement**: turn off the shared-token fallback in
    staging/production via Settings; keep dev/test usable with either
    model for local convenience. Remove the fallback after a soak

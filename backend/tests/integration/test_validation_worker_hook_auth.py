@@ -504,13 +504,24 @@ async def test_shared_token_fallback_logs_deprecation_but_not_token(
 # ---------------------------------------------------------------------------
 
 
-async def test_duplicate_worker_finished_remains_idempotent_after_auth(
+async def test_terminal_worker_finished_revokes_credential_and_freezes_verdict(
     validation_app: tuple[AsyncClient, CapturingValidationDispatcher, Any],
     create_organization: CreateOrg,
     session_factory: async_sessionmaker[AsyncSession],
 ) -> None:
+    """A successful finish revokes the credential; a redelivery cannot revive it.
+
+    The first ``worker-finished`` reaches a terminal verdict and — per the
+    per-execution credential design (Expiry and revocation) — revokes the
+    credential inside the same transaction. A broker redelivery therefore fails
+    authentication with the single indistinguishable 401 (the revoked credential
+    is no longer accepted), rather than re-entering the service. This is the
+    intended fall-through: the recorded verdict is frozen, so the redelivery is
+    harmless (the consumer does not retry a 401), and the credential cannot be
+    replayed against the closed execution.
+    """
     client, _dispatcher, _app = validation_app
-    _ctx, execution_id = await _create_execution(
+    ctx, execution_id = await _create_execution(
         client, create_organization, session_factory
     )
     token = await _issue_credential(
@@ -537,9 +548,22 @@ async def test_duplicate_worker_finished_remains_idempotent_after_auth(
     )
 
     assert first.status_code == 200
-    assert second.status_code == 200
-    # Stored finished_at must not have moved between the two calls.
-    assert first.json()["finished_at"] == second.json()["finished_at"]
+    # Terminal transition revoked the credential: the redelivered finish now
+    # collapses to the single indistinguishable auth failure.
+    assert second.status_code == 401
+    assert second.json()["error"]["code"] == "worker_authentication_failed"
+
+    # The recorded verdict is frozen: the tenant-facing view still shows the
+    # first (and only) terminal result, unmoved by the rejected redelivery.
+    stored = (
+        await client.get(
+            f"/api/v1/validation-executions/{execution_id}",
+            headers=tenant_headers(ctx["org_id"]),
+        )
+    ).json()
+    assert stored["status"] == "succeeded"
+    assert stored["outcome"] == "validated"
+    assert stored["finished_at"] == first.json()["finished_at"]
 
 
 async def test_no_raw_token_in_logs_on_per_execution_auth(

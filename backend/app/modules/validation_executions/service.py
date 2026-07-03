@@ -6,6 +6,7 @@ the dispatch seam, and records lifecycle transitions. It never runs scanner
 logic — that belongs to an isolated worker.
 """
 
+import hmac
 import secrets
 from collections.abc import Sequence
 from datetime import timedelta
@@ -26,6 +27,9 @@ from app.modules.projects.repository import ProjectRepository
 from app.modules.shared.persistence import unique_violation_constraint
 from app.modules.tenancy.context import TenantContext
 from app.modules.validation_executions import audit
+from app.modules.validation_executions.credential_repository import (
+    WorkerCredentialRepository,
+)
 from app.modules.validation_executions.dispatcher import (
     ValidationDispatcher,
     WorkerDispatchPayload,
@@ -42,6 +46,7 @@ from app.modules.validation_executions.errors import (
     InvalidExecutionStateTransition,
     ValidationExecutionNotFound,
     WorkerCredentialIssuanceFailed,
+    WorkerKillSwitchAuthenticationFailed,
 )
 from app.modules.validation_executions.models import (
     ValidationExecution,
@@ -325,6 +330,41 @@ class ValidationExecutionService:
             expires_at=issued.grant.expires_at,
         )
 
+    async def _revoke_worker_credentials(
+        self, execution_id: UUID, organization_id: UUID, *, reason: str
+    ) -> None:
+        """Revoke every active worker credential for a terminated execution.
+
+        Called inside the same transaction as the terminal transition so the
+        credential row(s) close atomically with the execution: a redelivered
+        broker message cannot resurrect a credential for a run that is already
+        ``succeeded`` / ``failed`` / ``cancelled`` / ``blocked`` (see
+        docs/validation-worker-credentials-design.md → Expiry and revocation).
+
+        Idempotent: a credential already carrying ``revoked_at`` is skipped, so
+        a duplicate terminal hook does not move the timestamp forward and emits
+        no second audit event (nothing was closed). The revocation writes only
+        the wall-clock timestamp — no token, digest, or payload is read or
+        logged.
+        """
+        revoked = await self._credentials.revoke_for_execution(
+            execution_id,
+            organization_id,
+            revoked_at=self._clock.now(),
+        )
+        # Record the revocation as an audit fact only when it closed a live
+        # credential; a no-op on an already-revoked/expired set is unremarkable
+        # and would only add noise to the trail on duplicate terminal hooks.
+        if revoked:
+            audit.record_execution_event(
+                action="worker_credential_revoke",
+                organization_id=organization_id,
+                execution_id=execution_id,
+                actor=None,
+                decision="revoked",
+                detail=reason,
+            )
+
     # ------------------------------------------------------------------
     # Read
     # ------------------------------------------------------------------
@@ -382,6 +422,12 @@ class ValidationExecutionService:
                 "execution was modified concurrently; cannot cancel"
             )
         await self._executions.persist(execution)
+        # Cancellation is terminal: close the per-execution worker credential so
+        # a still-running or redelivered worker cannot keep driving hooks for a
+        # run the operator stopped.
+        await self._revoke_worker_credentials(
+            execution.id, tenant.organization_id, reason="cancelled"
+        )
         audit.record_execution_event(
             action="cancel",
             organization_id=tenant.organization_id,
@@ -574,6 +620,14 @@ class ValidationExecutionService:
                 )
             )
         await self._executions.persist(execution)
+        # The run has reached a terminal result: revoke the worker credential so
+        # a broker redelivery of this finish (or a lingering worker) cannot
+        # re-authenticate against a closed execution. The worker's own call has
+        # already been verified above, so closing the credential here does not
+        # break the in-flight request.
+        await self._revoke_worker_credentials(
+            execution.id, organization_id, reason=new_status.value
+        )
         audit.record_execution_event(
             action="worker_finished",
             organization_id=organization_id,
@@ -583,6 +637,50 @@ class ValidationExecutionService:
             detail=payload.outcome.value,
         )
         return execution
+
+    # ------------------------------------------------------------------
+    # Kill-switch poll
+    # ------------------------------------------------------------------
+
+    async def worker_kill_switch_status(
+        self, execution_id: UUID, presented_token: str | None
+    ) -> bool:
+        """Report whether a polling worker must abort this execution.
+
+        Machine path authenticated on the opaque ``kill_switch_token`` the
+        control plane froze into the execution specification (see
+        ``scan-authorization.md``) — not the per-execution worker credential, so
+        a poll never depends on the credential's lifecycle. The presented token
+        is compared to the stored one in constant time; a missing header and a
+        mismatch are indistinguishable, both raising
+        :class:`WorkerKillSwitchAuthenticationFailed` (401). The token value is
+        never logged or echoed.
+
+        Aborts (returns ``True``) when the engagement kill switch is active or
+        the execution has already reached a terminal state — either means an
+        in-flight scan should stop promptly. The read takes no row lock so
+        frequent polls never serialize behind a running transition.
+        """
+        execution = await self._executions.get_by_id(execution_id)
+        if execution is None:
+            # Indistinguishable from a bad token: never disclose existence.
+            raise WorkerKillSwitchAuthenticationFailed("kill-switch authentication failed")
+
+        stored_token = execution.execution_specification.get("kill_switch_token")
+        if not _kill_switch_token_matches(stored_token, presented_token):
+            raise WorkerKillSwitchAuthenticationFailed("kill-switch authentication failed")
+
+        if execution.status in _TERMINAL_STATUSES:
+            return True
+
+        engagement = await self._engagements.get_in_org(
+            execution.engagement_id, execution.organization_id
+        )
+        # A missing engagement (deleted mid-run) is treated as a stop signal:
+        # the worker should not keep scanning against a vanished authorization.
+        if engagement is None:
+            return True
+        return bool(engagement.kill_switch_active)
 
     # ------------------------------------------------------------------
     # Eligibility helpers

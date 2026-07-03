@@ -71,6 +71,21 @@ class ValidationExecutionRepository:
         )
         return result.scalar_one_or_none()
 
+    async def get_by_id(self, execution_id: UUID) -> ValidationExecution | None:
+        """Fetch an execution by id alone, without a lock, for machine reads.
+
+        Used by the kill-switch poll, which authenticates on the frozen
+        ``kill_switch_token`` (not a tenant) and only reads state — so it must
+        not take the row lock ``get_for_update`` holds (polls are frequent and
+        must not serialize behind a running transition). The organization is
+        read from the row, never the caller. User-facing reads keep using the
+        ``*_in_org`` variants so one tenant never sees another's rows.
+        """
+        result = await self._session.execute(
+            select(ValidationExecution).where(ValidationExecution.id == execution_id)
+        )
+        return result.scalar_one_or_none()
+
     async def get_by_idempotency_key(
         self, organization_id: UUID, idempotency_key: str
     ) -> ValidationExecution | None:
