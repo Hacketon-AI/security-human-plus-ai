@@ -122,6 +122,21 @@ def _risk_tier_lte(a: RiskTier, b: RiskTier) -> bool:
     return _RISK_TIER_ORDER.get(a, -1) <= _RISK_TIER_ORDER.get(b, -1)
 
 
+def _kill_switch_token_matches(stored: object, presented: str | None) -> bool:
+    """Constant-time equality of the frozen kill-switch token and a poll header.
+
+    Both operands are coerced to bytes so a missing header (``None``), an absent
+    stored token, or a non-string stored value can never raise or short-circuit —
+    the comparison always runs to completion via :func:`hmac.compare_digest`, so
+    the answer does not leak token length or position through timing. Only a
+    non-empty stored token can match; an empty stored token rejects every poll.
+    """
+    if not isinstance(stored, str) or not stored:
+        return False
+    presented_bytes = (presented or "").encode("utf-8")
+    return hmac.compare_digest(stored.encode("utf-8"), presented_bytes)
+
+
 class ValidationExecutionService:
     """Creates, queues, reads, cancels, and transitions validation executions."""
 
@@ -664,11 +679,15 @@ class ValidationExecutionService:
         execution = await self._executions.get_by_id(execution_id)
         if execution is None:
             # Indistinguishable from a bad token: never disclose existence.
-            raise WorkerKillSwitchAuthenticationFailed("kill-switch authentication failed")
+            raise WorkerKillSwitchAuthenticationFailed(
+                "kill-switch authentication failed"
+            )
 
         stored_token = execution.execution_specification.get("kill_switch_token")
         if not _kill_switch_token_matches(stored_token, presented_token):
-            raise WorkerKillSwitchAuthenticationFailed("kill-switch authentication failed")
+            raise WorkerKillSwitchAuthenticationFailed(
+                "kill-switch authentication failed"
+            )
 
         if execution.status in _TERMINAL_STATUSES:
             return True

@@ -297,6 +297,35 @@ async def test_bootstrap_resolves_token_and_runs_full_lifecycle() -> None:
     assert started["headers"]["X-Worker-Authorization"] == _SENSITIVE_RAW_TOKEN
 
 
+async def test_bootstrap_builds_per_execution_kill_switch_from_envelope() -> None:
+    # The kill switch is built per envelope from the frozen execution id and
+    # ``kill_switch_token`` (in the validated spec), not injected once.
+    registry = InMemoryWorkerCredentialHandoffRegistry(_FixedClock(_NOW))
+    registry.register(_handoff())
+    factory = _CapturingClientFactory()
+    seen: list[tuple[str, str]] = []
+
+    class _InactivePoller:
+        async def is_active(self) -> bool:
+            return False
+
+    def kill_switch_factory(execution_id: str, kill_switch_token: str) -> Any:
+        seen.append((execution_id, kill_switch_token))
+        return _InactivePoller()
+
+    result = await run_validation_envelope_with_handoff(
+        _envelope_dict(),
+        source=registry,
+        client_factory=factory,
+        kill_switch_factory=kill_switch_factory,
+        transport_factory=_scanner_factory,
+    )
+
+    assert result.outcome is BrokerConsumerOutcome.delivered
+    # The factory received this envelope's execution id and kill-switch token.
+    assert seen == [(_EXECUTION_ID, "opaque-poll-key")]
+
+
 # --- Bootstrap: fail-closed paths ------------------------------------------
 
 

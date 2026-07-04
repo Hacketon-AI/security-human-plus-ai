@@ -40,6 +40,9 @@ from app.modules.validation_executions.celery_worker import (
     run_validation_envelope,
 )
 from app.modules.validation_executions.executor import KillSwitch
+from app.modules.validation_executions.kill_switch_control_plane import (
+    KillSwitchFactory,
+)
 from app.modules.validation_executions.worker_client import WorkerClient
 from app.modules.validation_executions.worker_credential_contracts import (
     WorkerBootstrapSecretSource,
@@ -73,6 +76,7 @@ async def run_validation_envelope_with_handoff(
     source: WorkerBootstrapSecretSource,
     client_factory: WorkerClientFactory,
     kill_switch: KillSwitch | None = None,
+    kill_switch_factory: KillSwitchFactory | None = None,
     transport_factory: TransportFactory | None = None,
     shared_token_fallback: SecretStr | None = None,
 ) -> BrokerConsumerResult:
@@ -155,6 +159,7 @@ async def run_validation_envelope_with_handoff(
         envelope,
         client,
         kill_switch=kill_switch,
+        kill_switch_factory=kill_switch_factory,
         transport_factory=transport_factory,
     )
 
@@ -164,7 +169,8 @@ def build_run_validation_task_with_handoff_source(
     *,
     source: WorkerBootstrapSecretSource,
     client_factory: WorkerClientFactory,
-    kill_switch: KillSwitch,
+    kill_switch: KillSwitch | None = None,
+    kill_switch_factory: KillSwitchFactory | None = None,
     transport_factory: TransportFactory | None = None,
     shared_token_fallback: SecretStr | None = None,
     task_name: str = DEFAULT_VALIDATION_TASK_NAME,
@@ -175,8 +181,9 @@ def build_run_validation_task_with_handoff_source(
     body is a single ``asyncio.run`` call, ``ignore_result=True`` (no result
     backend — the worker reports via the ``worker-finished`` hook), and no
     retry is configured (the broker driver decides ack/requeue). The
-    ``source`` (side-channel), ``client_factory`` (client builder),
-    ``kill_switch``, and optional ``transport_factory`` /
+    ``source`` (side-channel), ``client_factory`` (client builder), the kill
+    switch (a per-execution ``kill_switch_factory`` in production, or a fixed
+    ``kill_switch`` for dev/test), and optional ``transport_factory`` /
     ``shared_token_fallback`` are injected by the operational worker
     bootstrap; they are not constructed here, and this module is never bound
     to ``app.main`` or imported by the dispatcher/service/router.
@@ -190,6 +197,7 @@ def build_run_validation_task_with_handoff_source(
                 source=source,
                 client_factory=client_factory,
                 kill_switch=kill_switch,
+                kill_switch_factory=kill_switch_factory,
                 transport_factory=transport_factory,
                 shared_token_fallback=shared_token_fallback,
             )
