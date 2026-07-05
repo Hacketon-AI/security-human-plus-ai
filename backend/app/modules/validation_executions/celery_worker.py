@@ -55,6 +55,9 @@ from app.modules.validation_executions.dispatch_serialization import (
 )
 from app.modules.validation_executions.enums import ExecutionOutcome, StepStatus
 from app.modules.validation_executions.executor import KillSwitch
+from app.modules.validation_executions.kill_switch_control_plane import (
+    KillSwitchFactory,
+)
 from app.modules.validation_executions.schemas import (
     WorkerFinishedRequest,
     WorkerStepResult,
@@ -204,6 +207,7 @@ async def run_validation_envelope(
     client: WorkerClient,
     *,
     kill_switch: KillSwitch | None = None,
+    kill_switch_factory: KillSwitchFactory | None = None,
     transport_factory: TransportFactory | None = None,
 ) -> BrokerConsumerResult:
     """Process one broker-delivered envelope through the worker lifecycle.
@@ -292,13 +296,24 @@ async def run_validation_envelope(
             outcome=BrokerConsumerOutcome.started_delivery_failed,
         )
 
+    # A per-execution kill switch is built from the frozen ``kill_switch_token``
+    # (in the validated spec) so the executor can poll the control plane and
+    # abort mid-run. The factory takes precedence over any fixed ``kill_switch``;
+    # when neither is supplied the run proceeds without a switch (dev/test only).
+    effective_kill_switch = kill_switch
+    if kill_switch_factory is not None:
+        token = worker_input.execution_specification.get("kill_switch_token")
+        effective_kill_switch = kill_switch_factory(
+            worker_input.execution_id, token if isinstance(token, str) else ""
+        )
+
     # Step 4: runner. A failure here is recovered into a sanitized
     # ``failed_safely`` request — never re-raised, never echoed — so the
     # execution is closed out instead of lingering in ``executing``.
     try:
         finished = await run_http_security_header_validation(
             worker_input,
-            kill_switch=kill_switch,
+            kill_switch=effective_kill_switch,
             transport_factory=transport_factory,
         )
     except MalformedWorkerInput:

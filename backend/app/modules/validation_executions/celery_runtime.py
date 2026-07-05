@@ -25,8 +25,8 @@ from collections.abc import Mapping
 from typing import Any
 
 from celery import Celery
+from pydantic import SecretStr
 
-from app.config import Settings
 from app.modules.validation_executions.celery_publisher import (
     CelerySendError,
     CelerySendTask,
@@ -44,11 +44,16 @@ _logger = logging.getLogger("securescope.validation.celery_runtime")
 _CELERY_APP_NAME = "securescope.validation"
 
 
-def create_validation_celery_app(settings: Settings) -> Celery:
-    """Construct a Celery app for the validation dispatch publisher.
+def create_validation_celery_app(
+    broker_url: SecretStr, *, app_name: str = _CELERY_APP_NAME
+) -> Celery:
+    """Construct a Celery app bound to ``broker_url``.
 
-    Configuration choices follow the broker contract in
-    ``docs/validation-dispatch-broker-design.md``:
+    Shared by both sides of the pipeline: the API-side publisher (see
+    :mod:`app.main`) and the worker-side consumer (see
+    :mod:`celery_worker_app`) build their Celery app here so the hardened
+    configuration is identical. Configuration choices follow the broker contract
+    in ``docs/validation-dispatch-broker-design.md``:
 
     * **No result backend.** The worker reports back via the
       ``worker-finished`` HTTP hook, not via a Celery result; a Redis (or
@@ -60,24 +65,15 @@ def create_validation_celery_app(settings: Settings) -> Celery:
     * **JSON only.** ``pickle``/``yaml``/``msgpack`` serializers are
       refused so an envelope cannot smuggle code or non-JSON values.
     * **No automatic startup retry.** Connection retries are disabled so
-      the lifespan fails fast and surfaces a misconfiguration at startup
+      the caller fails fast and surfaces a misconfiguration at startup
       rather than blocking on a missing broker.
 
-    A missing ``celery_broker_url`` is treated as a programming error here
-    (the :class:`Settings` validator already enforces it for the celery
-    backend); raising :class:`RuntimeError` keeps the defense in depth.
     The broker URL leaves :class:`SecretStr` only to be passed to Celery's
     internal config; no log, repr, or exception in this module includes it.
     """
-    if settings.celery_broker_url is None:
-        raise RuntimeError(
-            "celery_broker_url must be configured before constructing the "
-            "validation Celery app"
-        )
-
-    app = Celery(_CELERY_APP_NAME)
+    app = Celery(app_name)
     app.conf.update(
-        broker_url=settings.celery_broker_url.get_secret_value(),
+        broker_url=broker_url.get_secret_value(),
         # No result backend: worker reports via the worker-finished hook.
         result_backend=None,
         task_ignore_result=True,

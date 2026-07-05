@@ -77,7 +77,15 @@ async def _lifespan(app: FastAPI) -> AsyncIterator[None]:
         )
         from app.platform.clock import SystemClock
 
-        celery_app = create_validation_celery_app(settings)
+        # The Settings validator guarantees a broker URL for the celery backend;
+        # assert it here so the type is narrowed and a future regression fails
+        # loudly at startup rather than passing ``None`` to the app builder.
+        broker_url = settings.celery_broker_url
+        if broker_url is None:  # pragma: no cover - enforced by Settings validator
+            raise RuntimeError(
+                "celery_broker_url must be configured for the celery backend"
+            )
+        celery_app = create_validation_celery_app(broker_url)
         sender = make_celery_sender(celery_app)
         app.state.validation_dispatch_publisher = CeleryValidationDispatchPublisher(
             sender,

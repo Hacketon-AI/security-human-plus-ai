@@ -6,7 +6,7 @@ to the dispatch seam. It never runs scanner logic inline.
 
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Header, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.assets.repository import AssetRepository
@@ -29,6 +29,7 @@ from app.modules.validation_executions.repository import (
     ValidationExecutionRepository,
 )
 from app.modules.validation_executions.schemas import (
+    KillSwitchStatusResponse,
     ValidationExecutionCreate,
     ValidationExecutionResponse,
     WorkerExecutionStateResponse,
@@ -148,3 +149,18 @@ async def worker_finished(
     # but never reflected back to the worker.
     execution = await service.worker_finished(execution_id, worker, payload)
     return WorkerExecutionStateResponse.model_validate(execution)
+
+
+@router.get("/api/v1/validation-executions/{execution_id}/kill-switch")
+async def worker_kill_switch(
+    execution_id: UUID,
+    x_kill_switch_token: str | None = Header(default=None),
+    service: ValidationExecutionService = Depends(_service),
+) -> KillSwitchStatusResponse:
+    # Machine poll authenticated on the opaque ``kill_switch_token`` frozen into
+    # the execution spec (``scan-authorization.md``) — not the per-execution
+    # worker credential, so the poll is independent of that credential's
+    # lifecycle. A missing/wrong token is an indistinguishable 401. The response
+    # is exactly one boolean; the token is never echoed.
+    active = await service.worker_kill_switch_status(execution_id, x_kill_switch_token)
+    return KillSwitchStatusResponse(active=active)

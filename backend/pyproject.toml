@@ -92,6 +92,12 @@ ignore_missing_imports = true
 module = "celery"
 ignore_missing_imports = true
 
+# kombu (Celery's messaging layer) ships no py.typed marker either; only the
+# worker composition root imports it, to declare the consumer's bound queue.
+[[tool.mypy.overrides]]
+module = "kombu"
+ignore_missing_imports = true
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"

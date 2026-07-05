@@ -82,6 +82,18 @@ class WorkerExecutionStateResponse(BaseModel):
     updated_at: datetime
 
 
+class KillSwitchStatusResponse(BaseModel):
+    """Abort signal returned to a polling worker.
+
+    The ``worker-*`` hooks are machine endpoints; so is the kill-switch poll.
+    The response carries exactly one non-sensitive boolean — whether the worker
+    must abort the in-flight scan. Nothing else (execution id, engagement state,
+    the poll token) is echoed back over the wire.
+    """
+
+    active: bool
+
+
 class ValidationStepResultResponse(BaseModel):
     """Step result as returned by the API."""
 

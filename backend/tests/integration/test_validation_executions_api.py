@@ -167,6 +167,27 @@ async def _setup(
     }
 
 
+async def _credential_revocation_state(
+    session_factory: async_sessionmaker[AsyncSession], execution_id: str
+) -> list[bool]:
+    """Return ``revoked_at is not None`` for each credential of an execution.
+
+    One boolean per persisted ``validation_worker_credentials`` row, so a test
+    can assert both that a credential was issued and whether it is now revoked.
+    """
+    async with session_factory() as session:
+        rows = (
+            await session.execute(
+                text(
+                    "SELECT revoked_at FROM validation_worker_credentials "
+                    "WHERE execution_id = :execution_id"
+                ),
+                {"execution_id": execution_id},
+            )
+        ).all()
+    return [row[0] is not None for row in rows]
+
+
 def _create_body(ctx: dict[str, str], **overrides: Any) -> dict[str, Any]:
     body: dict[str, Any] = {
         "project_id": ctx["project_id"],
@@ -805,6 +826,40 @@ async def test_cannot_cancel_terminal_execution(
     assert again.json()["error"]["code"] == "execution_immutable"
 
 
+async def test_cancel_revokes_worker_credential(
+    validation_app: tuple[AsyncClient, CapturingValidationDispatcher, Any],
+    create_organization: CreateOrg,
+    session_factory: async_sessionmaker[AsyncSession],
+) -> None:
+    """Cancelling a queued execution revokes its per-execution credential.
+
+    A terminal cancellation must close the worker credential so a still-running
+    or redelivered worker cannot keep authenticating hooks for the stopped run.
+    """
+    client, _dispatcher, _app = validation_app
+    ctx = await _setup(client, create_organization, session_factory)
+    headers = tenant_headers(ctx["org_id"])
+    execution = (
+        await client.post(
+            "/api/v1/validation-executions",
+            json=_create_body(ctx),
+            headers=headers,
+        )
+    ).json()
+
+    # A credential is minted at dispatch and is still live before cancellation.
+    before = await _credential_revocation_state(session_factory, execution["id"])
+    assert before == [False]
+
+    resp = await client.post(
+        f"/api/v1/validation-executions/{execution['id']}/cancel", headers=headers
+    )
+    assert resp.status_code == 200
+
+    after = await _credential_revocation_state(session_factory, execution["id"])
+    assert after == [True]
+
+
 # ---------------------------------------------------------------------------
 # Worker hooks
 # ---------------------------------------------------------------------------
@@ -896,6 +951,48 @@ async def test_worker_finished_succeeded(
     assert len(user_body["step_results"]) == 1
     assert user_body["step_results"][0]["status"] == "passed"
     assert "execution_specification" in user_body
+
+
+async def test_worker_finished_revokes_worker_credential(
+    validation_app: tuple[AsyncClient, CapturingValidationDispatcher, Any],
+    create_organization: CreateOrg,
+    session_factory: async_sessionmaker[AsyncSession],
+) -> None:
+    """A terminal worker-finished revokes the per-execution credential.
+
+    Once a run reports a terminal verdict the credential must close, so a broker
+    redelivery of the finish (or a lingering worker) cannot re-authenticate
+    against the completed execution (design → Expiry and revocation).
+    """
+    client, _dispatcher, _app = validation_app
+    ctx = await _setup(client, create_organization, session_factory)
+    headers = tenant_headers(ctx["org_id"])
+    execution = (
+        await client.post(
+            "/api/v1/validation-executions",
+            json=_create_body(ctx),
+            headers=headers,
+        )
+    ).json()
+    await client.post(
+        f"/api/v1/validation-executions/{execution['id']}/worker-started",
+        headers=worker_auth_headers(),
+    )
+
+    # Still live while the run is executing.
+    assert await _credential_revocation_state(session_factory, execution["id"]) == [
+        False
+    ]
+
+    resp = await client.post(
+        f"/api/v1/validation-executions/{execution['id']}/worker-finished",
+        json={"succeeded": True, "outcome": "validated"},
+        headers=worker_auth_headers(),
+    )
+    assert resp.status_code == 200
+
+    after = await _credential_revocation_state(session_factory, execution["id"])
+    assert after == [True]
 
 
 async def test_worker_finished_failed_safely(
