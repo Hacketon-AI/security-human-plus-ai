@@ -90,7 +90,7 @@ export function WorkersPage() {
               })}
             </div>
             <div className="mt-3 h-px relative overflow-hidden">
-              <div className="absolute inset-0 bg-[var(--ss-hairline)]" />
+              <div className="absolute inset-0 bg-(--ss-hairline)" />
               <div className="absolute inset-0 ss-flow-line opacity-60" />
             </div>
           </div>
@@ -151,10 +151,10 @@ export function WorkersPage() {
                   </div>
                   <Pill tone="slate">{workers.length} workers</Pill>
                 </div>
-                <div className="overflow-hidden border border-[var(--ss-hairline)] rounded-sm">
+                <div className="overflow-hidden border border-(--ss-hairline) rounded-sm">
                   <table className="w-full text-xs">
                     <thead>
-                      <tr className="bg-[var(--ss-surface-2)]">
+                      <tr className="bg-(--ss-surface-2)">
                         <th className="text-left px-3 py-2 ss-eyebrow">Worker ID</th>
                         <th className="text-left px-3 py-2 ss-eyebrow">Region</th>
                         <th className="text-left px-3 py-2 ss-eyebrow">State</th>
@@ -164,7 +164,7 @@ export function WorkersPage() {
                     </thead>
                     <tbody>
                       {workers.map((w) => (
-                        <tr key={w.workerId} className={cn("border-t border-[var(--ss-hairline)]", w.state === "running" && "bg-cyan-500/5")}>
+                        <tr key={w.workerId} className={cn("border-t border-(--ss-hairline)", w.state === "running" && "bg-cyan-500/5")}>
                           <td className="px-3 py-2.5"><code className="ss-mono-xs text-cyan-200">{w.workerId}</code></td>
                           <td className="px-3 py-2.5 ss-mono-xs text-slate-400">{w.region}</td>
                           <td className="px-3 py-2.5">
@@ -233,7 +233,7 @@ export function WorkersPage() {
                 </div>
                 <ul className="space-y-2">
                   {executions.slice(0, 5).map((e) => (
-                    <li key={e.id} onClick={() => openExecution(e.id)} className="flex items-center justify-between p-2 rounded-sm border border-[var(--ss-hairline)] hover:border-cyan-500/40 hover:bg-[var(--ss-surface-3)]/40 cursor-pointer">
+                    <li key={e.id} onClick={() => openExecution(e.id)} className="flex items-center justify-between p-2 rounded-sm border border-(--ss-hairline) hover:border-cyan-500/40 hover:bg-(--ss-surface-3)/40 cursor-pointer">
                       <div className="flex items-center gap-2 min-w-0">
                         <code className="ss-mono-xs text-cyan-200">{e.code}</code>
                         <span className="text-[10px] text-slate-500">→</span>

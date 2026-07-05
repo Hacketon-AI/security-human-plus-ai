@@ -67,7 +67,7 @@ export function ExecutionLifecycleRail({
       </div>
       <div className="relative">
         {/* base line */}
-        <div className="absolute left-0 right-0 top-[7px] h-px bg-[var(--ss-hairline-strong)]" />
+        <div className="absolute left-0 right-0 top-[7px] h-px bg-(--ss-hairline-strong)" />
         {/* progress line */}
         <div
           className={cn(
@@ -148,7 +148,7 @@ export function EventTimeline({
   };
   return (
     <div className={cn("relative", className)}>
-      <div className="absolute left-[5px] top-1 bottom-1 w-px bg-[var(--ss-hairline-strong)]" />
+      <div className="absolute left-[5px] top-1 bottom-1 w-px bg-(--ss-hairline-strong)" />
       <ul className="space-y-3">
         {events.map((e) => {
           const tone = kindTone[e.kind] ?? { dot: "bg-slate-400", line: "border-slate-600/40", text: "text-slate-300" };
@@ -216,7 +216,7 @@ export function SecureCodeBlock({
   return (
     <div className={cn("ss-panel-flat", className)}>
       {label && (
-        <div className="flex items-center justify-between px-3 py-1.5 border-b border-[var(--ss-hairline)]">
+        <div className="flex items-center justify-between px-3 py-1.5 border-b border-(--ss-hairline)">
           <div className="ss-eyebrow">{label}</div>
           {hint && <div className="text-[10px] text-slate-500">{hint}</div>}
         </div>
@@ -226,7 +226,7 @@ export function SecureCodeBlock({
         {copyable && (
           <button
             onClick={copy}
-            className="shrink-0 text-[10px] uppercase tracking-wider text-slate-400 hover:text-cyan-300 border border-[var(--ss-hairline-strong)] rounded-sm px-2 py-0.5 transition-colors"
+            className="shrink-0 text-[10px] uppercase tracking-wider text-slate-400 hover:text-cyan-300 border border-(--ss-hairline-strong) rounded-sm px-2 py-0.5 transition-colors"
           >
             {copied ? "Copied" : "Copy"}
           </button>

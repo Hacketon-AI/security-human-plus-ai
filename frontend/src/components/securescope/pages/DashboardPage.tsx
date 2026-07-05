@@ -35,15 +35,15 @@ function DispatchStatusStrip() {
     { label: "Environment", value: "Staging", tone: "amber" as const, hint: "Pre-prod mirror" },
     { label: "Dispatch Backend", value: "Celery", tone: "green" as const, hint: "online · eu-1" },
     { label: "Worker Auth Mode", value: "Per-execution", tone: "cyan" as const, hint: "credential" },
-    { label: "Shared-token Fallback", value: "Disabled", tone: "slate" as const, hint: "policy" },
+    { label: "Shared-token Fallback", value: "Disabled", tone: "default" as const, hint: "policy" },
     { label: "Global Kill Switch", value: "Inactive", tone: "green" as const, hint: "armed: 1 engagement" },
     { label: "Running Executions", value: "1", tone: "cyan" as const, hint: "EXEC-2026-0702-002" },
     { label: "Failed / Blocked (24h)", value: "1 / 1", tone: "red" as const, hint: "see audit trail" },
     { label: "Last Dispatch Event", value: "00:13s ago", tone: "blue" as const, hint: "worker heartbeat" },
   ];
   return (
-    <div className="border-b border-[var(--ss-hairline-strong)] bg-[#050810]/60">
-      <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-8 divide-x divide-[var(--ss-hairline)]">
+    <div className="border-b border-(--ss-hairline-strong) bg-[#050810]/60">
+      <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-8 divide-x divide-(--ss-hairline)">
         {items.map((it) => (
           <KpiCell
             key={it.label}
@@ -86,13 +86,13 @@ function PipelineNodeCard({ node, onClick }: { node: PipelineNode; onClick?: () 
     <button
       onClick={onClick}
       className={cn(
-        "group relative w-full ss-panel border p-3 text-left transition-all hover:bg-[var(--ss-surface-3)]/40",
+        "group relative w-full ss-panel border p-3 text-left transition-all hover:bg-(--ss-surface-3)/40",
         t.ring,
         node.pulse && t.glow
       )}
     >
       <div className="flex items-start justify-between mb-2">
-        <div className={cn("w-7 h-7 rounded-sm border flex items-center justify-center", t.ring, "bg-[var(--ss-surface-2)]")}>
+        <div className={cn("w-7 h-7 rounded-sm border flex items-center justify-center", t.ring, "bg-(--ss-surface-2)")}>
           {node.icon}
         </div>
         <span className={cn("w-1.5 h-1.5 rounded-full", t.dot, node.pulse && "ss-pulse-cyan")} />
@@ -178,7 +178,7 @@ function ValidationOperationsMap() {
         </div>
         {/* connecting flow line */}
         <div className="hidden lg:block mt-3 h-px relative overflow-hidden">
-          <div className="absolute inset-0 bg-[var(--ss-hairline)]" />
+          <div className="absolute inset-0 bg-(--ss-hairline)" />
           <div className="absolute inset-0 ss-flow-line opacity-60" />
         </div>
       </div>
@@ -273,7 +273,7 @@ function ActivityRail() {
 
   return (
     <div className="ss-panel flex flex-col h-full">
-      <div className="px-4 py-2.5 border-b border-[var(--ss-hairline-strong)] flex items-center justify-between">
+      <div className="px-4 py-2.5 border-b border-(--ss-hairline-strong) flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Radio className="w-3.5 h-3.5 text-cyan-400" />
           <span className="text-xs font-semibold text-slate-100">Live Activity Rail</span>
@@ -296,7 +296,7 @@ function ActivityRail() {
                     openEngagement(e.target);
                   }
                 }}
-                className="w-full text-left p-2 rounded-sm border border-transparent hover:border-[var(--ss-hairline-strong)] hover:bg-[var(--ss-surface-3)]/40 transition-colors"
+                className="w-full text-left p-2 rounded-sm border border-transparent hover:border-(--ss-hairline-strong) hover:bg-(--ss-surface-3)/40 transition-colors"
               >
                 <div className="flex items-start gap-2">
                   <span className={cn("mt-1 w-1.5 h-1.5 rounded-full shrink-0", toneDot[e.tone], e.tone === "cyan" && "ss-pulse-cyan")} />
@@ -313,7 +313,7 @@ function ActivityRail() {
           ))}
         </ul>
       </div>
-      <div className="px-3 py-2 border-t border-[var(--ss-hairline-strong)]">
+      <div className="px-3 py-2 border-t border-(--ss-hairline-strong)">
         <button
           onClick={() => useApp.getState().go("audit")}
           className="text-[10px] uppercase tracking-wider text-cyan-300 hover:text-cyan-200"
@@ -348,7 +348,7 @@ function ActiveExecutionFocus() {
 
   return (
     <div className="ss-panel">
-      <div className="px-4 py-2.5 border-b border-[var(--ss-hairline-strong)] flex items-center justify-between gap-3 flex-wrap">
+      <div className="px-4 py-2.5 border-b border-(--ss-hairline-strong) flex items-center justify-between gap-3 flex-wrap">
         <div className="flex items-center gap-2.5 min-w-0">
           <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 ss-pulse-cyan" />
           <span className="text-xs font-semibold text-slate-100">Active Execution Focus</span>
@@ -364,7 +364,7 @@ function ActiveExecutionFocus() {
         </div>
       </div>
 
-      <div className="grid lg:grid-cols-[1.4fr_1fr] gap-0 divide-x divide-[var(--ss-hairline)]">
+      <div className="grid lg:grid-cols-[1.4fr_1fr] gap-0 divide-x divide-(--ss-hairline)">
         <div className="p-4 space-y-3">
           <div className="grid grid-cols-2 gap-x-4 gap-y-0">
             <KeyValue k="Asset Target" v={<code className="ss-mono-xs text-cyan-200">{exec.assetTargetMasked}</code>} />
@@ -461,10 +461,10 @@ function RiskDistributionMatrix() {
         title="Risk Distribution Matrix"
         right={<Pill tone="slate">24h</Pill>}
       />
-      <div className="overflow-hidden border border-[var(--ss-hairline)] rounded-sm">
+      <div className="overflow-hidden border border-(--ss-hairline) rounded-sm">
         <table className="w-full text-[10px]">
           <thead>
-            <tr className="bg-[var(--ss-surface-2)]">
+            <tr className="bg-(--ss-surface-2)">
               <th className="text-left px-2 py-1.5 ss-eyebrow">Risk \ Outcome</th>
               {cols.map((c) => (
                 <th key={c} className="px-2 py-1.5 ss-eyebrow text-center">{c.replace(/_/g, " ")}</th>
@@ -473,7 +473,7 @@ function RiskDistributionMatrix() {
           </thead>
           <tbody>
             {rows.map((r) => (
-              <tr key={r} className="border-t border-[var(--ss-hairline)]">
+              <tr key={r} className="border-t border-(--ss-hairline)">
                 <td className="px-2 py-1.5 text-slate-300 capitalize">{r}</td>
                 {cols.map((c) => {
                   const v = matrix[r][c];
@@ -486,7 +486,7 @@ function RiskDistributionMatrix() {
                       <div
                         className={cn(
                           "inline-flex items-center justify-center w-6 h-6 rounded-sm ss-mono-xs tnum",
-                          v > 0 ? `${intensity} text-[#060912] font-semibold` : "text-slate-600 border border-[var(--ss-hairline)]"
+                          v > 0 ? `${intensity} text-[#060912] font-semibold` : "text-slate-600 border border-(--ss-hairline)"
                         )}
                       >
                         {v > 0 ? v : "·"}
@@ -542,7 +542,7 @@ function AuthorizationExpiryRadar() {
                   {it.days}d remaining
                 </span>
               </div>
-              <div className="h-1 rounded-full bg-[var(--ss-surface-3)] overflow-hidden">
+              <div className="h-1 rounded-full bg-(--ss-surface-3) overflow-hidden">
                 <div className={cn("h-full rounded-full", tone)} style={{ width: `${Math.max(8, pct)}%` }} />
               </div>
             </li>
@@ -572,7 +572,7 @@ function AssetVerificationQueue() {
             <li key={a.id}>
               <button
                 onClick={() => openAsset(a.id)}
-                className="w-full text-left p-2 rounded-sm border border-[var(--ss-hairline)] hover:border-cyan-500/40 hover:bg-[var(--ss-surface-3)]/40 transition-colors"
+                className="w-full text-left p-2 rounded-sm border border-(--ss-hairline) hover:border-cyan-500/40 hover:bg-(--ss-surface-3)/40 transition-colors"
               >
                 <div className="flex items-center justify-between gap-2">
                   <div className="min-w-0">

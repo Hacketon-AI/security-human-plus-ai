@@ -31,7 +31,7 @@ export function KillSwitchModal() {
 
   return (
     <Modal open={!!target} onClose={close} size="md">
-      <div className="px-5 py-4 border-b border-[var(--ss-hairline-strong)] flex items-center gap-2">
+      <div className="px-5 py-4 border-b border-(--ss-hairline-strong) flex items-center gap-2">
         <ShieldAlert className="w-4 h-4 text-amber-400" />
         <span className="text-sm font-semibold text-slate-100">Activate Kill Switch</span>
       </div>
@@ -58,7 +58,7 @@ export function KillSwitchModal() {
             onChange={(e) => setReason(e.target.value)}
             rows={3}
             placeholder="e.g. ISO review pending on step 4 evidence — staging manual hold."
-            className="w-full px-3 py-2 text-xs bg-[var(--ss-surface-2)] border border-[var(--ss-hairline-strong)] rounded-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-cyan-400/50 resize-none"
+            className="w-full px-3 py-2 text-xs bg-(--ss-surface-2) border border-(--ss-hairline-strong) rounded-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-cyan-400/50 resize-none"
           />
         </div>
 
@@ -84,10 +84,10 @@ export function KillSwitchModal() {
         </label>
       </div>
 
-      <div className="px-5 py-3 border-t border-[var(--ss-hairline-strong)] flex items-center justify-end gap-2">
+      <div className="px-5 py-3 border-t border-(--ss-hairline-strong) flex items-center justify-end gap-2">
         <button
           onClick={close}
-          className="px-3 py-1.5 text-[11px] uppercase tracking-wider text-slate-400 hover:text-slate-200 border border-[var(--ss-hairline-strong)] rounded-sm"
+          className="px-3 py-1.5 text-[11px] uppercase tracking-wider text-slate-400 hover:text-slate-200 border border-(--ss-hairline-strong) rounded-sm"
         >
           Cancel
         </button>

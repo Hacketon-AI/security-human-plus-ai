@@ -84,14 +84,14 @@ function DispatchStatusPill() {
 
 function GlobalSearch() {
   return (
-    <div className="hidden md:flex items-center gap-2 px-2.5 py-1.5 rounded-sm border border-[var(--ss-hairline-strong)] bg-[var(--ss-surface-2)] min-w-[220px] lg:min-w-[280px]">
+    <div className="hidden md:flex items-center gap-2 px-2.5 py-1.5 rounded-sm border border-(--ss-hairline-strong) bg-(--ss-surface-2) min-w-[220px] lg:min-w-[280px]">
       <Search className="w-3.5 h-3.5 text-slate-500" />
       <input
         type="text"
         placeholder="Search executions, assets, authorizations…"
         className="bg-transparent text-xs text-slate-200 placeholder:text-slate-600 outline-none flex-1 min-w-0"
       />
-      <kbd className="ss-mono-xs text-[10px] text-slate-500 border border-[var(--ss-hairline-strong)] rounded-sm px-1.5 py-0.5 hidden lg:inline-flex items-center gap-0.5">
+      <kbd className="ss-mono-xs text-[10px] text-slate-500 border border-(--ss-hairline-strong) rounded-sm px-1.5 py-0.5 hidden lg:inline-flex items-center gap-0.5">
         <Command className="w-2.5 h-2.5" />K
       </kbd>
     </div>
@@ -104,7 +104,7 @@ function NotificationBell() {
     <div className="relative">
       <button
         onClick={() => setOpen((v) => !v)}
-        className="relative w-8 h-8 flex items-center justify-center rounded-sm border border-[var(--ss-hairline-strong)] bg-[var(--ss-surface-2)] hover:bg-[var(--ss-surface-3)] text-slate-400 hover:text-slate-200 transition-colors"
+        className="relative w-8 h-8 flex items-center justify-center rounded-sm border border-(--ss-hairline-strong) bg-(--ss-surface-2) hover:bg-(--ss-surface-3) text-slate-400 hover:text-slate-200 transition-colors"
         aria-label="Notifications"
       >
         <Bell className="w-3.5 h-3.5" />
@@ -114,7 +114,7 @@ function NotificationBell() {
         <>
           <div className="fixed inset-0 z-30" onClick={() => setOpen(false)} />
           <div className="absolute right-0 top-10 z-40 w-80 ss-panel-raised shadow-2xl">
-            <div className="px-3 py-2 border-b border-[var(--ss-hairline-strong)] flex items-center justify-between">
+            <div className="px-3 py-2 border-b border-(--ss-hairline-strong) flex items-center justify-between">
               <span className="text-xs font-semibold text-slate-200">Operational Alerts</span>
               <span className="text-[10px] text-slate-500">3 unread</span>
             </div>
@@ -124,7 +124,7 @@ function NotificationBell() {
                 { t: "Authorization AUTH-NSL-001 expires in 13d", at: "1h ago", tone: "yellow" },
                 { t: "EXEC-2026-0702-003 validated · 6/6 steps", at: "20m ago", tone: "green" },
               ].map((n, i) => (
-                <li key={i} className="px-3 py-2 border-b border-[var(--ss-hairline)] hover:bg-[var(--ss-surface-3)]/50 cursor-pointer">
+                <li key={i} className="px-3 py-2 border-b border-(--ss-hairline) hover:bg-(--ss-surface-3)/50 cursor-pointer">
                   <div className="flex items-start gap-2">
                     <span
                       className={cn(
@@ -142,7 +142,7 @@ function NotificationBell() {
                 </li>
               ))}
             </ul>
-            <div className="px-3 py-2 border-t border-[var(--ss-hairline-strong)]">
+            <div className="px-3 py-2 border-t border-(--ss-hairline-strong)">
               <button className="text-[10px] text-cyan-300 hover:text-cyan-200 uppercase tracking-wider">
                 View audit trail →
               </button>
@@ -161,9 +161,9 @@ function UserMenu() {
     <div className="relative">
       <button
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-2 pl-1.5 pr-2 py-1 rounded-sm border border-[var(--ss-hairline-strong)] bg-[var(--ss-surface-2)] hover:bg-[var(--ss-surface-3)] transition-colors"
+        className="flex items-center gap-2 pl-1.5 pr-2 py-1 rounded-sm border border-(--ss-hairline-strong) bg-(--ss-surface-2) hover:bg-(--ss-surface-3) transition-colors"
       >
-        <div className="w-6 h-6 rounded-sm bg-gradient-to-br from-cyan-500/30 to-blue-600/20 border border-cyan-400/30 flex items-center justify-center">
+        <div className="w-6 h-6 rounded-sm bg-linear-to-br from-cyan-500/30 to-blue-600/20 border border-cyan-400/30 flex items-center justify-center">
           <span className="text-[10px] font-semibold text-cyan-200">KA</span>
         </div>
         <div className="hidden sm:block leading-none text-left">
@@ -176,7 +176,7 @@ function UserMenu() {
         <>
           <div className="fixed inset-0 z-30" onClick={() => setOpen(false)} />
           <div className="absolute right-0 top-10 z-40 w-56 ss-panel-raised shadow-2xl">
-            <div className="px-3 py-2.5 border-b border-[var(--ss-hairline-strong)]">
+            <div className="px-3 py-2.5 border-b border-(--ss-hairline-strong)">
               <div className="text-xs font-medium text-slate-200">Karim Andrade</div>
               <div className="text-[10px] text-slate-500">k.andrade@nasari.sec</div>
               <div className="mt-1 flex items-center gap-1.5">
@@ -195,14 +195,14 @@ function UserMenu() {
                 { icon: Settings, label: "Settings" },
               ].map((it) => (
                 <li key={it.label}>
-                  <button className="w-full flex items-center gap-2.5 px-3 py-1.5 text-[11px] text-slate-300 hover:bg-[var(--ss-surface-3)]/50 hover:text-slate-100">
+                  <button className="w-full flex items-center gap-2.5 px-3 py-1.5 text-[11px] text-slate-300 hover:bg-(--ss-surface-3)/50 hover:text-slate-100">
                     <it.icon className="w-3 h-3 text-slate-500" />
                     {it.label}
                   </button>
                 </li>
               ))}
             </ul>
-            <div className="py-1 border-t border-[var(--ss-hairline-strong)]">
+            <div className="py-1 border-t border-(--ss-hairline-strong)">
               <button
                 onClick={logout}
                 className="w-full flex items-center gap-2.5 px-3 py-1.5 text-[11px] text-red-300 hover:bg-red-500/5"
@@ -224,10 +224,10 @@ export function TopNavCommandBar() {
   const moduleLabel = activeModule(route);
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-40 h-14 border-b border-[var(--ss-hairline-strong)] bg-[#070B14]/95 backdrop-blur-md">
+    <header className="fixed top-0 left-0 right-0 z-40 h-14 border-b border-(--ss-hairline-strong) bg-[#070B14]/95 backdrop-blur-md">
       <div className="h-full flex items-center gap-4 px-4">
         {/* Left: mark */}
-        <button onClick={() => go("dashboard")} className="shrink-0 pr-4 border-r border-[var(--ss-hairline)] h-full flex items-center">
+        <button onClick={() => go("dashboard")} className="shrink-0 pr-4 border-r border-(--ss-hairline) h-full flex items-center">
           <SecureScopeMark />
         </button>
 
@@ -251,7 +251,7 @@ export function TopNavCommandBar() {
                       "relative px-2.5 py-1.5 text-[11px] font-medium uppercase tracking-wider rounded-sm transition-colors whitespace-nowrap",
                       isActive
                         ? "text-cyan-200 bg-cyan-500/10"
-                        : "text-slate-400 hover:text-slate-200 hover:bg-[var(--ss-surface-3)]/50"
+                        : "text-slate-400 hover:text-slate-200 hover:bg-(--ss-surface-3)/50"
                     )}
                   >
                     {item.label}
@@ -271,13 +271,13 @@ export function TopNavCommandBar() {
           <EnvironmentBadge />
           <DispatchStatusPill />
           <NotificationBell />
-          <div className="w-px h-6 bg-[var(--ss-hairline)] mx-1" />
+          <div className="w-px h-6 bg-(--ss-hairline) mx-1" />
           <UserMenu />
         </div>
       </div>
 
       {/* Module subline (very thin) */}
-      <div className="h-5 px-4 flex items-center justify-between border-t border-[var(--ss-hairline)] bg-[#050810]/80 text-[10px]">
+      <div className="h-5 px-4 flex items-center justify-between border-t border-(--ss-hairline) bg-[#050810]/80 text-[10px]">
         <div className="flex items-center gap-3 text-slate-500">
           <span className="flex items-center gap-1">
             <Activity className="w-2.5 h-2.5" />
@@ -320,7 +320,7 @@ export function SecondaryContextNav({
   right?: React.ReactNode;
 }) {
   return (
-    <div className="sticky top-[76px] z-20 h-10 flex items-center justify-between px-4 border-b border-[var(--ss-hairline-strong)] bg-[#070B14]/80 backdrop-blur-sm">
+    <div className="sticky top-[76px] z-20 h-10 flex items-center justify-between px-4 border-b border-(--ss-hairline-strong) bg-[#070B14]/80 backdrop-blur-sm">
       <div className="flex items-center gap-0.5 overflow-x-auto ss-scroll">
         {items.map((it) => {
           const isActive = it.key === active;
@@ -338,7 +338,7 @@ export function SecondaryContextNav({
                 <span
                   className={cn(
                     "ss-mono-xs px-1 rounded-sm",
-                    isActive ? "bg-cyan-500/20 text-cyan-200" : "bg-[var(--ss-surface-3)] text-slate-500"
+                    isActive ? "bg-cyan-500/20 text-cyan-200" : "bg-(--ss-surface-3) text-slate-500"
                   )}
                 >
                   {it.count}
@@ -371,7 +371,7 @@ export function PageHeader({
   meta?: React.ReactNode;
 }) {
   return (
-    <div className="px-4 lg:px-6 pt-4 pb-3 border-b border-[var(--ss-hairline)]">
+    <div className="px-4 lg:px-6 pt-4 pb-3 border-b border-(--ss-hairline)">
       <div className="flex items-center gap-1.5 text-[10px] text-slate-500 mb-2">
         {breadcrumbs.map((b, i) => (
           <React.Fragment key={i}>

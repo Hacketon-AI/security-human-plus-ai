@@ -39,7 +39,7 @@ export function EngagementsListPage() {
           <div className="ss-panel overflow-hidden">
             <table className="w-full text-xs">
               <thead>
-                <tr className="bg-[var(--ss-surface-2)] border-b border-[var(--ss-hairline-strong)]">
+                <tr className="bg-(--ss-surface-2) border-b border-(--ss-hairline-strong)">
                   <th className="text-left px-3 py-2 ss-eyebrow">Code</th>
                   <th className="text-left px-3 py-2 ss-eyebrow">Name</th>
                   <th className="text-left px-3 py-2 ss-eyebrow">State</th>
@@ -53,7 +53,7 @@ export function EngagementsListPage() {
               </thead>
               <tbody>
                 {engagements.map((e) => (
-                  <tr key={e.id} onClick={() => openEngagement(e.id)} className="border-b border-[var(--ss-hairline)] hover:bg-[var(--ss-surface-3)]/40 cursor-pointer">
+                  <tr key={e.id} onClick={() => openEngagement(e.id)} className="border-b border-(--ss-hairline) hover:bg-(--ss-surface-3)/40 cursor-pointer">
                     <td className="px-3 py-2.5"><code className="ss-mono-xs text-cyan-200">{e.code}</code></td>
                     <td className="px-3 py-2.5 text-slate-200">{e.name}</td>
                     <td className="px-3 py-2.5"><EngagementStateBadge state={e.state} /></td>
@@ -148,7 +148,7 @@ export function EngagementDetailPage() {
                 <span className="ss-mono-xs text-slate-400">{eng.windowStart.replace("T", " ").slice(0, 16)} → {eng.windowEnd.replace("T", " ").slice(0, 16)} UTC</span>
               </div>
             </div>
-            <div className="relative h-2 bg-[var(--ss-surface-3)] rounded-full overflow-hidden">
+            <div className="relative h-2 bg-(--ss-surface-3) rounded-full overflow-hidden">
               <div
                 className={cn(
                   "absolute inset-y-0 left-0 rounded-full",
@@ -190,7 +190,7 @@ export function EngagementDetailPage() {
               ) : (
                 <ul className="space-y-2">
                   {engExecs.map((e) => (
-                    <li key={e.id} onClick={() => openExecution(e.id)} className="flex items-center justify-between p-3 rounded-sm border border-[var(--ss-hairline)] hover:border-cyan-500/40 hover:bg-[var(--ss-surface-3)]/40 cursor-pointer">
+                    <li key={e.id} onClick={() => openExecution(e.id)} className="flex items-center justify-between p-3 rounded-sm border border-(--ss-hairline) hover:border-cyan-500/40 hover:bg-(--ss-surface-3)/40 cursor-pointer">
                       <div className="min-w-0">
                         <code className="ss-mono-xs text-cyan-200">{e.code}</code>
                         <div className="text-[11px] text-slate-400 mt-0.5 truncate">{e.templateName} · {e.assetName}</div>
@@ -250,7 +250,7 @@ export function EngagementDetailPage() {
               <div className="ss-eyebrow mb-2">Scoped assets</div>
               <ul className="space-y-1">
                 {eng.scopedAssetNames.map((a) => (
-                  <li key={a} className="text-[11px] text-slate-200 border border-[var(--ss-hairline)] rounded-sm px-2 py-1">{a}</li>
+                  <li key={a} className="text-[11px] text-slate-200 border border-(--ss-hairline) rounded-sm px-2 py-1">{a}</li>
                 ))}
               </ul>
             </div>

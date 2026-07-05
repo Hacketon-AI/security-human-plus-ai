@@ -57,7 +57,7 @@ export function SettingsPage() {
                       "w-full text-left px-2.5 py-1.5 text-[11px] uppercase tracking-wider rounded-sm transition-colors",
                       section === s.key
                         ? "text-cyan-200 bg-cyan-500/10"
-                        : "text-slate-400 hover:text-slate-200 hover:bg-[var(--ss-surface-3)]/40"
+                        : "text-slate-400 hover:text-slate-200 hover:bg-(--ss-surface-3)/40"
                     )}
                   >
                     {s.label}
@@ -195,7 +195,7 @@ export function SettingsPage() {
                     "Sensitive request payloads",
                     "Private signing keys",
                   ].map((s) => (
-                    <div key={s} className="flex items-center justify-between p-2.5 border border-[var(--ss-hairline)] rounded-sm">
+                    <div key={s} className="flex items-center justify-between p-2.5 border border-(--ss-hairline) rounded-sm">
                       <span className="text-[11px] text-slate-300">{s}</span>
                       <Pill tone="red"><Lock className="w-2.5 h-2.5" /> Never exposed</Pill>
                     </div>

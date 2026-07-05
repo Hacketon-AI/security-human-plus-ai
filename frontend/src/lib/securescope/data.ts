@@ -482,7 +482,7 @@ function makeCredential(execId: string, orgId: string, active: boolean): Credent
   };
 }
 
-function makeSteps(template: "headers" | "tls" | "availability", success: boolean) {
+function makeSteps(template: "headers" | "tls" | "availability", success: boolean): ExecutionStepResult[] {
   if (template === "headers") {
     return [
       {
@@ -640,7 +640,7 @@ function makeEvents(
         at: "2026-07-02T06:52:48Z",
         kind: "failed_safely",
         label: "Worker finished — failed safely",
-        safeMeta: { outcome: "failed_safely", steps_failed: 2, exec_id: execId },
+        safeMeta: { outcome: "failed_safely", steps_failed: "2", exec_id: execId },
       },
       {
         id: `ev_${execId}_3`,
@@ -666,7 +666,7 @@ function makeEvents(
       at: "2026-07-02T06:48:11Z",
       kind: "worker_finished",
       label: "Worker finished",
-      safeMeta: { worker_id: "wkr-eu-1-a07", region: "eu-1", steps_total: 6, steps_failed: 0 },
+      safeMeta: { worker_id: "wkr-eu-1-a07", region: "eu-1", steps_total: "6", steps_failed: "0" },
     },
     {
       id: `ev_${execId}_3`,

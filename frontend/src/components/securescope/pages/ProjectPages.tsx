@@ -28,7 +28,7 @@ export function ProjectsListPage() {
               <button
                 key={p.id}
                 onClick={() => openProject(p.id)}
-                className="ss-panel p-4 text-left hover:border-cyan-500/40 hover:bg-[var(--ss-surface-3)]/40 transition-all"
+                className="ss-panel p-4 text-left hover:border-cyan-500/40 hover:bg-(--ss-surface-3)/40 transition-all"
               >
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
@@ -42,7 +42,7 @@ export function ProjectsListPage() {
                   </div>
                   <Pill tone={p.status === "healthy" ? "green" : "amber"}>{p.status}</Pill>
                 </div>
-                <div className="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-[var(--ss-hairline)]">
+                <div className="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-(--ss-hairline)">
                   <div>
                     <div className="ss-eyebrow">Assets</div>
                     <div className="text-sm font-semibold text-slate-200 tnum">{p.assetsCount}</div>
@@ -121,7 +121,7 @@ export function ProjectDetailPage() {
         <div className="px-4 lg:px-6 py-5">
           {/* Project health strip */}
           <div className="ss-panel p-3 mb-4">
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-px bg-[var(--ss-hairline)] rounded-sm overflow-hidden">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-px bg-(--ss-hairline) rounded-sm overflow-hidden">
               {[
                 { l: "Assets verified", v: `${projectAssets.filter((a) => a.verification === "verified").length}/${projectAssets.length}` },
                 { l: "Active authorizations", v: projectAuths.filter((a) => a.state === "active").length },
@@ -129,7 +129,7 @@ export function ProjectDetailPage() {
                 { l: "Running executions", v: projectExecs.filter((e) => e.status === "executing").length },
                 { l: "Latest execution", v: project.latestExecutionId },
               ].map((x) => (
-                <div key={x.l} className="bg-[var(--ss-surface-1)] px-3 py-2">
+                <div key={x.l} className="bg-(--ss-surface-1) px-3 py-2">
                   <div className="ss-eyebrow">{x.l}</div>
                   <div className="text-sm font-semibold text-slate-200 mt-0.5 ss-mono-xs tnum">{x.v}</div>
                 </div>
@@ -153,7 +153,7 @@ export function ProjectDetailPage() {
                 ) : (
                   <ul className="space-y-2">
                     {projectAssets.map((a) => (
-                      <li key={a.id} onClick={() => openAsset(a.id)} className="flex items-center justify-between p-2 rounded-sm border border-[var(--ss-hairline)] hover:border-cyan-500/40 hover:bg-[var(--ss-surface-3)]/40 cursor-pointer">
+                      <li key={a.id} onClick={() => openAsset(a.id)} className="flex items-center justify-between p-2 rounded-sm border border-(--ss-hairline) hover:border-cyan-500/40 hover:bg-(--ss-surface-3)/40 cursor-pointer">
                         <div className="min-w-0">
                           <div className="text-xs font-medium text-slate-200 truncate">{a.name}</div>
                           <code className="ss-mono-xs text-slate-500 truncate block">{a.target}</code>
@@ -177,7 +177,7 @@ export function ProjectDetailPage() {
                 ) : (
                   <ul className="space-y-2">
                     {projectExecs.slice(0, 6).map((e) => (
-                      <li key={e.id} onClick={() => openExecution(e.id)} className="flex items-center justify-between p-2 rounded-sm border border-[var(--ss-hairline)] hover:border-cyan-500/40 hover:bg-[var(--ss-surface-3)]/40 cursor-pointer">
+                      <li key={e.id} onClick={() => openExecution(e.id)} className="flex items-center justify-between p-2 rounded-sm border border-(--ss-hairline) hover:border-cyan-500/40 hover:bg-(--ss-surface-3)/40 cursor-pointer">
                         <div className="flex items-center gap-2 min-w-0">
                           <code className="ss-mono-xs text-cyan-200">{e.code}</code>
                           <span className="text-[11px] text-slate-400 truncate">{e.templateName}</span>
@@ -202,7 +202,7 @@ export function ProjectDetailPage() {
                 ) : (
                   <ul className="space-y-2">
                     {projectAuths.map((a) => (
-                      <li key={a.id} onClick={() => useApp.getState().openAuthorization(a.id)} className="p-2 rounded-sm border border-[var(--ss-hairline)] hover:border-cyan-500/40 cursor-pointer">
+                      <li key={a.id} onClick={() => useApp.getState().openAuthorization(a.id)} className="p-2 rounded-sm border border-(--ss-hairline) hover:border-cyan-500/40 cursor-pointer">
                         <div className="flex items-center justify-between">
                           <code className="ss-mono-xs text-cyan-200">{a.code}</code>
                           <RiskTierBadge tier={a.maxRiskTier} />
@@ -224,7 +224,7 @@ export function ProjectDetailPage() {
                 ) : (
                   <ul className="space-y-2">
                     {projectEngs.map((e) => (
-                      <li key={e.id} onClick={() => useApp.getState().openEngagement(e.id)} className="p-2 rounded-sm border border-[var(--ss-hairline)] hover:border-cyan-500/40 cursor-pointer">
+                      <li key={e.id} onClick={() => useApp.getState().openEngagement(e.id)} className="p-2 rounded-sm border border-(--ss-hairline) hover:border-cyan-500/40 cursor-pointer">
                         <div className="flex items-center justify-between">
                           <code className="ss-mono-xs text-cyan-200">{e.code}</code>
                           <Pill tone={e.state === "active" ? "green" : "slate"}>{e.state}</Pill>

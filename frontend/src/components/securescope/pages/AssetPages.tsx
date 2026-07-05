@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 import { useApp } from "@/lib/securescope/store";
 import { verificationAttempts } from "@/lib/securescope/data";
-import type { Asset, VerificationState } from "@/lib/securescope/types";
+import type { Asset, VerificationState, Authorization, Engagement, ValidationExecution } from "@/lib/securescope/types";
 import { Pill, RiskTierBadge, StatusBadge, VerificationBadge } from "../shared/badges";
 import { AlertBanner, CyberButton, EmptyState, KeyValue, MaskedField } from "../shared/ui";
 import { EventTimeline, SecureCodeBlock } from "../shared/lifecycle";
@@ -69,7 +69,7 @@ export function AssetsListPage() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Filter assets…"
-              className="px-2.5 py-1 text-[11px] bg-[var(--ss-surface-2)] border border-[var(--ss-hairline-strong)] rounded-sm text-slate-200 placeholder:text-slate-600 outline-none focus:border-cyan-400/50 w-48"
+              className="px-2.5 py-1 text-[11px] bg-(--ss-surface-2) border border-(--ss-hairline-strong) rounded-sm text-slate-200 placeholder:text-slate-600 outline-none focus:border-cyan-400/50 w-48"
             />
           }
         />
@@ -78,7 +78,7 @@ export function AssetsListPage() {
           <div className="ss-panel overflow-hidden">
             <table className="w-full text-xs">
               <thead>
-                <tr className="bg-[var(--ss-surface-2)] border-b border-[var(--ss-hairline-strong)]">
+                <tr className="bg-(--ss-surface-2) border-b border-(--ss-hairline-strong)">
                   <th className="text-left px-3 py-2 ss-eyebrow">Asset</th>
                   <th className="text-left px-3 py-2 ss-eyebrow">Target</th>
                   <th className="text-left px-3 py-2 ss-eyebrow">Type</th>
@@ -94,7 +94,7 @@ export function AssetsListPage() {
                   <tr
                     key={a.id}
                     onClick={() => openAsset(a.id)}
-                    className="border-b border-[var(--ss-hairline)] hover:bg-[var(--ss-surface-3)]/40 cursor-pointer transition-colors"
+                    className="border-b border-(--ss-hairline) hover:bg-(--ss-surface-3)/40 cursor-pointer transition-colors"
                   >
                     <td className="px-3 py-2.5">
                       <div className="flex items-center gap-2">
@@ -103,7 +103,7 @@ export function AssetsListPage() {
                       </div>
                       <div className="flex flex-wrap gap-1 mt-1">
                         {a.tags.slice(0, 2).map((t) => (
-                          <span key={t} className="text-[9px] ss-mono-xs text-slate-500 border border-[var(--ss-hairline)] rounded-sm px-1 py-0.5">{t}</span>
+                          <span key={t} className="text-[9px] ss-mono-xs text-slate-500 border border-(--ss-hairline) rounded-sm px-1 py-0.5">{t}</span>
                         ))}
                       </div>
                     </td>
@@ -154,7 +154,7 @@ export function AssetDetailPage() {
       <TopNavCommandBar />
       <div className="pt-[76px] min-h-screen">
         {/* Identity header */}
-        <div className="px-4 lg:px-6 pt-4 pb-4 border-b border-[var(--ss-hairline-strong)] bg-gradient-to-b from-[var(--ss-surface-2)]/30 to-transparent">
+        <div className="px-4 lg:px-6 pt-4 pb-4 border-b border-(--ss-hairline-strong) bg-linear-to-b from-(--ss-surface-2)/30 to-transparent">
           <div className="flex items-center gap-1.5 text-[10px] text-slate-500 mb-2">
             <button onClick={() => go("assets")} className="hover:text-slate-300 uppercase tracking-wider">Assets</button>
             <span className="text-slate-700">/</span>
@@ -198,28 +198,28 @@ export function AssetDetailPage() {
           </div>
 
           {/* Identity strip */}
-          <div className="mt-4 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-px bg-[var(--ss-hairline)] border border-[var(--ss-hairline)] rounded-sm overflow-hidden">
-            <div className="bg-[var(--ss-surface-1)] px-3 py-2">
+          <div className="mt-4 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-px bg-(--ss-hairline) border border-(--ss-hairline) rounded-sm overflow-hidden">
+            <div className="bg-(--ss-surface-1) px-3 py-2">
               <div className="ss-eyebrow">Organization</div>
               <div className="text-[11px] text-slate-200 mt-0.5">{asset.organizationName}</div>
             </div>
-            <div className="bg-[var(--ss-surface-1)] px-3 py-2">
+            <div className="bg-(--ss-surface-1) px-3 py-2">
               <div className="ss-eyebrow">Project</div>
               <div className="text-[11px] text-slate-200 mt-0.5">{asset.projectName}</div>
             </div>
-            <div className="bg-[var(--ss-surface-1)] px-3 py-2">
+            <div className="bg-(--ss-surface-1) px-3 py-2">
               <div className="ss-eyebrow">Ownership</div>
               <div className="text-[11px] text-slate-200 mt-0.5">{asset.ownershipVerified ? "Verified" : "Unverified"}</div>
             </div>
-            <div className="bg-[var(--ss-surface-1)] px-3 py-2">
+            <div className="bg-(--ss-surface-1) px-3 py-2">
               <div className="ss-eyebrow">Authorizations</div>
               <div className="text-[11px] text-slate-200 mt-0.5 ss-mono-xs">{assetAuths.length}</div>
             </div>
-            <div className="bg-[var(--ss-surface-1)] px-3 py-2">
+            <div className="bg-(--ss-surface-1) px-3 py-2">
               <div className="ss-eyebrow">Engagements</div>
               <div className="text-[11px] text-slate-200 mt-0.5 ss-mono-xs">{assetEngs.length}</div>
             </div>
-            <div className="bg-[var(--ss-surface-1)] px-3 py-2">
+            <div className="bg-(--ss-surface-1) px-3 py-2">
               <div className="ss-eyebrow">Last validation</div>
               <div className="text-[11px] text-slate-200 mt-0.5 ss-mono-xs">{asset.lastValidation ? asset.lastValidation.slice(0, 16).replace("T", " ") : "—"}</div>
             </div>
@@ -227,7 +227,7 @@ export function AssetDetailPage() {
         </div>
 
         {/* Tabs */}
-        <div className="px-4 lg:px-6 border-b border-[var(--ss-hairline-strong)] sticky top-[76px] bg-[#070B14]/80 backdrop-blur-sm z-20">
+        <div className="px-4 lg:px-6 border-b border-(--ss-hairline-strong) sticky top-[76px] bg-[#070B14]/80 backdrop-blur-sm z-20">
           <div className="flex items-center gap-0.5 overflow-x-auto ss-scroll">
             {ASSET_TABS.map((t) => (
               <button
@@ -259,9 +259,9 @@ export function AssetDetailPage() {
 
 function AssetOverview({ asset, assetAuths, assetEngs, assetExecs }: {
   asset: Asset;
-  assetAuths: typeof authorizations;
-  assetEngs: typeof engagements;
-  assetExecs: typeof executions;
+  assetAuths: Authorization[];
+  assetEngs: Engagement[];
+  assetExecs: ValidationExecution[];
 }) {
   return (
     <div className="grid lg:grid-cols-[1.5fr_1fr] gap-4">
@@ -285,7 +285,7 @@ function AssetOverview({ asset, assetAuths, assetEngs, assetExecs }: {
           ) : (
             <ul className="space-y-2">
               {assetExecs.slice(0, 5).map((e) => (
-                <li key={e.id} className="flex items-center justify-between p-2 rounded-sm border border-[var(--ss-hairline)] hover:border-cyan-500/40 hover:bg-[var(--ss-surface-3)]/40 cursor-pointer"
+                <li key={e.id} className="flex items-center justify-between p-2 rounded-sm border border-(--ss-hairline) hover:border-cyan-500/40 hover:bg-(--ss-surface-3)/40 cursor-pointer"
                     onClick={() => useApp.getState().openExecution(e.id)}>
                   <code className="ss-mono-xs text-cyan-200">{e.code}</code>
                   <div className="flex items-center gap-2">
@@ -307,7 +307,7 @@ function AssetOverview({ asset, assetAuths, assetEngs, assetExecs }: {
           ) : (
             <ul className="space-y-2">
               {assetAuths.map((a) => (
-                <li key={a.id} className="p-2 rounded-sm border border-[var(--ss-hairline)]">
+                <li key={a.id} className="p-2 rounded-sm border border-(--ss-hairline)">
                   <div className="flex items-center justify-between">
                     <code className="ss-mono-xs text-cyan-200">{a.code}</code>
                     <RiskTierBadge tier={a.maxRiskTier} />
@@ -346,7 +346,7 @@ function AssetVerification({ asset, attempts }: { asset: Asset; attempts: typeof
       <div className="space-y-4">
         {/* Challenge card */}
         <div className="ss-panel">
-          <div className="px-4 py-2.5 border-b border-[var(--ss-hairline-strong)] flex items-center justify-between">
+          <div className="px-4 py-2.5 border-b border-(--ss-hairline-strong) flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Shield className="w-3.5 h-3.5 text-cyan-400" />
               <span className="text-xs font-semibold text-slate-100">DNS TXT Challenge</span>
@@ -396,7 +396,7 @@ function AssetVerification({ asset, attempts }: { asset: Asset; attempts: typeof
         <div className="ss-panel p-4">
           <div className="ss-eyebrow mb-3">Verification status timeline</div>
           <div className="relative">
-            <div className="absolute left-[5px] top-1 bottom-1 w-px bg-[var(--ss-hairline-strong)]" />
+            <div className="absolute left-[5px] top-1 bottom-1 w-px bg-(--ss-hairline-strong)" />
             <ul className="space-y-3">
               {([
                 { state: "pending", label: "Pending", desc: "Challenge issued, awaiting DNS propagation.", reached: true },
@@ -458,7 +458,7 @@ function AssetVerification({ asset, attempts }: { asset: Asset; attempts: typeof
   );
 }
 
-function AssetAuthorizations({ assetAuths }: { assetAuths: typeof authorizations }) {
+function AssetAuthorizations({ assetAuths }: { assetAuths: Authorization[] }) {
   const openAuthorization = useApp((s) => s.openAuthorization);
   if (assetAuths.length === 0) {
     return <EmptyState eyebrow="Authorizations" title="No authorizations scope this asset" description="Create an authorization and add this asset to its scope." icon={<Shield className="w-5 h-5" />} />;
@@ -467,7 +467,7 @@ function AssetAuthorizations({ assetAuths }: { assetAuths: typeof authorizations
     <div className="ss-panel overflow-hidden">
       <table className="w-full text-xs">
         <thead>
-          <tr className="bg-[var(--ss-surface-2)] border-b border-[var(--ss-hairline-strong)]">
+          <tr className="bg-(--ss-surface-2) border-b border-(--ss-hairline-strong)">
             <th className="text-left px-3 py-2 ss-eyebrow">Code</th>
             <th className="text-left px-3 py-2 ss-eyebrow">State</th>
             <th className="text-left px-3 py-2 ss-eyebrow">Max risk</th>
@@ -478,7 +478,7 @@ function AssetAuthorizations({ assetAuths }: { assetAuths: typeof authorizations
         </thead>
         <tbody>
           {assetAuths.map((a) => (
-            <tr key={a.id} onClick={() => openAuthorization(a.id)} className="border-b border-[var(--ss-hairline)] hover:bg-[var(--ss-surface-3)]/40 cursor-pointer">
+            <tr key={a.id} onClick={() => openAuthorization(a.id)} className="border-b border-(--ss-hairline) hover:bg-(--ss-surface-3)/40 cursor-pointer">
               <td className="px-3 py-2.5"><code className="ss-mono-xs text-cyan-200">{a.code}</code></td>
               <td className="px-3 py-2.5"><Pill tone={a.state === "active" ? "green" : "slate"}>{a.state}</Pill></td>
               <td className="px-3 py-2.5"><RiskTierBadge tier={a.maxRiskTier} /></td>
@@ -493,7 +493,7 @@ function AssetAuthorizations({ assetAuths }: { assetAuths: typeof authorizations
   );
 }
 
-function AssetEngagements({ assetEngs }: { assetEngs: typeof engagements }) {
+function AssetEngagements({ assetEngs }: { assetEngs: Engagement[] }) {
   const openEngagement = useApp((s) => s.openEngagement);
   if (assetEngs.length === 0) {
     return <EmptyState eyebrow="Engagements" title="No engagements reference this asset" icon={<Target className="w-5 h-5" />} />;
@@ -501,7 +501,7 @@ function AssetEngagements({ assetEngs }: { assetEngs: typeof engagements }) {
   return (
     <div className="grid md:grid-cols-2 gap-3">
       {assetEngs.map((e) => (
-        <button key={e.id} onClick={() => openEngagement(e.id)} className="ss-panel p-3 text-left hover:border-cyan-500/40 hover:bg-[var(--ss-surface-3)]/40 transition-colors">
+        <button key={e.id} onClick={() => openEngagement(e.id)} className="ss-panel p-3 text-left hover:border-cyan-500/40 hover:bg-(--ss-surface-3)/40 transition-colors">
           <div className="flex items-center justify-between mb-1">
             <code className="ss-mono-xs text-cyan-200">{e.code}</code>
             <Pill tone={e.state === "active" ? "green" : "slate"}>{e.state}</Pill>
@@ -514,7 +514,7 @@ function AssetEngagements({ assetEngs }: { assetEngs: typeof engagements }) {
   );
 }
 
-function AssetValidationHistory({ assetExecs }: { assetExecs: typeof executions }) {
+function AssetValidationHistory({ assetExecs }: { assetExecs: ValidationExecution[] }) {
   const openExecution = useApp((s) => s.openExecution);
   if (assetExecs.length === 0) {
     return <EmptyState eyebrow="Validation History" title="No executions yet" icon={<Target className="w-5 h-5" />} />;
@@ -523,7 +523,7 @@ function AssetValidationHistory({ assetExecs }: { assetExecs: typeof executions 
     <div className="ss-panel overflow-hidden">
       <table className="w-full text-xs">
         <thead>
-          <tr className="bg-[var(--ss-surface-2)] border-b border-[var(--ss-hairline-strong)]">
+          <tr className="bg-(--ss-surface-2) border-b border-(--ss-hairline-strong)">
             <th className="text-left px-3 py-2 ss-eyebrow">Execution</th>
             <th className="text-left px-3 py-2 ss-eyebrow">Template</th>
             <th className="text-left px-3 py-2 ss-eyebrow">Status</th>
@@ -534,7 +534,7 @@ function AssetValidationHistory({ assetExecs }: { assetExecs: typeof executions 
         </thead>
         <tbody>
           {assetExecs.map((e) => (
-            <tr key={e.id} onClick={() => openExecution(e.id)} className="border-b border-[var(--ss-hairline)] hover:bg-[var(--ss-surface-3)]/40 cursor-pointer">
+            <tr key={e.id} onClick={() => openExecution(e.id)} className="border-b border-(--ss-hairline) hover:bg-(--ss-surface-3)/40 cursor-pointer">
               <td className="px-3 py-2.5"><code className="ss-mono-xs text-cyan-200">{e.code}</code></td>
               <td className="px-3 py-2.5 text-slate-400">{e.templateName}</td>
               <td className="px-3 py-2.5"><StatusBadge status={e.status} /></td>
@@ -551,7 +551,13 @@ function AssetValidationHistory({ assetExecs }: { assetExecs: typeof executions 
 
 function AssetAudit({ asset }: { asset: Asset }) {
   const go = useApp((s) => s.go);
-  const events = [
+  const events: {
+    id: string;
+    at: string;
+    label: string;
+    kind: string;
+    safeMeta?: Record<string, string>;
+  }[] = [
     { id: "aa1", at: asset.lastValidation ?? "2026-07-02T06:42:11Z", label: "Validation executed", kind: "worker_finished", safeMeta: { exec: "EXEC-2026-0702-003", outcome: "validated" } },
     { id: "aa2", at: "2026-07-01T18:44:11Z", label: "Verification renewed", kind: "worker_started", safeMeta: { method: "dns_txt", duration_ms: "5230" } },
     { id: "aa3", at: "2026-06-30T11:22:00Z", label: "Asset registered", kind: "auth_expiry_warning", safeMeta: { org: asset.organizationName, project: asset.projectName } },

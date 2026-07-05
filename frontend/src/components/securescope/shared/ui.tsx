@@ -99,7 +99,7 @@ export function EmptyState({
 // ============================================================
 
 export function Skeleton({ className }: { className?: string }) {
-  return <div className={cn("bg-[var(--ss-surface-3)]/60 ss-scan rounded-sm", className)} />;
+  return <div className={cn("bg-(--ss-surface-3)/60 ss-scan rounded-sm", className)} />;
 }
 
 export function LoadingPanel({ label = "Initializing subsystem", className }: { label?: string; className?: string }) {
@@ -178,7 +178,7 @@ export function MonoRef({ children, className }: { children: React.ReactNode; cl
 
 export function KeyValue({ k, v, mono = false, className }: { k: string; v: React.ReactNode; mono?: boolean; className?: string }) {
   return (
-    <div className={cn("flex items-baseline justify-between gap-3 py-1.5 border-b border-[var(--ss-hairline)] last:border-b-0", className)}>
+    <div className={cn("flex items-baseline justify-between gap-3 py-1.5 border-b border-(--ss-hairline) last:border-b-0", className)}>
       <span className="text-[11px] text-slate-500 uppercase tracking-wide shrink-0">{k}</span>
       <span className={cn("text-xs text-slate-200 text-right", mono && "ss-mono-xs tnum")}>{v}</span>
     </div>
@@ -207,11 +207,11 @@ export function CyberButton({
   type?: "button" | "submit";
 }) {
   const variants = {
-    default: "bg-[var(--ss-surface-3)] hover:bg-[var(--ss-surface-4)] text-slate-200 border border-[var(--ss-hairline-strong)]",
+    default: "bg-(--ss-surface-3) hover:bg-(--ss-surface-4) text-slate-200 border border-(--ss-hairline-strong)",
     primary: "bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-200 border border-cyan-400/40 hover:ss-glow-cyan",
     danger: "bg-red-500/15 hover:bg-red-500/25 text-red-200 border border-red-400/40",
     amber: "bg-amber-500/15 hover:bg-amber-500/25 text-amber-200 border border-amber-400/40",
-    ghost: "bg-transparent hover:bg-[var(--ss-surface-3)] text-slate-300 border border-transparent",
+    ghost: "bg-transparent hover:bg-(--ss-surface-3) text-slate-300 border border-transparent",
   };
   const sizes = { sm: "px-2.5 py-1 text-[11px]", md: "px-3.5 py-1.5 text-xs" };
   return (
@@ -248,13 +248,13 @@ export function MaskedField({
 }) {
   return (
     <div className={cn("ss-panel-flat", className)}>
-      <div className="px-3 py-1.5 border-b border-[var(--ss-hairline)] flex items-center justify-between">
+      <div className="px-3 py-1.5 border-b border-(--ss-hairline) flex items-center justify-between">
         <div className="ss-eyebrow">{label}</div>
         <span className="text-[10px] text-amber-400/80 uppercase tracking-wider">Restricted</span>
       </div>
       <div className="px-3 py-2.5 flex items-center gap-2">
         <code className="ss-mono-xs text-slate-500 flex-1">{placeholder}</code>
-        <span className="shrink-0 text-[10px] uppercase tracking-wider text-slate-500 border border-[var(--ss-hairline-strong)] rounded-sm px-2 py-0.5">
+        <span className="shrink-0 text-[10px] uppercase tracking-wider text-slate-500 border border-(--ss-hairline-strong) rounded-sm px-2 py-0.5">
           Hidden
         </span>
       </div>

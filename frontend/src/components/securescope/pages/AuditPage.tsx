@@ -86,7 +86,7 @@ export function AuditPage() {
               <select
                 value={entityType}
                 onChange={(e) => setEntityType(e.target.value)}
-                className="px-2 py-1 text-[11px] bg-[var(--ss-surface-2)] border border-[var(--ss-hairline-strong)] rounded-sm text-slate-200 outline-none focus:border-cyan-400/50"
+                className="px-2 py-1 text-[11px] bg-(--ss-surface-2) border border-(--ss-hairline-strong) rounded-sm text-slate-200 outline-none focus:border-cyan-400/50"
               >
                 <option value="all">All entities</option>
                 <option value="organization">Organization</option>
@@ -98,7 +98,7 @@ export function AuditPage() {
                 <option value="credential">Credential</option>
                 <option value="dispatch">Dispatch</option>
               </select>
-              <div className="flex items-center gap-2 px-2.5 py-1 rounded-sm border border-[var(--ss-hairline-strong)] bg-[var(--ss-surface-2)]">
+              <div className="flex items-center gap-2 px-2.5 py-1 rounded-sm border border-(--ss-hairline-strong) bg-(--ss-surface-2)">
                 <Search className="w-3 h-3 text-slate-500" />
                 <input
                   value={query}
@@ -114,7 +114,7 @@ export function AuditPage() {
         <div className="px-4 lg:px-6 py-5">
           {/* Dense event timeline */}
           <div className="ss-panel">
-            <div className="px-4 py-2.5 border-b border-[var(--ss-hairline-strong)] flex items-center justify-between">
+            <div className="px-4 py-2.5 border-b border-(--ss-hairline-strong) flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Activity className="w-3.5 h-3.5 text-cyan-400" />
                 <span className="text-xs font-semibold text-slate-100">Event stream</span>
@@ -127,7 +127,7 @@ export function AuditPage() {
             {filtered.length === 0 ? (
               <EmptyState eyebrow="No matches" title="No events match your filters" icon={<Filter className="w-5 h-5" />} />
             ) : (
-              <ul className="divide-y divide-[var(--ss-hairline)]">
+              <ul className="divide-y divide-(--ss-hairline)">
                 {filtered.map((e) => {
                   const Icon = ACTOR_TYPE_ICON[e.actorType] ?? Activity;
                   const time = new Date(e.at).toLocaleString("en-GB", {
@@ -138,9 +138,9 @@ export function AuditPage() {
                     second: "2-digit",
                   });
                   return (
-                    <li key={e.id} className="px-4 py-2.5 hover:bg-[var(--ss-surface-3)]/40 transition-colors">
+                    <li key={e.id} className="px-4 py-2.5 hover:bg-(--ss-surface-3)/40 transition-colors">
                       <div className="flex items-start gap-3">
-                        <div className="shrink-0 mt-0.5 w-6 h-6 rounded-sm border border-[var(--ss-hairline-strong)] bg-[var(--ss-surface-2)] flex items-center justify-center">
+                        <div className="shrink-0 mt-0.5 w-6 h-6 rounded-sm border border-(--ss-hairline-strong) bg-(--ss-surface-2) flex items-center justify-center">
                           <Icon className="w-3 h-3 text-slate-400" />
                         </div>
                         <div className="flex-1 min-w-0">

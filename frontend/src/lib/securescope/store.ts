@@ -474,8 +474,12 @@ export const useApp = create<AppState>((set, get) => ({
 
   addAsset: async (payload) => {
     const orgId = get().selectedOrgId;
-    if (!orgId) return;
-    await api.createAsset(orgId, payload);
+    const projectId = get().selectedProjectId;
+    if (!orgId || !projectId) return;
+    await api.createAsset(orgId, {
+      ...payload,
+      project_id: projectId,
+    });
     await get().fetchData();
   },
 

@@ -33,7 +33,7 @@ export function OrganizationsListPage() {
           active="all"
           onSelect={() => {}}
           right={
-            <div className="flex items-center gap-2 px-2.5 py-1 rounded-sm border border-[var(--ss-hairline-strong)] bg-[var(--ss-surface-2)]">
+            <div className="flex items-center gap-2 px-2.5 py-1 rounded-sm border border-(--ss-hairline-strong) bg-(--ss-surface-2)">
               <Search className="w-3 h-3 text-slate-500" />
               <input
                 value={query}
@@ -49,7 +49,7 @@ export function OrganizationsListPage() {
           <div className="ss-panel overflow-hidden">
             <table className="w-full text-xs">
               <thead>
-                <tr className="bg-[var(--ss-surface-2)] border-b border-[var(--ss-hairline-strong)]">
+                <tr className="bg-(--ss-surface-2) border-b border-(--ss-hairline-strong)">
                   <th className="text-left px-3 py-2 ss-eyebrow">Organization</th>
                   <th className="text-left px-3 py-2 ss-eyebrow">Status</th>
                   <th className="text-left px-3 py-2 ss-eyebrow">Projects</th>
@@ -62,7 +62,7 @@ export function OrganizationsListPage() {
               </thead>
               <tbody>
                 {filtered.map((o) => (
-                  <tr key={o.id} onClick={() => openOrg(o.id)} className="border-b border-[var(--ss-hairline)] hover:bg-[var(--ss-surface-3)]/40 cursor-pointer">
+                  <tr key={o.id} onClick={() => openOrg(o.id)} className="border-b border-(--ss-hairline) hover:bg-(--ss-surface-3)/40 cursor-pointer">
                     <td className="px-3 py-3">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-sm border border-cyan-400/30 bg-cyan-500/5 flex items-center justify-center shrink-0">
@@ -152,14 +152,14 @@ export function OrganizationDetailPage() {
             <div className="grid lg:grid-cols-3 gap-4">
               <div className="ss-panel p-4 lg:col-span-2">
                 <div className="ss-eyebrow mb-2">Organization health</div>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-[var(--ss-hairline)] border border-[var(--ss-hairline)] rounded-sm overflow-hidden">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-(--ss-hairline) border border-(--ss-hairline) rounded-sm overflow-hidden">
                   {[
                     { l: "Projects", v: org.projectsCount },
                     { l: "Verified assets", v: org.verifiedAssets },
                     { l: "Active engagements", v: org.activeEngagements },
                     { l: "Executions (24h)", v: orgExecs.length },
                   ].map((x) => (
-                    <div key={x.l} className="bg-[var(--ss-surface-1)] px-3 py-3">
+                    <div key={x.l} className="bg-(--ss-surface-1) px-3 py-3">
                       <div className="ss-eyebrow">{x.l}</div>
                       <div className="text-2xl font-semibold tnum text-slate-100 mt-1">{x.v}</div>
                     </div>
@@ -186,7 +186,7 @@ export function OrganizationDetailPage() {
           {tab === "Projects" && (
             <div className="grid md:grid-cols-2 gap-3">
               {orgProjects.map((p) => (
-                <button key={p.id} onClick={() => openProject(p.id)} className="ss-panel p-4 text-left hover:border-cyan-500/40 hover:bg-[var(--ss-surface-3)]/40 transition-colors">
+                <button key={p.id} onClick={() => openProject(p.id)} className="ss-panel p-4 text-left hover:border-cyan-500/40 hover:bg-(--ss-surface-3)/40 transition-colors">
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-sm font-medium text-slate-100">{p.name}</span>
                     <Pill tone={p.status === "healthy" ? "green" : "amber"}>{p.status}</Pill>
@@ -200,7 +200,7 @@ export function OrganizationDetailPage() {
           {tab === "Assets" && (
             <div className="ss-panel overflow-hidden">
               <table className="w-full text-xs">
-                <thead><tr className="bg-[var(--ss-surface-2)] border-b border-[var(--ss-hairline-strong)]">
+                <thead><tr className="bg-(--ss-surface-2) border-b border-(--ss-hairline-strong)">
                   <th className="text-left px-3 py-2 ss-eyebrow">Asset</th>
                   <th className="text-left px-3 py-2 ss-eyebrow">Target</th>
                   <th className="text-left px-3 py-2 ss-eyebrow">Criticality</th>
@@ -208,7 +208,7 @@ export function OrganizationDetailPage() {
                 </tr></thead>
                 <tbody>
                   {orgAssets.map((a) => (
-                    <tr key={a.id} onClick={() => useApp.getState().openAsset(a.id)} className="border-b border-[var(--ss-hairline)] hover:bg-[var(--ss-surface-3)]/40 cursor-pointer">
+                    <tr key={a.id} onClick={() => useApp.getState().openAsset(a.id)} className="border-b border-(--ss-hairline) hover:bg-(--ss-surface-3)/40 cursor-pointer">
                       <td className="px-3 py-2.5 text-slate-200">{a.name}</td>
                       <td className="px-3 py-2.5"><code className="ss-mono-xs text-cyan-200">{a.target}</code></td>
                       <td className="px-3 py-2.5"><Pill tone={a.criticality === "critical" ? "red" : "slate"}>{a.criticality}</Pill></td>
@@ -223,7 +223,7 @@ export function OrganizationDetailPage() {
           {tab === "Executions" && (
             <div className="ss-panel overflow-hidden">
               <table className="w-full text-xs">
-                <thead><tr className="bg-[var(--ss-surface-2)] border-b border-[var(--ss-hairline-strong)]">
+                <thead><tr className="bg-(--ss-surface-2) border-b border-(--ss-hairline-strong)">
                   <th className="text-left px-3 py-2 ss-eyebrow">Execution</th>
                   <th className="text-left px-3 py-2 ss-eyebrow">Asset</th>
                   <th className="text-left px-3 py-2 ss-eyebrow">Template</th>
@@ -232,7 +232,7 @@ export function OrganizationDetailPage() {
                 </tr></thead>
                 <tbody>
                   {orgExecs.map((e) => (
-                    <tr key={e.id} onClick={() => useApp.getState().openExecution(e.id)} className="border-b border-[var(--ss-hairline)] hover:bg-[var(--ss-surface-3)]/40 cursor-pointer">
+                    <tr key={e.id} onClick={() => useApp.getState().openExecution(e.id)} className="border-b border-(--ss-hairline) hover:bg-(--ss-surface-3)/40 cursor-pointer">
                       <td className="px-3 py-2.5"><code className="ss-mono-xs text-cyan-200">{e.code}</code></td>
                       <td className="px-3 py-2.5 text-slate-300">{e.assetName}</td>
                       <td className="px-3 py-2.5 text-slate-400">{e.templateName}</td>

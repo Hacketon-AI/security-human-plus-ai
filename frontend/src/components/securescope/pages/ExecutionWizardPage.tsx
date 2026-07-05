@@ -102,7 +102,7 @@ export function ExecutionWizardPage() {
         />
 
         {/* Horizontal stepper */}
-        <div className="px-4 lg:px-6 py-3 border-b border-[var(--ss-hairline-strong)] bg-[#050810]/60 overflow-x-auto ss-scroll">
+        <div className="px-4 lg:px-6 py-3 border-b border-(--ss-hairline-strong) bg-[#050810]/60 overflow-x-auto ss-scroll">
           <ol className="flex items-center gap-1 min-w-max">
             {STEPS.map((s, i) => {
               const isActive = s.key === step;
@@ -117,14 +117,14 @@ export function ExecutionWizardPage() {
                         "flex items-center gap-2 px-3 py-1.5 rounded-sm border transition-all whitespace-nowrap",
                         isActive && "border-cyan-400/50 bg-cyan-500/10 ss-glow-cyan",
                         isDone && "border-emerald-500/40 bg-emerald-500/5 hover:bg-emerald-500/10",
-                        !isActive && !isDone && "border-[var(--ss-hairline-strong)] bg-transparent hover:bg-[var(--ss-surface-3)]/40"
+                        !isActive && !isDone && "border-(--ss-hairline-strong) bg-transparent hover:bg-(--ss-surface-3)/40"
                       )}
                     >
                       <span className={cn(
                         "w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-semibold tnum",
                         tone === "cyan" && "bg-cyan-400 text-[#060912]",
                         tone === "green" && "bg-emerald-400 text-[#060912]",
-                        tone === "slate" && "bg-[var(--ss-surface-3)] text-slate-500 border border-[var(--ss-hairline-strong)]"
+                        tone === "slate" && "bg-(--ss-surface-3) text-slate-500 border border-(--ss-hairline-strong)"
                       )}>
                         {isDone ? "✓" : i + 1}
                       </span>
@@ -139,7 +139,7 @@ export function ExecutionWizardPage() {
                   {i < STEPS.length - 1 && (
                     <li className={cn(
                       "w-6 h-px",
-                      i < stepIdx ? "bg-emerald-500/50" : "bg-[var(--ss-hairline-strong)]"
+                      i < stepIdx ? "bg-emerald-500/50" : "bg-(--ss-hairline-strong)"
                     )} />
                   )}
                 </React.Fragment>
@@ -230,7 +230,7 @@ function ContextStep({ draft, update }: { draft: DraftState; update: (p: Partial
                       "text-left p-3 rounded-sm border transition-all",
                       active
                         ? "border-cyan-400/50 bg-cyan-500/10 ss-glow-cyan"
-                        : "border-[var(--ss-hairline-strong)] bg-[var(--ss-surface-2)] hover:bg-[var(--ss-surface-3)]/50"
+                        : "border-(--ss-hairline-strong) bg-(--ss-surface-2) hover:bg-(--ss-surface-3)/50"
                     )}
                   >
                     <div className="flex items-center justify-between mb-1">
@@ -258,7 +258,7 @@ function ContextStep({ draft, update }: { draft: DraftState; update: (p: Partial
                       "text-left p-3 rounded-sm border transition-all flex items-center gap-3",
                       active
                         ? "border-cyan-400/50 bg-cyan-500/10"
-                        : "border-[var(--ss-hairline-strong)] bg-[var(--ss-surface-2)] hover:bg-[var(--ss-surface-3)]/50"
+                        : "border-(--ss-hairline-strong) bg-(--ss-surface-2) hover:bg-(--ss-surface-3)/50"
                     )}
                   >
                     <Layers className={cn("w-4 h-4", active ? "text-cyan-400" : "text-slate-500")} />
@@ -323,8 +323,8 @@ function AssetStep({ draft, update }: { draft: DraftState; update: (p: Partial<D
                 disabled={disabled}
                 className={cn(
                   "w-full text-left p-3 rounded-sm border transition-all",
-                  active ? "border-cyan-400/50 bg-cyan-500/10 ss-glow-cyan" : "border-[var(--ss-hairline-strong)] bg-[var(--ss-surface-2)]",
-                  !disabled && "hover:bg-[var(--ss-surface-3)]/50",
+                  active ? "border-cyan-400/50 bg-cyan-500/10 ss-glow-cyan" : "border-(--ss-hairline-strong) bg-(--ss-surface-2)",
+                  !disabled && "hover:bg-(--ss-surface-3)/50",
                   disabled && "opacity-50 cursor-not-allowed"
                 )}
               >
@@ -346,7 +346,7 @@ function AssetStep({ draft, update }: { draft: DraftState; update: (p: Partial<D
                 <code className="ss-mono-xs text-slate-400 block">{a.target}</code>
                 <div className="mt-1.5 flex flex-wrap gap-1">
                   {a.tags.map((t) => (
-                    <span key={t} className="text-[9px] ss-mono-xs text-slate-500 border border-[var(--ss-hairline)] rounded-sm px-1.5 py-0.5">
+                    <span key={t} className="text-[9px] ss-mono-xs text-slate-500 border border-(--ss-hairline) rounded-sm px-1.5 py-0.5">
                       {t}
                     </span>
                   ))}
@@ -398,8 +398,8 @@ function AuthorizationStep({ draft, update }: { draft: DraftState; update: (p: P
                 disabled={expired}
                 className={cn(
                   "w-full text-left p-3 rounded-sm border transition-all",
-                  active ? "border-cyan-400/50 bg-cyan-500/10 ss-glow-cyan" : "border-[var(--ss-hairline-strong)] bg-[var(--ss-surface-2)]",
-                  !expired && "hover:bg-[var(--ss-surface-3)]/50",
+                  active ? "border-cyan-400/50 bg-cyan-500/10 ss-glow-cyan" : "border-(--ss-hairline-strong) bg-(--ss-surface-2)",
+                  !expired && "hover:bg-(--ss-surface-3)/50",
                   expired && "opacity-50 cursor-not-allowed"
                 )}
               >
@@ -481,8 +481,8 @@ function EngagementStep({ draft, update }: { draft: DraftState; update: (p: Part
                 disabled={blocked}
                 className={cn(
                   "w-full text-left p-3 rounded-sm border transition-all",
-                  active ? "border-cyan-400/50 bg-cyan-500/10 ss-glow-cyan" : "border-[var(--ss-hairline-strong)] bg-[var(--ss-surface-2)]",
-                  !blocked && "hover:bg-[var(--ss-surface-3)]/50",
+                  active ? "border-cyan-400/50 bg-cyan-500/10 ss-glow-cyan" : "border-(--ss-hairline-strong) bg-(--ss-surface-2)",
+                  !blocked && "hover:bg-(--ss-surface-3)/50",
                   blocked && "opacity-50 cursor-not-allowed"
                 )}
               >
@@ -549,7 +549,7 @@ function TemplateStep({ draft, update }: { draft: DraftState; update: (p: Partia
                 onClick={() => update({ templateId: t.id })}
                 className={cn(
                   "w-full text-left p-3 rounded-sm border transition-all",
-                  active ? "border-cyan-400/50 bg-cyan-500/10 ss-glow-cyan" : "border-[var(--ss-hairline-strong)] bg-[var(--ss-surface-2)] hover:bg-[var(--ss-surface-3)]/50"
+                  active ? "border-cyan-400/50 bg-cyan-500/10 ss-glow-cyan" : "border-(--ss-hairline-strong) bg-(--ss-surface-2) hover:bg-(--ss-surface-3)/50"
                 )}
               >
                 <div className="flex items-center justify-between mb-1">
@@ -683,13 +683,13 @@ function SafetyStep({ draft }: { draft: DraftState }) {
           Each gate is evaluated against the live state of asset, authorization, and engagement. Blocking failures prevent queueing.
         </p>
 
-        <div className="border border-[var(--ss-hairline-strong)] rounded-sm overflow-hidden">
+        <div className="border border-(--ss-hairline-strong) rounded-sm overflow-hidden">
           {rows.map((r, i) => (
             <div
               key={r.label}
               className={cn(
                 "flex items-start gap-3 px-3 py-2.5",
-                i > 0 && "border-t border-[var(--ss-hairline)]"
+                i > 0 && "border-t border-(--ss-hairline)"
               )}
             >
               <div className="shrink-0 mt-0.5">

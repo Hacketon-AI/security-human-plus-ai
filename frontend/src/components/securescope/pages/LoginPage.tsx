@@ -24,7 +24,7 @@ export function LoginPage() {
   return (
     <div className="min-h-screen ss-vignette flex flex-col">
       {/* Top thin strip */}
-      <div className="h-8 px-6 flex items-center justify-between text-[10px] uppercase tracking-[0.2em] text-slate-500 border-b border-[var(--ss-hairline)]">
+      <div className="h-8 px-6 flex items-center justify-between text-[10px] uppercase tracking-[0.2em] text-slate-500 border-b border-(--ss-hairline)">
         <div className="flex items-center gap-3">
           <span className="flex items-center gap-1.5">
             <span className="w-1 h-1 rounded-full bg-amber-400" />
@@ -121,7 +121,7 @@ export function LoginPage() {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full px-3 py-2 text-sm bg-[var(--ss-surface-2)] border border-[var(--ss-hairline-strong)] rounded-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-cyan-400/50 focus:ss-glow-cyan transition-all"
+                    className="w-full px-3 py-2 text-sm bg-(--ss-surface-2) border border-(--ss-hairline-strong) rounded-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-cyan-400/50 focus:ss-glow-cyan transition-all"
                     placeholder="operator@org.sec"
                     required
                   />
@@ -132,7 +132,7 @@ export function LoginPage() {
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full px-3 py-2 text-sm bg-[var(--ss-surface-2)] border border-[var(--ss-hairline-strong)] rounded-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-cyan-400/50 focus:ss-glow-cyan transition-all"
+                    className="w-full px-3 py-2 text-sm bg-(--ss-surface-2) border border-(--ss-hairline-strong) rounded-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-cyan-400/50 focus:ss-glow-cyan transition-all"
                     placeholder="••••••••••••"
                     required
                   />
@@ -148,7 +148,7 @@ export function LoginPage() {
                     maxLength={6}
                     value={mfa}
                     onChange={(e) => setMfa(e.target.value.replace(/\D/g, ""))}
-                    className="w-full px-3 py-2 text-sm bg-[var(--ss-surface-2)] border border-[var(--ss-hairline-strong)] rounded-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-cyan-400/50 focus:ss-glow-cyan transition-all ss-mono tracking-[0.4em] text-center"
+                    className="w-full px-3 py-2 text-sm bg-(--ss-surface-2) border border-(--ss-hairline-strong) rounded-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-cyan-400/50 focus:ss-glow-cyan transition-all ss-mono tracking-[0.4em] text-center"
                     placeholder="······"
                   />
                 </div>

@@ -23,7 +23,7 @@ import {
 } from "lucide-react";
 import { useApp } from "@/lib/securescope/store";
 // Removed mock imports
-import type { ExecutionStatus } from "@/lib/securescope/types";
+import type { ExecutionStatus, ValidationExecution } from "@/lib/securescope/types";
 import { OutcomeBadge, Pill, RiskTierBadge, StatusBadge } from "../shared/badges";
 import { AlertBanner, CyberButton, KeyValue, MaskedField } from "../shared/ui";
 import { EventTimeline, ExecutionLifecycleRail, SecureCodeBlock } from "../shared/lifecycle";
@@ -42,7 +42,7 @@ export function ExecutionDetailPage() {
   const [tab, setTab] = React.useState<Tab>("Overview");
 
   const executions = useApp((s) => s.executions);
-  const exec = executions.find((e) => e.id === execId) ?? { id: "", code: "—", status: "failed", outcome: "inconclusive", organizationId: "", organizationName: "", projectId: "", projectName: "", assetId: "", assetName: "", assetTargetMasked: "", authorizationId: "", authorizationCode: "", engagementId: "", engagementCode: "", templateId: "", templateName: "", riskTier: "moderate", scopeSnapshot: { allowedPaths: [], excludedPaths: [], allowedPorts: [], maxRiskTier: "moderate", scopedAssets: [] }, safetySnapshot: { assetVerified: false, authorizationActive: false, engagementActive: false, scopeMatch: false, windowValid: false, killSwitchInactive: false, riskTierAllowed: false, credentialIssued: false, dispatchBackendAvailable: false, workerAuthModeReady: false }, steps: [], events: [], credential: { id: "", organizationId: "", executionId: "", allowedActions: [], issuedAt: "", expiresAt: "", revokedAt: null, state: "expired", source: "per_execution", fallbackEnabled: false }, dispatchMessage: { messageId: "", queueName: "", routingKey: "", envelopeSchemaVersion: "", payloadHash: "", publishStatus: "failed", workerState: "idle", lastHeartbeat: "" } };
+  const exec = executions.find((e) => e.id === execId) ?? { id: "", code: "—", status: "failed", outcome: "inconclusive", organizationId: "", organizationName: "", projectId: "", projectName: "", assetId: "", assetName: "", assetTargetMasked: "", authorizationId: "", authorizationCode: "", engagementId: "", engagementCode: "", templateId: "", templateName: "", riskTier: "moderate", queuedAt: null, dispatchingAt: null, workerStartedAt: null, workerFinishedAt: null, scopeSnapshot: { allowedPaths: [], excludedPaths: [], allowedPorts: [], maxRiskTier: "moderate", scopedAssets: [] }, safetySnapshot: { assetVerified: false, authorizationActive: false, engagementActive: false, scopeMatch: false, windowValid: false, killSwitchInactive: false, riskTierAllowed: false, credentialIssued: false, dispatchBackendAvailable: false, workerAuthModeReady: false }, steps: [], events: [], credential: { id: "", organizationId: "", executionId: "", allowedActions: [], issuedAt: "", expiresAt: "", revokedAt: null, state: "expired", source: "per_execution", fallbackEnabled: false }, dispatchMessage: { messageId: "", queueName: "", routingKey: "", envelopeSchemaVersion: "", payloadHash: "", publishStatus: "failed", workerState: "idle", lastHeartbeat: "" } };
 
   return (
     <>
@@ -103,7 +103,7 @@ export function ExecutionDetailPage() {
         </div>
 
         {/* Tabs */}
-        <div className="px-4 lg:px-6 border-b border-[var(--ss-hairline-strong)]">
+        <div className="px-4 lg:px-6 border-b border-(--ss-hairline-strong)">
           <div className="flex items-center gap-0.5 overflow-x-auto ss-scroll">
             {TABS.map((t) => (
               <button
@@ -135,7 +135,7 @@ export function ExecutionDetailPage() {
 }
 
 /* ---------------- Overview tab ---------------- */
-function OverviewTab({ exec }: { exec: typeof executions[number] }) {
+function OverviewTab({ exec }: { exec: ValidationExecution }) {
   return (
     <div className="grid lg:grid-cols-[1.5fr_1fr] gap-4">
       {/* Left: timeline + steps summary */}
@@ -168,7 +168,7 @@ function OverviewTab({ exec }: { exec: typeof executions[number] }) {
             </div>
             <ol className="space-y-2">
               {exec.steps.map((s, i) => (
-                <li key={s.id} className="flex items-start gap-3 p-2.5 rounded-sm border border-[var(--ss-hairline)] bg-[var(--ss-surface-2)]/50">
+                <li key={s.id} className="flex items-start gap-3 p-2.5 rounded-sm border border-(--ss-hairline) bg-(--ss-surface-2)/50">
                   <div className="shrink-0">
                     {s.status === "succeeded" ? (
                       <CheckCircle2 className="w-4 h-4 text-emerald-400" />
@@ -243,11 +243,11 @@ function OverviewTab({ exec }: { exec: typeof executions[number] }) {
 }
 
 /* ---------------- Inspector panel ---------------- */
-function ExecutionInspector({ exec }: { exec: typeof executions[number] }) {
+function ExecutionInspector({ exec }: { exec: ValidationExecution }) {
   return (
     <div className="space-y-4">
       <div className="ss-panel-raised">
-        <div className="px-4 py-2.5 border-b border-[var(--ss-hairline-strong)] flex items-center justify-between">
+        <div className="px-4 py-2.5 border-b border-(--ss-hairline-strong) flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Cpu className="w-3.5 h-3.5 text-cyan-400" />
             <span className="text-xs font-semibold text-slate-100">Execution Inspector</span>
@@ -302,7 +302,7 @@ function ExecutionInspector({ exec }: { exec: typeof executions[number] }) {
 }
 
 /* ---------------- Scope tab ---------------- */
-function ScopeTab({ exec }: { exec: typeof executions[number] }) {
+function ScopeTab({ exec }: { exec: ValidationExecution }) {
   return (
     <div className="grid lg:grid-cols-2 gap-4">
       <div className="ss-panel p-4">
@@ -374,7 +374,7 @@ function ScopeTab({ exec }: { exec: typeof executions[number] }) {
 }
 
 /* ---------------- Safety tab ---------------- */
-function SafetyTab({ exec }: { exec: typeof executions[number] }) {
+function SafetyTab({ exec }: { exec: ValidationExecution }) {
   const rows: { k: keyof typeof exec.safetySnapshot; label: string; blocking: boolean }[] = [
     { k: "assetVerified", label: "Asset verified", blocking: true },
     { k: "authorizationActive", label: "Authorization active", blocking: true },
@@ -394,11 +394,11 @@ function SafetyTab({ exec }: { exec: typeof executions[number] }) {
           <Shield className="w-3.5 h-3.5 text-cyan-400" />
           <span className="text-xs font-semibold text-slate-100">Safety Snapshot</span>
         </div>
-        <div className="border border-[var(--ss-hairline-strong)] rounded-sm overflow-hidden">
+        <div className="border border-(--ss-hairline-strong) rounded-sm overflow-hidden">
           {rows.map((r, i) => {
             const v = exec.safetySnapshot[r.k];
             return (
-              <div key={r.k} className={cn("flex items-center gap-3 px-3 py-2.5", i > 0 && "border-t border-[var(--ss-hairline)]")}>
+              <div key={r.k} className={cn("flex items-center gap-3 px-3 py-2.5", i > 0 && "border-t border-(--ss-hairline)")}>
                 {v ? <CheckCircle2 className="w-4 h-4 text-emerald-400" /> : <XCircle className="w-4 h-4 text-red-400" />}
                 <div className="flex-1">
                   <div className="text-xs font-medium text-slate-200">{r.label}</div>
@@ -420,7 +420,7 @@ function SafetyTab({ exec }: { exec: typeof executions[number] }) {
 }
 
 /* ---------------- Steps tab ---------------- */
-function StepsTab({ exec }: { exec: typeof executions[number] }) {
+function StepsTab({ exec }: { exec: ValidationExecution }) {
   if (exec.steps.length === 0) {
     return (
       <div className="ss-panel-flat p-8 text-center">
@@ -436,7 +436,7 @@ function StepsTab({ exec }: { exec: typeof executions[number] }) {
           <FileCheck2 className="w-3.5 h-3.5 text-cyan-400" />
           <span className="text-xs font-semibold text-slate-100">Step Results & Evidence</span>
         </div>
-        <AlertBanner tone="info" title="Evidence is sanitized" className="!py-1.5 !px-2.5 max-w-md">
+        <AlertBanner tone="info" title="Evidence is sanitized" className="py-1.5! px-2.5! max-w-md">
           No raw response bodies, cookies, Authorization headers, or Set-Cookie values are stored.
         </AlertBanner>
       </div>
@@ -476,7 +476,7 @@ function StepsTab({ exec }: { exec: typeof executions[number] }) {
 }
 
 /* ---------------- Audit tab ---------------- */
-function AuditTab({ exec }: { exec: typeof executions[number] }) {
+function AuditTab({ exec }: { exec: ValidationExecution }) {
   const go = useApp((s) => s.go);
   // Build a synthetic audit view focused on this execution
   const events = exec.events.map((e) => ({

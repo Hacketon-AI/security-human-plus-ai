@@ -35,7 +35,7 @@ export function AuthorizationsListPage() {
           <div className="ss-panel overflow-hidden">
             <table className="w-full text-xs">
               <thead>
-                <tr className="bg-[var(--ss-surface-2)] border-b border-[var(--ss-hairline-strong)]">
+                <tr className="bg-(--ss-surface-2) border-b border-(--ss-hairline-strong)">
                   <th className="text-left px-3 py-2 ss-eyebrow">Code</th>
                   <th className="text-left px-3 py-2 ss-eyebrow">State</th>
                   <th className="text-left px-3 py-2 ss-eyebrow">Organization</th>
@@ -49,7 +49,7 @@ export function AuthorizationsListPage() {
               </thead>
               <tbody>
                 {authorizations.map((a) => (
-                  <tr key={a.id} onClick={() => openAuthorization(a.id)} className="border-b border-[var(--ss-hairline)] hover:bg-[var(--ss-surface-3)]/40 cursor-pointer">
+                  <tr key={a.id} onClick={() => openAuthorization(a.id)} className="border-b border-(--ss-hairline) hover:bg-(--ss-surface-3)/40 cursor-pointer">
                     <td className="px-3 py-2.5"><code className="ss-mono-xs text-cyan-200">{a.code}</code></td>
                     <td className="px-3 py-2.5"><AuthorizationStateBadge state={a.state} /></td>
                     <td className="px-3 py-2.5 text-slate-300">{a.organizationName}</td>
@@ -95,7 +95,7 @@ export function AuthorizationDetailPage() {
             ? "border-slate-600/30 bg-slate-500/5"
             : auth.state === "blocked"
             ? "border-red-500/30 bg-red-500/5"
-            : "border-[var(--ss-hairline-strong)] bg-[var(--ss-surface-2)]/30"
+            : "border-(--ss-hairline-strong) bg-(--ss-surface-2)/30"
         )}>
           <div className="flex items-center gap-1.5 text-[10px] text-slate-500 mb-2">
             <button onClick={() => go("authorizations")} className="hover:text-slate-300 uppercase tracking-wider">Authorizations</button>
@@ -196,7 +196,7 @@ export function AuthorizationDetailPage() {
                     <div className="ss-eyebrow mt-3 mb-1.5">Scoped assets</div>
                     <div className="space-y-1">
                       {auth.scopedAssetNames.map((a) => (
-                        <div key={a} className="text-[11px] text-slate-200 border border-[var(--ss-hairline)] rounded-sm px-2 py-1">{a}</div>
+                        <div key={a} className="text-[11px] text-slate-200 border border-(--ss-hairline) rounded-sm px-2 py-1">{a}</div>
                       ))}
                     </div>
                   </div>
@@ -223,7 +223,7 @@ export function AuthorizationDetailPage() {
               <div className="ss-panel-flat p-4">
                 <div className="ss-eyebrow mb-3">Authorization lifecycle</div>
                 <div className="relative">
-                  <div className="absolute left-[5px] top-1 bottom-1 w-px bg-[var(--ss-hairline-strong)]" />
+                  <div className="absolute left-[5px] top-1 bottom-1 w-px bg-(--ss-hairline-strong)" />
                   <ul className="space-y-3">
                     {auth.approvalTimeline.map((t, i) => {
                       const isLast = i === auth.approvalTimeline.length - 1;
