@@ -20,3 +20,11 @@
 | **Retest Plan panel** | `POST /ai-proof-of-risk/executions/{id}/analyze` | - | `retest_plan` | Yes | ✅ Connected |
 | **Executive Report panel** | `POST /ai-proof-of-risk/executions/{id}/analyze` | - | `executive_summary` | Yes | ✅ Connected |
 | **Safety Statement banner** | `POST /ai-proof-of-risk/executions/{id}/analyze` | - | `safety_notes` | Yes | ✅ Connected |
+| **Dashboard AI Command Strip** | *Store / Static Env* | - | `latestAiProofOfRiskAnalysis` | Yes | ✅ Connected |
+| **Dashboard Workflow Rail** | *Zustand Action* | - | Navigation to `openExecution` | Yes | ✅ Connected |
+| **Dashboard Quick Actions** | *Zustand Action* | - | Navigation to `openExecution` | Yes | ✅ Connected |
+| **Dashboard AI Routing Panel** | *Store / API cache* | - | `routing_details.*` from store | Yes | ✅ Connected |
+| **Dashboard Attack Surface Preview** | *Store / API cache* | - | `attack_surface_graph` from store | Yes | ✅ Connected |
+| **Dashboard Digital Twin Preview** | *Store / API cache* | - | `digital_twin_scenarios`, `sandbox_proof_artifacts` from store | Yes | ✅ Connected |
+| **Dashboard Tribunal Preview** | *Store / API cache* | - | `tribunal_verdict` from store | Yes | ✅ Connected |
+| **Scan My Authorized Domain Panel** | `POST /domain-safe-scan/analyze` | `domain`, `scheme`, `scan_type` | `missing_headers`, `ai_summary`, `attack_graph_preview` | Yes | ✅ Connected |

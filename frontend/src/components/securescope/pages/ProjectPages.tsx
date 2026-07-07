@@ -12,6 +12,31 @@ import { TopNavCommandBar, PageHeader } from "../shell/TopNav";
 export function ProjectsListPage() {
   const openProject = useApp((s) => s.openProject);
   const projects = useApp((s) => s.projects);
+  const addProject = useApp((s) => s.addProject);
+  const organizations = useApp((s) => s.organizations);
+  const [showCreate, setShowCreate] = React.useState(false);
+  const [createName, setCreateName] = React.useState('');
+  const [createSlug, setCreateSlug] = React.useState('');
+  const [createDescription, setCreateDescription] = React.useState('');
+  const [createLoading, setCreateLoading] = React.useState(false);
+  const [createError, setCreateError] = React.useState<string | null>(null);
+
+  const handleCreate = async () => {
+    if (!createName.trim()) { setCreateError('Project name is required'); return; }
+    setCreateLoading(true);
+    setCreateError(null);
+    try {
+      await addProject(createName.trim(), createSlug.trim() || undefined, createDescription.trim() || undefined);
+      setShowCreate(false);
+      setCreateName('');
+      setCreateSlug('');
+      setCreateDescription('');
+    } catch (e: any) {
+      setCreateError(e.message || 'Failed to create project');
+    } finally {
+      setCreateLoading(false);
+    }
+  };
   return (
     <>
       <TopNavCommandBar />
@@ -20,7 +45,7 @@ export function ProjectsListPage() {
           breadcrumbs={[{ label: "Projects" }]}
           title="Projects"
           description="Projects group assets, authorizations, and engagements within an organization. Each project carries its own health and execution lineage."
-          right={<CyberButton size="sm" variant="primary"><Plus className="w-3 h-3" /> New project</CyberButton>}
+          right={<CyberButton size="sm" variant="primary" onClick={() => setShowCreate(true)}><Plus className="w-3 h-3" /> New project</CyberButton>}
         />
         <div className="px-4 lg:px-6 py-4">
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -61,6 +86,66 @@ export function ProjectsListPage() {
           </div>
         </div>
       </div>
+
+      {showCreate && (
+        <>
+          <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm" onClick={() => setShowCreate(false)} />
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
+            <div className="ss-panel-raised shadow-2xl w-full max-w-md pointer-events-auto">
+              <div className="px-4 py-3 border-b border-(--ss-hairline-strong) flex items-center justify-between">
+                <span className="text-sm font-semibold text-slate-100">Create Project</span>
+                <button onClick={() => setShowCreate(false)} className="text-slate-500 hover:text-slate-300 text-xs">✕</button>
+              </div>
+              <div className="p-4 space-y-4">
+                <div>
+                  <label className="block text-[11px] uppercase tracking-wider text-slate-400 mb-1">Organization</label>
+                  <div className="text-sm text-slate-300 bg-(--ss-surface-1) border border-(--ss-hairline) rounded-sm p-2">
+                    {organizations.find(o => o.id === useApp.getState().selectedOrgId)?.name || 'Current organization'}
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-[11px] uppercase tracking-wider text-slate-400 mb-1">Project Name *</label>
+                  <input
+                    value={createName}
+                    onChange={(e) => setCreateName(e.target.value)}
+                    placeholder="e.g. Web Application Pentest Q3"
+                    className="w-full bg-(--ss-surface-1) border border-(--ss-hairline) rounded-sm text-sm p-2 text-slate-200 outline-none focus:border-cyan-500/50"
+                    autoFocus
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] uppercase tracking-wider text-slate-400 mb-1">Slug (optional)</label>
+                  <input
+                    value={createSlug}
+                    onChange={(e) => setCreateSlug(e.target.value)}
+                    placeholder="auto-generated from name"
+                    className="w-full bg-(--ss-surface-1) border border-(--ss-hairline) rounded-sm text-sm p-2 text-slate-200 outline-none focus:border-cyan-500/50"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] uppercase tracking-wider text-slate-400 mb-1">Description (optional)</label>
+                  <textarea
+                    value={createDescription}
+                    onChange={(e) => setCreateDescription(e.target.value)}
+                    placeholder="Brief description of the project scope"
+                    rows={2}
+                    className="w-full bg-(--ss-surface-1) border border-(--ss-hairline) rounded-sm text-sm p-2 text-slate-200 outline-none focus:border-cyan-500/50 resize-none"
+                  />
+                </div>
+                {createError && (
+                  <div className="text-xs text-red-400 bg-red-500/10 border border-red-500/30 rounded-sm p-2">{createError}</div>
+                )}
+              </div>
+              <div className="px-4 py-3 border-t border-(--ss-hairline-strong) flex justify-end gap-2">
+                <CyberButton size="sm" variant="ghost" onClick={() => setShowCreate(false)} disabled={createLoading}>Cancel</CyberButton>
+                <CyberButton size="sm" variant="primary" onClick={handleCreate} disabled={createLoading || !createName.trim()}>
+                  {createLoading ? <span className="animate-pulse">Creating...</span> : 'Save Project'}
+                </CyberButton>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </>
   );
 }

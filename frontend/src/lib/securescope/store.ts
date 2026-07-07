@@ -27,6 +27,7 @@ interface AppState {
   selectedAuthorizationId: string | null;
   selectedEngagementId: string | null;
   selectedExecutionId: string | null;
+  executionTab?: string;
   inspectorExecutionId: string | null;
   killSwitchTarget: string | null;
   authenticated: boolean;
@@ -56,6 +57,7 @@ interface AppState {
 
   initData: () => Promise<void>;
   fetchData: () => Promise<void>;
+  addOrg: (name: string, slug?: string) => Promise<void>;
   addProject: (name: string, slug?: string, description?: string) => Promise<void>;
   addAsset: (payload: { name: string; asset_type: string; environment: string; target: string; criticality: string }) => Promise<void>;
   verifyAsset: (assetId: string) => Promise<void>;
@@ -72,6 +74,12 @@ interface AppState {
   triggerKillSwitch: (engagementId: string, active: boolean, reason: string) => Promise<void>;
   addExecution: (payload: { asset_id: string; engagement_id: string; template_id: string; risk_tier: string; execution_specification: any }) => Promise<void>;
   cancelExec: (execId: string) => Promise<void>;
+
+  // AI Proof-of-Risk Safe State
+  latestAiProofOfRiskAnalysis: any | null;
+  latestAiProofOfRiskExecutionId: string | null;
+  aiProofOfRiskLastRunAt: string | null;
+  setLatestAiProofOfRiskAnalysis: (executionId: string, analysis: any) => void;
 }
 
 // --------------------------------------------------
@@ -122,6 +130,7 @@ export const useApp = create<AppState>((set, get) => ({
   selectedAuthorizationId: null,
   selectedEngagementId: null,
   selectedExecutionId: null,
+  executionTab: "Overview",
   inspectorExecutionId: null,
   killSwitchTarget: null,
   authenticated: false,
@@ -134,6 +143,10 @@ export const useApp = create<AppState>((set, get) => ({
   executions: [],
   auditEvents: mockAuditEvents,
 
+  latestAiProofOfRiskAnalysis: null,
+  latestAiProofOfRiskExecutionId: null,
+  aiProofOfRiskLastRunAt: null,
+
   isLoading: false,
   error: null,
 
@@ -143,7 +156,7 @@ export const useApp = create<AppState>((set, get) => ({
   openAsset: (id) => set({ selectedAssetId: id, route: "asset_detail" }),
   openAuthorization: (id) => set({ selectedAuthorizationId: id, route: "authorization_detail" }),
   openEngagement: (id) => set({ selectedEngagementId: id, route: "engagement_detail" }),
-  openExecution: (id) => set({ selectedExecutionId: id, route: "execution_detail" }),
+  openExecution: (id, tab = "Overview") => set({ selectedExecutionId: id, executionTab: tab, route: "execution_detail" }),
   openInspector: (id) => set({ inspectorExecutionId: id }),
   requestKillSwitch: (engagementId) => set({ killSwitchTarget: engagementId }),
   login: () => {
@@ -168,6 +181,9 @@ export const useApp = create<AppState>((set, get) => ({
       authorizations: [],
       engagements: [],
       executions: [],
+      latestAiProofOfRiskAnalysis: null,
+      latestAiProofOfRiskExecutionId: null,
+      aiProofOfRiskLastRunAt: null,
     }),
 
   initData: async () => {
@@ -465,6 +481,29 @@ export const useApp = create<AppState>((set, get) => ({
     }
   },
 
+  addOrg: async (name, slug) => {
+    try {
+      await api.createOrganization({ name, slug });
+      await get().initData();
+    } catch (e: any) {
+      // If backend provisioning is not available, create a local demo organization
+      const demoId = `demo-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+      const demoOrg = {
+        id: demoId,
+        name,
+        code: (slug || name).toUpperCase().replace(/\s+/g, '-').slice(0, 8),
+        status: 'healthy' as const,
+        projectsCount: 0,
+        verifiedAssets: 0,
+        activeEngagements: 0,
+        latestExecutionState: 'succeeded' as const,
+        latestExecutionId: '',
+        lastActivity: new Date().toISOString(),
+      };
+      set({ organizations: [...get().organizations, demoOrg] });
+    }
+  },
+
   addProject: async (name, slug, description) => {
     const orgId = get().selectedOrgId;
     if (!orgId) return;
@@ -604,6 +643,14 @@ export const useApp = create<AppState>((set, get) => ({
     if (!orgId) return;
     await api.cancelExecution(orgId, execId);
     await get().fetchData();
+  },
+
+  setLatestAiProofOfRiskAnalysis: (executionId, analysis) => {
+    set({
+      latestAiProofOfRiskExecutionId: executionId,
+      latestAiProofOfRiskAnalysis: analysis,
+      aiProofOfRiskLastRunAt: new Date().toISOString(),
+    });
   },
 }));
 

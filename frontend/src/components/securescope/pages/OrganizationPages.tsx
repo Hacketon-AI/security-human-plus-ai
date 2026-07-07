@@ -12,7 +12,29 @@ import { TopNavCommandBar, PageHeader, SecondaryContextNav } from "../shell/TopN
 export function OrganizationsListPage() {
   const openOrg = useApp((s) => s.openOrg);
   const organizations = useApp((s) => s.organizations);
+  const addOrg = useApp((s) => s.addOrg);
   const [query, setQuery] = React.useState("");
+  const [showCreate, setShowCreate] = React.useState(false);
+  const [createName, setCreateName] = React.useState('');
+  const [createSlug, setCreateSlug] = React.useState('');
+  const [createLoading, setCreateLoading] = React.useState(false);
+  const [createError, setCreateError] = React.useState<string | null>(null);
+
+  const handleCreate = async () => {
+    if (!createName.trim()) { setCreateError('Name is required'); return; }
+    setCreateLoading(true);
+    setCreateError(null);
+    try {
+      await addOrg(createName.trim(), createSlug.trim() || undefined);
+      setShowCreate(false);
+      setCreateName('');
+      setCreateSlug('');
+    } catch (e: any) {
+      setCreateError(e.message || 'Failed to create organization');
+    } finally {
+      setCreateLoading(false);
+    }
+  };
 
   const filtered = organizations.filter((o) =>
     !query || `${o.name} ${o.code}`.toLowerCase().includes(query.toLowerCase())
@@ -26,7 +48,7 @@ export function OrganizationsListPage() {
           breadcrumbs={[{ label: "Organizations" }]}
           title="Organizations"
           description="Tenant-level grouping. Each organization isolates projects, assets, authorizations, engagements, and audit attribution."
-          right={<CyberButton size="sm" variant="primary"><Plus className="w-3 h-3" /> New organization</CyberButton>}
+          right={<CyberButton size="sm" variant="primary" onClick={() => setShowCreate(true)}><Plus className="w-3 h-3" /> New organization</CyberButton>}
         />
         <SecondaryContextNav
           items={[{ key: "all", label: "All", count: organizations.length }]}
@@ -98,6 +120,53 @@ export function OrganizationsListPage() {
           </div>
         </div>
       </div>
+
+      {showCreate && (
+        <>
+          <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm" onClick={() => setShowCreate(false)} />
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
+            <div className="ss-panel-raised shadow-2xl w-full max-w-md pointer-events-auto">
+              <div className="px-4 py-3 border-b border-(--ss-hairline-strong) flex items-center justify-between">
+                <span className="text-sm font-semibold text-slate-100">Create Organization</span>
+                <button onClick={() => setShowCreate(false)} className="text-slate-500 hover:text-slate-300 text-xs">✕</button>
+              </div>
+              <div className="p-4 space-y-4">
+                <div>
+                  <label className="block text-[11px] uppercase tracking-wider text-slate-400 mb-1">Organization Name *</label>
+                  <input
+                    value={createName}
+                    onChange={(e) => setCreateName(e.target.value)}
+                    placeholder="e.g. Acme Security Lab"
+                    className="w-full bg-(--ss-surface-1) border border-(--ss-hairline) rounded-sm text-sm p-2 text-slate-200 outline-none focus:border-cyan-500/50"
+                    autoFocus
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] uppercase tracking-wider text-slate-400 mb-1">Slug (optional)</label>
+                  <input
+                    value={createSlug}
+                    onChange={(e) => setCreateSlug(e.target.value)}
+                    placeholder="auto-generated from name"
+                    className="w-full bg-(--ss-surface-1) border border-(--ss-hairline) rounded-sm text-sm p-2 text-slate-200 outline-none focus:border-cyan-500/50"
+                  />
+                </div>
+                {createError && (
+                  <div className="text-xs text-red-400 bg-red-500/10 border border-red-500/30 rounded-sm p-2">{createError}</div>
+                )}
+                <div className="text-[10px] text-slate-500 bg-(--ss-surface-1) border border-(--ss-hairline) rounded-sm p-2">
+                  If the backend provisioning endpoint is not available, a local demo organization will be created. Local demo organizations are not persisted to the database.
+                </div>
+              </div>
+              <div className="px-4 py-3 border-t border-(--ss-hairline-strong) flex justify-end gap-2">
+                <CyberButton size="sm" variant="ghost" onClick={() => setShowCreate(false)} disabled={createLoading}>Cancel</CyberButton>
+                <CyberButton size="sm" variant="primary" onClick={handleCreate} disabled={createLoading || !createName.trim()}>
+                  {createLoading ? <span className="animate-pulse">Creating...</span> : 'Save Organization'}
+                </CyberButton>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </>
   );
 }

@@ -8,10 +8,19 @@ const nextConfig: NextConfig = {
   },
   reactStrictMode: false,
   async rewrites() {
+    const internalApiBaseUrl = process.env.API_INTERNAL_BASE_URL ?? "http://securescope-api:8000";
     return [
       {
-        source: "/api/v1/:path*",
-        destination: "http://127.0.0.1:8000/api/v1/:path*",
+        source: "/api/:path*",
+        destination: `${internalApiBaseUrl}/api/:path*`,
+      },
+      {
+        source: "/ai-proof-of-risk/:path*",
+        destination: `${internalApiBaseUrl}/ai-proof-of-risk/:path*`,
+      },
+      {
+        source: "/domain-safe-scan/:path*",
+        destination: `${internalApiBaseUrl}/domain-safe-scan/:path*`,
       },
     ];
   },

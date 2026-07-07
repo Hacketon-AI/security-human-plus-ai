@@ -52,6 +52,11 @@ curl -X POST http://localhost:8000/ai-proof-of-risk/executions/00000000-0000-000
 curl -X POST http://localhost:8000/ai-proof-of-risk/executions/00000000-0000-0000-0000-000000000000/analyze \
   -H "Content-Type: application/json" \
   -d '{"allow_sandbox_simulation": true, "analysis_mode": "quick_summary", "audience": "executive"}'
+
+# 6. Run Authorized Domain Safe Scan
+curl -X POST http://localhost:8000/domain-safe-scan/analyze \
+  -H "Content-Type: application/json" \
+  -d '{"domain": "example.com", "scheme": "https", "confirm_authorized": true, "scan_type": "http_security_headers", "run_ai_proof_of_risk": true}'
 ```
 
 To enable Fireworks:
@@ -80,19 +85,24 @@ You can run the full end-to-end demo using Docker Compose:
 1. Copy the environment template: `cp .env.example .env`
 2. Start the full stack: `docker compose -f docker-compose.hackathon.yml up --build`
 3. Open the frontend: `http://localhost:3000` (Backend API available at `http://localhost:8000`, health endpoint at `/healthz`)
-4. Open the **Execution Detail** page (use a mock execution ID for demo purposes).
-5. Click the **AI Proof-of-Risk** tab.
-6. Configure the analysis (e.g. Mode: `full_report`, Audience: `security_engineer`) and click **Run Analysis**.
-7. **Review Trace**: Explain the AI Routing Trace. The trace visually demonstrates how tokens are saved by checking local models (e.g. AMD ROCm) before routing to remote models (Fireworks).
-8. **Review Attack Graph**: The attack surface graph visualizes how assets and findings relate, derived securely from backend intelligence.
-9. **Review Digital Twin**: Explain the Digital Twin Scenario. Notice that `production_exploit_allowed: false` is strictly enforced.
-10. **Review Safety Statement**: Point out the Safety Statement banner ensuring all simulated validation happened offline in the sandbox.
+4. **Observe the Dashboard**: The main dashboard immediately showcases SecureScope as an AI Proof-of-Risk platform. Note the top **AI Proof-of-Risk Command Strip** indicating the hybrid router mode, local AMD ROCm status, and Fireworks AI availability.
+5. **Create Organization & Project**: Navigate to the Organizations page to create a new tenant using the "New Organization" button, then create a new project under the Projects page using the "New Project" button. This demonstrates the UI's multi-tenant capabilities.
+6. **Explore Dashboard Panels**: Notice the **AI Proof-of-Risk Workflow Pipeline**, **AI Routing Pipeline**, **Attack Surface Preview**, **Digital Twin Proofs**, and **Risk Tribunal** panels on the dashboard.
+7. **Launch Demo**: Click the **Run AI Proof-of-Risk Demo** button on the dashboard Workflow Rail or Quick Actions panel. This will navigate you to the detailed **AI Proof-of-Risk** view.
+8. **Configure the analysis** (e.g. Mode: `full_report`, Audience: `security_engineer`) and click **Run Analysis**.
+9. **Review Trace**: Explain the AI Routing Trace. The trace visually demonstrates how tokens are saved by checking local models (e.g. AMD ROCm) before routing to remote models (Fireworks).
+10. **Review Attack Graph**: The attack surface graph visualizes how assets and findings relate, derived securely from backend intelligence.
+11. **Review Digital Twin & Tribunal**: Explain the Digital Twin Scenario and Multi-Agent Risk Tribunal. Notice that `production_exploit_allowed: false` is strictly enforced.
+12. **Review Safety Statement**: Point out the Safety Statement banner ensuring all simulated validation happened offline in the sandbox.
+13. Return to the **Dashboard** and observe the panels update with the latest analysis data from the store.
+14. **Scan My Authorized Domain**: On the dashboard, find the "Scan My Authorized Domain" panel. Enter your own domain, verify the strict HTTPS and "HTTP Security Headers only" constraint, check the authorization checkbox, and run the scan. This demonstrates safe real-world validation without active payloads, and safely feeds into the AI Proof-of-Risk system.
 
 Note: 
 - The `scripts/demo_ai_proof_of_risk.sh` demo script is still available if you want to bypass the UI and test the API directly.
 - The UI mock mode is controlled via `NEXT_PUBLIC_USE_MOCK_API`.
 - Fireworks API Key (`SECURESCOPE_FIREWORKS_API_KEY`) is optional.
 - AMD Endpoint (`SECURESCOPE_AI_LOCAL_AMD_BASE_URL`) is optional for the local mock demo.
+- API Networking: The frontend uses `NEXT_PUBLIC_API_BASE_URL=http://localhost:8000` for client-side browser requests and `API_INTERNAL_BASE_URL=http://securescope-api:8000` for Docker internal server-side requests.
 
 ## J. What Judges Should Evaluate
 - Product workflow and clarity of vision.

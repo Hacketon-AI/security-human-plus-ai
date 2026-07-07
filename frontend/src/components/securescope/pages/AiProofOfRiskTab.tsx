@@ -11,6 +11,7 @@ import {
 } from "@/lib/securescope/aiProofOfRiskApi";
 import { CyberButton, AlertBanner } from "../shared/ui";
 import { StatusBadge, Pill } from "../shared/badges";
+import { useApp } from "@/lib/securescope/store";
 
 interface AiProofOfRiskTabProps {
   exec: ValidationExecution;
@@ -42,6 +43,7 @@ export function AiProofOfRiskTab({ exec }: AiProofOfRiskTabProps) {
       };
       const data = await analyzeProofOfRisk(exec.id, payload);
       setResult(data);
+      useApp.getState().setLatestAiProofOfRiskAnalysis(exec.id, data);
     } catch (err: any) {
       setError(err.message || "Failed to run AI analysis");
     } finally {
@@ -122,7 +124,11 @@ export function AiProofOfRiskTab({ exec }: AiProofOfRiskTabProps) {
           </div>
         </div>
 
-        <div className="mt-6 flex justify-end border-t border-(--ss-hairline) pt-4">
+        <div className="mt-6 flex items-center justify-between border-t border-(--ss-hairline) pt-4">
+          <div className="text-[11px] text-slate-500">
+            {!exec.id && <span className="text-amber-400">⚠ Execution ID is required</span>}
+            {exec.id && loading && <span className="text-cyan-400">Analysis is running…</span>}
+          </div>
           <CyberButton variant="primary" onClick={handleAnalyze} disabled={loading || !exec.id}>
             {loading ? <span className="animate-pulse">Analyzing...</span> : <><Play className="w-4 h-4 mr-1" /> Run AI Analysis</>}
           </CyberButton>

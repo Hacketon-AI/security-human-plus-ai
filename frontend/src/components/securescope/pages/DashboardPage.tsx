@@ -624,18 +624,42 @@ function RecentAuditTrail() {
   );
 }
 
-// ============================================================
-// Main Dashboard page
-// ============================================================
+import {
+  AiProofOfRiskCommandStrip,
+  DashboardQuickActions,
+  AiProofOfRiskWorkflowRail,
+  AiRoutingPipelinePanel,
+  AttackSurfacePreviewPanel,
+  DigitalTwinProofPanel,
+  MultiAgentTribunalPanel,
+  AuthorizedDomainScanPanel
+} from "./DashboardAiPanels";
 
 export function DashboardPage() {
   return (
     <>
       <TopNavCommandBar />
-      <div className="pt-[76px] min-h-screen">
-        <DispatchStatusStrip />
+      <div className="pt-[76px] min-h-screen pb-12">
+        <AiProofOfRiskCommandStrip />
 
         <div className="px-4 lg:px-6 py-4 space-y-4">
+          <DashboardQuickActions />
+          <AiProofOfRiskWorkflowRail />
+
+          <div className="grid lg:grid-cols-3 gap-4">
+            <div className="lg:col-span-1">
+              <AuthorizedDomainScanPanel />
+            </div>
+            <div className="lg:col-span-2 grid lg:grid-cols-2 gap-4">
+              <AiRoutingPipelinePanel />
+              <AttackSurfacePreviewPanel />
+              <DigitalTwinProofPanel />
+              <MultiAgentTribunalPanel />
+            </div>
+          </div>
+
+          <DispatchStatusStrip />
+
           {/* A + B: Operations map (65%) + Activity rail (35%) */}
           <div className="grid lg:grid-cols-[1.85fr_1fr] gap-4">
             <ValidationOperationsMap />

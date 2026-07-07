@@ -40,10 +40,15 @@ export function ExecutionDetailPage() {
   const openEngagement = useApp((s) => s.openEngagement);
   const openAsset = useApp((s) => s.openAsset);
   const requestKillSwitch = useApp((s) => s.requestKillSwitch);
-  const [tab, setTab] = React.useState<Tab>("Overview");
+  const initialTab = useApp((s) => s.executionTab) as Tab || "Overview";
+  const [tab, setTab] = React.useState<Tab>(initialTab);
+
+  React.useEffect(() => {
+    setTab(initialTab);
+  }, [initialTab]);
 
   const executions = useApp((s) => s.executions);
-  const exec = executions.find((e) => e.id === execId) ?? { id: "", code: "—", status: "failed", outcome: "inconclusive", organizationId: "", organizationName: "", projectId: "", projectName: "", assetId: "", assetName: "", assetTargetMasked: "", authorizationId: "", authorizationCode: "", engagementId: "", engagementCode: "", templateId: "", templateName: "", riskTier: "moderate", queuedAt: null, dispatchingAt: null, workerStartedAt: null, workerFinishedAt: null, scopeSnapshot: { allowedPaths: [], excludedPaths: [], allowedPorts: [], maxRiskTier: "moderate", scopedAssets: [] }, safetySnapshot: { assetVerified: false, authorizationActive: false, engagementActive: false, scopeMatch: false, windowValid: false, killSwitchInactive: false, riskTierAllowed: false, credentialIssued: false, dispatchBackendAvailable: false, workerAuthModeReady: false }, steps: [], events: [], credential: { id: "", organizationId: "", executionId: "", allowedActions: [], issuedAt: "", expiresAt: "", revokedAt: null, state: "expired", source: "per_execution", fallbackEnabled: false }, dispatchMessage: { messageId: "", queueName: "", routingKey: "", envelopeSchemaVersion: "", payloadHash: "", publishStatus: "failed", workerState: "idle", lastHeartbeat: "" } };
+  const exec = executions.find((e) => e.id === execId) ?? { id: execId || "", code: execId ? `DEMO-${execId.slice(0, 8).toUpperCase()}` : "—", status: "failed" as const, outcome: "inconclusive" as const, organizationId: "", organizationName: "", projectId: "", projectName: "", assetId: "", assetName: "Demo Asset", assetTargetMasked: "demo.target", authorizationId: "", authorizationCode: "", engagementId: "", engagementCode: "", templateId: "", templateName: "AI Proof-of-Risk Demo", riskTier: "moderate" as const, queuedAt: null, dispatchingAt: null, workerStartedAt: null, workerFinishedAt: null, scopeSnapshot: { allowedPaths: [], excludedPaths: [], allowedPorts: [], maxRiskTier: "moderate" as const, scopedAssets: [] }, safetySnapshot: { assetVerified: false, authorizationActive: false, engagementActive: false, scopeMatch: false, windowValid: false, killSwitchInactive: false, riskTierAllowed: false, credentialIssued: false, dispatchBackendAvailable: false, workerAuthModeReady: false }, steps: [], events: [], credential: { id: "", organizationId: "", executionId: "", allowedActions: [], issuedAt: "", expiresAt: "", revokedAt: null, state: "expired" as const, source: "per_execution" as const, fallbackEnabled: false }, dispatchMessage: { messageId: "", queueName: "", routingKey: "", envelopeSchemaVersion: "", payloadHash: "", publishStatus: "failed" as const, workerState: "idle" as const, lastHeartbeat: "" } };
 
   return (
     <>
