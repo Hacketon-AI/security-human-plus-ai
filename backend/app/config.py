@@ -113,6 +113,23 @@ class Settings(BaseSettings):
     # single-scan worker credentials).
     worker_shared_token_fallback_enabled: bool = False
 
+    # AI Proof-of-Risk Fireworks config
+    fireworks_api_key: SecretStr | None = None
+    fireworks_base_url: str = "https://api.fireworks.ai/inference/v1"
+    fireworks_model_name: str | None = None
+    ai_fireworks_timeout_seconds: float = 20.0
+    ai_fireworks_max_retries: int = 1
+    ai_max_remote_tokens: int = 4000
+    ai_temperature: float = 0.2
+
+    # AI Proof-of-Risk AMD Local Model config
+    ai_local_amd_enabled: bool = False
+    ai_local_amd_base_url: str | None = None
+    ai_local_amd_model_name: str | None = None
+    ai_local_amd_timeout_seconds: float = 10.0
+    ai_local_amd_max_tokens: int = 512
+    ai_local_amd_temperature: float = 0.0
+
     @field_validator("database_dsn")
     @classmethod
     def _require_postgresql(cls, value: SecretStr) -> SecretStr:

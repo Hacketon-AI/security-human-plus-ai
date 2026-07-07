@@ -29,8 +29,9 @@ import { AlertBanner, CyberButton, KeyValue, MaskedField } from "../shared/ui";
 import { EventTimeline, ExecutionLifecycleRail, SecureCodeBlock } from "../shared/lifecycle";
 import { CredentialStateCard, KillSwitchControl } from "../shared/secure-cards";
 import { TopNavCommandBar, PageHeader } from "../shell/TopNav";
+import { AiProofOfRiskTab } from "./AiProofOfRiskTab";
 
-const TABS = ["Overview", "Scope", "Safety", "Steps", "Audit"] as const;
+const TABS = ["Overview", "Scope", "Safety", "Steps", "Audit", "AI Proof-of-Risk"] as const;
 type Tab = (typeof TABS)[number];
 
 export function ExecutionDetailPage() {
@@ -128,6 +129,7 @@ export function ExecutionDetailPage() {
           {tab === "Safety" && <SafetyTab exec={exec} />}
           {tab === "Steps" && <StepsTab exec={exec} />}
           {tab === "Audit" && <AuditTab exec={exec} />}
+          {tab === "AI Proof-of-Risk" && <AiProofOfRiskTab exec={exec} />}
         </div>
       </div>
     </>

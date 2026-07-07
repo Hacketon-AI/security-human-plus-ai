@@ -21,6 +21,7 @@ from app.config import (
     ValidationDispatcherBackend,
     get_settings,
 )
+from app.modules.ai_proof_of_risk.router import router as ai_proof_of_risk_router
 from app.modules.asset_verifications.router import router as asset_verifications_router
 from app.modules.assets.router import router as assets_router
 from app.modules.authorizations.router import router as authorizations_router
@@ -139,4 +140,5 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(authorizations_router)
     app.include_router(engagements_router)
     app.include_router(validation_executions_router)
+    app.include_router(ai_proof_of_risk_router)
     return app

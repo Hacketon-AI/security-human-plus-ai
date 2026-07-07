@@ -1,0 +1,49 @@
+services:
+  securescope-api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      APP_ENV: development
+    depends_on:
+      - local-amd-model-mock
+
+  securescope-frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      # API Base URL used by browser runtime
+      NEXT_PUBLIC_API_BASE_URL: "http://localhost:8000"
+      NEXT_PUBLIC_USE_MOCK_API: "false"
+    depends_on:
+      - securescope-api
+
+  local-amd-model-mock:
+    image: python:3.12-slim
+    command: >
+      sh -c '
+      pip install --no-cache-dir fastapi uvicorn pydantic &&
+      uvicorn app:app --host 0.0.0.0 --port 8000
+      '
+    volumes:
+      - ./docker/local-amd-model-mock/app.py:/app.py
+    ports:
+      - "8001:8000"
+    expose:
+      - "8000"
+
+  local-amd-model-rocm:
+    image: rocm/vllm:latest
+    profiles: ["amd-rocm"]
+    ports:
+      - "8002:8000"
+    command: >
+      --model <local-model-name>
+      --trust-remote-code

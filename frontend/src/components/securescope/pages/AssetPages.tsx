@@ -39,11 +39,33 @@ export function AssetsListPage() {
   const [filter, setFilter] = React.useState<"all" | "verified" | "pending" | "failed">("all");
   const [query, setQuery] = React.useState("");
 
-  const filtered = assets.filter((a) => {
-    if (filter !== "all" && a.verification !== filter) return false;
-    if (query && !`${a.name} ${a.target} ${a.tags.join(" ")}`.toLowerCase().includes(query.toLowerCase())) return false;
-    return true;
-  });
+  const { counts, filtered } = React.useMemo(() => {
+    let verified = 0;
+    let pending = 0;
+    let failed = 0;
+
+    assets.forEach((a) => {
+      if (a.verification === "verified") verified++;
+      else if (a.verification === "pending") pending++;
+      else if (a.verification === "failed") failed++;
+    });
+
+    const filteredList = assets.filter((a) => {
+      if (filter !== "all" && a.verification !== filter) return false;
+      if (query && !`${a.name} ${a.target} ${a.tags.join(" ")}`.toLowerCase().includes(query.toLowerCase())) return false;
+      return true;
+    });
+
+    return {
+      counts: {
+        all: assets.length,
+        verified,
+        pending,
+        failed,
+      },
+      filtered: filteredList,
+    };
+  }, [assets, filter, query]);
 
   return (
     <>
@@ -57,10 +79,10 @@ export function AssetsListPage() {
         />
         <SecondaryContextNav
           items={[
-            { key: "all", label: "All", count: assets.length },
-            { key: "verified", label: "Verified", count: assets.filter((a) => a.verification === "verified").length },
-            { key: "pending", label: "Pending", count: assets.filter((a) => a.verification === "pending").length },
-            { key: "failed", label: "Failed", count: assets.filter((a) => a.verification === "failed").length },
+            { key: "all", label: "All", count: counts.all },
+            { key: "verified", label: "Verified", count: counts.verified },
+            { key: "pending", label: "Pending", count: counts.pending },
+            { key: "failed", label: "Failed", count: counts.failed },
           ]}
           active={filter}
           onSelect={(k) => setFilter(k as typeof filter)}
@@ -147,7 +169,15 @@ export function AssetDetailPage() {
   const assetAuths = authorizations.filter((a) => a.scopedAssets.includes(asset.id));
   const assetEngs = engagements.filter((e) => e.scopedAssetNames.includes(asset.name));
   const assetExecs = executions.filter((e) => e.assetId === asset.id);
-  const attempts = verificationAttempts.filter((v) => v.challengeHost.includes(asset.target.split(".").slice(-2).join(".")) || v.challengeHost.includes(asset.target));
+
+  const attempts = React.useMemo(() => {
+    if (!asset.target || asset.target === "—") return [];
+    const parts = asset.target.split(".");
+    const domainPart = parts.length >= 2 ? parts.slice(-2).join(".") : asset.target;
+    return verificationAttempts.filter(
+      (v) => v.challengeHost.includes(domainPart) || v.challengeHost.includes(asset.target)
+    );
+  }, [asset.target]);
 
   return (
     <>
@@ -246,7 +276,7 @@ export function AssetDetailPage() {
 
         <div className="px-4 lg:px-6 py-5">
           {tab === "Overview" && <AssetOverview asset={asset} assetAuths={assetAuths} assetEngs={assetEngs} assetExecs={assetExecs} />}
-          {tab === "Verification" && <AssetVerification asset={asset} attempts={attempts.length > 0 ? attempts : verificationAttempts} />}
+          {tab === "Verification" && <AssetVerification key={asset.id} asset={asset} attempts={attempts.length > 0 ? attempts : verificationAttempts} />}
           {tab === "Authorizations" && <AssetAuthorizations assetAuths={assetAuths} />}
           {tab === "Engagements" && <AssetEngagements assetEngs={assetEngs} />}
           {tab === "Validation History" && <AssetValidationHistory assetExecs={assetExecs} />}
@@ -337,9 +367,30 @@ function AssetOverview({ asset, assetAuths, assetEngs, assetExecs }: {
 // ============================================================
 
 function AssetVerification({ asset, attempts }: { asset: Asset; attempts: typeof verificationAttempts }) {
-  const [challengeToken] = React.useState(`ss-verify-${asset.id.replace(/_/g, "")}-${Math.random().toString(36).slice(2, 14)}`);
+  const verifyAsset = useApp((s) => s.verifyAsset);
+  const isLoading = useApp((s) => s.isLoading);
+  const [isVerifying, setIsVerifying] = React.useState(false);
+  const [challengeToken, setChallengeToken] = React.useState(
+    `ss-verify-${asset.id.replace(/_/g, "")}-${Math.random().toString(36).slice(2, 14)}`
+  );
+
   const challengeHost = `_securescope-verify.${asset.target}`;
   const ttl = 300;
+
+  const handleVerify = async () => {
+    setIsVerifying(true);
+    try {
+      await verifyAsset(asset.id);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
+  const handleReissue = () => {
+    setChallengeToken(`ss-verify-${asset.id.replace(/_/g, "")}-${Math.random().toString(36).slice(2, 14)}`);
+  };
 
   return (
     <div className="grid lg:grid-cols-[1.4fr_1fr] gap-4">
@@ -382,10 +433,11 @@ function AssetVerification({ asset, attempts }: { asset: Asset; attempts: typeof
             </div>
 
             <div className="flex items-center gap-2 pt-1">
-              <CyberButton size="md" variant="primary">
-                <RefreshCw className="w-3.5 h-3.5" /> Verify now
+              <CyberButton size="md" variant="primary" onClick={handleVerify} disabled={isVerifying || isLoading}>
+                <RefreshCw className={cn("w-3.5 h-3.5", (isVerifying || isLoading) && "animate-spin")} />
+                {isVerifying || isLoading ? "Verifying..." : "Verify now"}
               </CyberButton>
-              <CyberButton size="md" variant="ghost">
+              <CyberButton size="md" variant="ghost" onClick={handleReissue} disabled={isVerifying || isLoading}>
                 <RefreshCw className="w-3.5 h-3.5" /> Re-issue challenge
               </CyberButton>
             </div>
