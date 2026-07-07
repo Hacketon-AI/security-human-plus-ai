@@ -1,0 +1,60 @@
+# Dependencies
+node_modules/
+vendor/
+.pnpm-store/
+.yarn/
+.npm/
+
+# Build output
+.next/
+dist/
+build/
+out/
+coverage/
+.turbo/
+.cache/
+.vite/
+
+# Logs
+*.log
+logs/
+
+# Git
+.git/
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.crt
+
+# Large/generated files
+*.zip
+*.tar
+*.gz
+*.rar
+*.7z
+*.mp4
+*.mov
+*.avi
+*.png
+*.jpg
+*.jpeg
+*.webp
+*.gif
+*.pdf
+
+# Database / dumps
+*.sql
+*.dump
+*.sqlite
+*.db
+
+# Lock files - aktifkan kalau memang tidak perlu dibaca Kiro
+# package-lock.json
+# bun.lockb
+# pnpm-lock.yaml
+# yarn.lock
