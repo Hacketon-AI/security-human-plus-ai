@@ -181,6 +181,60 @@ _TEMPLATES: dict[str, _ScenarioTemplate] = {
             "Demonstrate that cross-origin credentialed request succeeds in sandbox"
         ),
     ),
+    "missing_hsts": _ScenarioTemplate(
+        scenario_type=ScenarioType.generic_security_header_risk,
+        exploit_simulation_type=ExploitSimulationType.missing_security_header_simulation,
+        vulnerability_pattern="Missing Strict-Transport-Security enables downgrade attacks",
+        controls_replicated=["HSTS header absent"],
+        sandbox_components=[
+            SandboxComponent(name="mock_web_server", role="Serves content without HSTS"),
+            SandboxComponent(name="network_tap", role="Simulates cleartext interception"),
+        ],
+        safe_proof_goal="Demonstrate downgrade to cleartext HTTP in sandbox",
+    ),
+    "missing_referrer_policy": _ScenarioTemplate(
+        scenario_type=ScenarioType.generic_security_header_risk,
+        exploit_simulation_type=ExploitSimulationType.missing_security_header_simulation,
+        vulnerability_pattern="Missing Referrer-Policy allows referer leakage",
+        controls_replicated=["Referrer-Policy header absent"],
+        sandbox_components=[
+            SandboxComponent(name="mock_web_server", role="Serves content without Referrer-Policy"),
+            SandboxComponent(name="attacker_page", role="Captures referer payload"),
+        ],
+        safe_proof_goal="Demonstrate referer header leakage in sandbox",
+    ),
+    "missing_permissions_policy": _ScenarioTemplate(
+        scenario_type=ScenarioType.generic_security_header_risk,
+        exploit_simulation_type=ExploitSimulationType.missing_security_header_simulation,
+        vulnerability_pattern="Missing Permissions-Policy allows unrestricted browser features",
+        controls_replicated=["Permissions-Policy header absent"],
+        sandbox_components=[
+            SandboxComponent(name="mock_web_server", role="Serves content without Permissions-Policy"),
+            SandboxComponent(name="headless_browser", role="Executes capability check"),
+        ],
+        safe_proof_goal="Demonstrate unrestricted feature access in sandbox",
+    ),
+    "missing_x_content_type_options": _ScenarioTemplate(
+        scenario_type=ScenarioType.generic_security_header_risk,
+        exploit_simulation_type=ExploitSimulationType.missing_security_header_simulation,
+        vulnerability_pattern="Missing X-Content-Type-Options enables MIME sniffing",
+        controls_replicated=["X-Content-Type-Options header absent"],
+        sandbox_components=[
+            SandboxComponent(name="mock_web_server", role="Serves content without nosniff"),
+            SandboxComponent(name="headless_browser", role="Executes sniffed content"),
+        ],
+        safe_proof_goal="Demonstrate MIME sniffing XSS execution in sandbox",
+    ),
+    "missing_security_header": _ScenarioTemplate(
+        scenario_type=ScenarioType.generic_security_header_risk,
+        exploit_simulation_type=ExploitSimulationType.missing_security_header_simulation,
+        vulnerability_pattern="Missing standard security header degrades defense-in-depth",
+        controls_replicated=["Security header absent"],
+        sandbox_components=[
+            SandboxComponent(name="mock_web_server", role="Serves content without header")
+        ],
+        safe_proof_goal="Demonstrate absence of defense-in-depth control in sandbox",
+    ),
 }
 
 

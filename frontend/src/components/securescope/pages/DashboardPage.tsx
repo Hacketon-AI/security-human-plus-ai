@@ -18,6 +18,7 @@ import {
   Zap,
   Radio,
   Server,
+  BrainCircuit,
 } from "lucide-react";
 import { useApp } from "@/lib/securescope/store";
 // Mock imports removed
@@ -636,6 +637,12 @@ import {
 } from "./DashboardAiPanels";
 
 export function DashboardPage() {
+  const workspaceWarning = useApp(s => s.workspaceWarning);
+  const demoWorkspaceMode = useApp(s => s.demoWorkspaceMode);
+  
+  const showWarning = workspaceWarning || demoWorkspaceMode === "real_scan_standalone";
+  const warningMessage = workspaceWarning || "Optional workspace context failed to load. Workspace seed data unavailable. Real authorized scan mode is still available.";
+
   return (
     <>
       <TopNavCommandBar />
@@ -643,48 +650,81 @@ export function DashboardPage() {
         <AiProofOfRiskCommandStrip />
 
         <div className="px-4 lg:px-6 py-4 space-y-4">
-          <DashboardQuickActions />
-          <AiProofOfRiskWorkflowRail />
+          {showWarning && (
+            <AlertBanner tone="amber" title="Optional workspace context failed to load">
+              {warningMessage}
+            </AlertBanner>
+          )}
 
-          <div className="grid lg:grid-cols-3 gap-4">
-            <div className="lg:col-span-1">
-              <AuthorizedDomainScanPanel />
+          {/* ============================================================ */}
+          {/* SECTION A: MANUAL BACKEND SECURITY VALIDATION                */}
+          {/* ============================================================ */}
+          <div className="mb-8 space-y-4">
+            <div className="flex items-center gap-2 mb-2">
+              <ShieldCheck className="w-5 h-5 text-emerald-400" />
+              <h2 className="text-lg font-semibold text-slate-100">Section A: Manual Backend Security Validation</h2>
+              <Pill tone="green">Deterministic Backend</Pill>
             </div>
-            <div className="lg:col-span-2 grid lg:grid-cols-2 gap-4">
+            
+            <div className="grid lg:grid-cols-3 gap-4">
+              <div className="lg:col-span-1 flex flex-col gap-4">
+                <AuthorizedDomainScanPanel />
+              </div>
+              <div className="lg:col-span-2">
+                <ValidationOperationsMap />
+              </div>
+            </div>
+
+            <DispatchStatusStrip />
+
+            <div className="grid lg:grid-cols-[1.85fr_1fr] gap-4">
+              <ActiveExecutionFocus />
+              <div className="min-h-[320px]">
+                <ActivityRail />
+              </div>
+            </div>
+
+            <div className="grid lg:grid-cols-12 gap-4">
+              <div className="lg:col-span-5">
+                <RiskDistributionMatrix />
+              </div>
+              <div className="lg:col-span-3">
+                <AuthorizationExpiryRadar />
+              </div>
+              <div className="lg:col-span-4">
+                <AssetVerificationQueue />
+              </div>
+            </div>
+
+            <RecentAuditTrail />
+          </div>
+
+          <div className="h-px bg-(--ss-hairline-strong) my-8 relative">
+            <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#050810] px-4 text-xs font-semibold uppercase tracking-wider text-slate-500 flex items-center gap-2">
+              <ArrowRight className="w-4 h-4" /> AI Integration Boundary <ArrowRight className="w-4 h-4" />
+            </div>
+          </div>
+
+          {/* ============================================================ */}
+          {/* SECTION B: AI PROOF-OF-RISK INTELLIGENCE                     */}
+          {/* ============================================================ */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 mb-2">
+              <BrainCircuit className="w-5 h-5 text-cyan-400" />
+              <h2 className="text-lg font-semibold text-slate-100">Section B: AI Proof-of-Risk Intelligence</h2>
+              <Pill tone="cyan">Generative Intelligence</Pill>
+            </div>
+
+            <DashboardQuickActions />
+            <AiProofOfRiskWorkflowRail />
+
+            <div className="grid lg:grid-cols-4 gap-4">
               <AiRoutingPipelinePanel />
               <AttackSurfacePreviewPanel />
               <DigitalTwinProofPanel />
               <MultiAgentTribunalPanel />
             </div>
           </div>
-
-          <DispatchStatusStrip />
-
-          {/* A + B: Operations map (65%) + Activity rail (35%) */}
-          <div className="grid lg:grid-cols-[1.85fr_1fr] gap-4">
-            <ValidationOperationsMap />
-            <div className="min-h-[320px]">
-              <ActivityRail />
-            </div>
-          </div>
-
-          {/* C: Active execution focus */}
-          <ActiveExecutionFocus />
-
-          {/* D: Bottom intelligence layer — 4 panels, asymmetric */}
-          <div className="grid lg:grid-cols-12 gap-4">
-            <div className="lg:col-span-5">
-              <RiskDistributionMatrix />
-            </div>
-            <div className="lg:col-span-3">
-              <AuthorizationExpiryRadar />
-            </div>
-            <div className="lg:col-span-4">
-              <AssetVerificationQueue />
-            </div>
-          </div>
-
-          <RecentAuditTrail />
         </div>
       </div>
     </>

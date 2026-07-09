@@ -22,7 +22,7 @@ I'll hit 'Run Analysis'.
 First, you see the routing trace. Then, the attack graph visualizing the threats. Here is the digital twin scenario, and below it, the results of the sandbox-only exploit simulation. Finally, we have the remediation steps and retest instructions."
 
 ## 2:20–2:45 | AMD Platform Usage
-"What powers this? Under the hood, we use a hybrid AI router. We leverage an AMD Developer Cloud + ROCm local model route for token-efficient classification, keeping evidence entirely local. For deep reasoning tasks, we intelligently route to Fireworks and Gemma. If a provider is down, we have a deterministic fallback for guaranteed safety."
+"What powers this? The live demo uses Fireworks/Gemma for deep reasoning. SecureScope also ships with an AMD ROCm-compatible local provider and compose profile so the same routing layer can run on AMD Developer Cloud once access is available. Right now, the local route is served by a deterministic mock for demo purposes. If any provider is down, we have a deterministic fallback for guaranteed safety."
 
 ## 2:45–3:00 | Closing
 "In short, SecureScope delivers faster triage, safer proofs, and better remediation. It's a complete, containerized product ready for modern DevSecOps pipelines. Thank you for checking out SecureScope!"

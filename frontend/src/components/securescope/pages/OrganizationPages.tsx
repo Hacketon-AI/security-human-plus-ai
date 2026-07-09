@@ -47,7 +47,7 @@ export function OrganizationsListPage() {
         <PageHeader
           breadcrumbs={[{ label: "Organizations" }]}
           title="Organizations"
-          description="Tenant-level grouping. Each organization isolates projects, assets, authorizations, engagements, and audit attribution."
+          description={<><span className="text-amber-400 font-semibold mr-2">Optional workspace context.</span> Tenant-level grouping. Each organization isolates projects, assets, authorizations, engagements, and audit attribution.</>}
           right={<CyberButton size="sm" variant="primary" onClick={() => setShowCreate(true)}><Plus className="w-3 h-3" /> New organization</CyberButton>}
         />
         <SecondaryContextNav

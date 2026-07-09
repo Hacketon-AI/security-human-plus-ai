@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { BrainCircuit, Play, AlertTriangle, ShieldCheck, FileCheck2, Database, Code, CheckCircle2, Lock, Route, Box, Share2, Eye, Server, Cpu, Layers } from "lucide-react";
+import { BrainCircuit, Play, AlertTriangle, ShieldCheck, FileCheck2, Database, Code, CheckCircle2, Lock, Route, Box, Share2, Eye, Server, Cpu, Layers, Terminal, Activity, Shield } from "lucide-react";
 import { ValidationExecution } from "@/lib/securescope/types";
 import {
   analyzeProofOfRisk,
@@ -15,12 +15,33 @@ import { useApp } from "@/lib/securescope/store";
 
 interface AiProofOfRiskTabProps {
   exec: ValidationExecution;
+  isDomainScan?: boolean;
 }
 
-export function AiProofOfRiskTab({ exec }: AiProofOfRiskTabProps) {
+export function AiProofOfRiskTab({ exec, isDomainScan }: AiProofOfRiskTabProps) {
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [result, setResult] = React.useState<AIProofOfRiskResponse | null>(null);
+  const domainScanResult = useApp((s) => s.latestDomainSafeScanResult);
+
+  React.useEffect(() => {
+    if (isDomainScan && domainScanResult) {
+      setResult({
+        analysis_id: domainScanResult.scan_metadata?.correlation_id || "session_ai_1",
+        status: "completed",
+        mode: "full_report",
+        created_at: new Date().toISOString(),
+        execution_id: domainScanResult.scan_metadata?.scan_id || "session_scan",
+        executive_summary: domainScanResult.ai_analysis_summary || undefined,
+        technical_summary: "Generated automatically via AI Proof-of-Risk ad-hoc session integration.",
+        routing_details: domainScanResult.routing_trace || undefined,
+        attack_surface_graph: domainScanResult.attack_graph || undefined,
+        digital_twin_scenarios: domainScanResult.digital_twin_scenarios || undefined,
+        remediation_plan: domainScanResult.remediation || undefined,
+        safety_notes: domainScanResult.safety_statement ? [domainScanResult.safety_statement] : undefined,
+      });
+    }
+  }, [isDomainScan, domainScanResult]);
 
   // Form State
   const [mode, setMode] = React.useState<AIAnalysisMode>("full_report");
@@ -60,9 +81,18 @@ export function AiProofOfRiskTab({ exec }: AiProofOfRiskTabProps) {
           <h2 className="text-sm font-semibold text-slate-100">AI Proof-of-Risk Analysis</h2>
         </div>
 
-        <AlertBanner tone="info" title="Security Boundary Notice" className="mb-4">
-          SecureScope analyzes validated execution evidence only. It does not accept arbitrary target URLs or raw evidence from the UI.
-        </AlertBanner>
+        {isDomainScan && (
+          <AlertBanner tone="success" title="Session Scan Complete" className="mb-4">
+            AI Proof-of-Risk is integrated directly into the Real Authorized Scan workflow. 
+            The AI analyzed your HTTP security headers automatically. View the generated summaries and graph below, or return to the Overview tab.
+          </AlertBanner>
+        )}
+
+        {!isDomainScan && (
+          <AlertBanner tone="info" title="Security Boundary Notice" className="mb-4">
+            SecureScope analyzes validated execution evidence only. It does not accept arbitrary target URLs or raw evidence from the UI.
+          </AlertBanner>
+        )}
 
         <div className="grid lg:grid-cols-2 gap-6">
           <div className="space-y-4">
@@ -124,15 +154,17 @@ export function AiProofOfRiskTab({ exec }: AiProofOfRiskTabProps) {
           </div>
         </div>
 
-        <div className="mt-6 flex items-center justify-between border-t border-(--ss-hairline) pt-4">
-          <div className="text-[11px] text-slate-500">
-            {!exec.id && <span className="text-amber-400">⚠ Execution ID is required</span>}
-            {exec.id && loading && <span className="text-cyan-400">Analysis is running…</span>}
+        {!isDomainScan && (
+          <div className="mt-6 flex items-center justify-between border-t border-(--ss-hairline) pt-4">
+            <div className="text-[11px] text-slate-500">
+              {!exec.id && <span className="text-amber-400">⚠ Execution ID is required</span>}
+              {exec.id && loading && <span className="text-cyan-400">Analysis is running…</span>}
+            </div>
+            <CyberButton variant="primary" onClick={handleAnalyze} disabled={loading || !exec.id}>
+              {loading ? <span className="animate-pulse">Analyzing...</span> : <><Play className="w-4 h-4 mr-1" /> Run AI Analysis</>}
+            </CyberButton>
           </div>
-          <CyberButton variant="primary" onClick={handleAnalyze} disabled={loading || !exec.id}>
-            {loading ? <span className="animate-pulse">Analyzing...</span> : <><Play className="w-4 h-4 mr-1" /> Run AI Analysis</>}
-          </CyberButton>
-        </div>
+        )}
       </div>
 
       {error && (

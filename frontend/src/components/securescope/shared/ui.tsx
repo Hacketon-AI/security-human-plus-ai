@@ -15,7 +15,7 @@ export function AlertBanner({
   className,
   onClose,
 }: {
-  tone?: "info" | "warning" | "danger" | "success";
+  tone?: "info" | "warning" | "danger" | "success" | "amber";
   title: string;
   children?: React.ReactNode;
   className?: string;
@@ -34,6 +34,12 @@ export function AlertBanner({
       text: "text-amber-200",
       icon: <AlertTriangle className="w-4 h-4 text-amber-400" />,
     },
+    amber: {
+      border: "border-amber-500/30",
+      bg: "bg-amber-500/5",
+      text: "text-amber-200",
+      icon: <AlertTriangle className="w-4 h-4 text-amber-400" />,
+    },
     danger: {
       border: "border-red-500/30",
       bg: "bg-red-500/5",
@@ -47,7 +53,7 @@ export function AlertBanner({
       icon: <ShieldCheck className="w-4 h-4 text-emerald-400" />,
     },
   } as const;
-  const t = tones[tone];
+  const t = tones[tone] ?? tones.info;
   return (
     <div className={cn("flex items-start gap-3 px-3 py-2.5 border rounded-sm", t.border, t.bg, className)}>
       <div className="mt-0.5 shrink-0">{t.icon}</div>

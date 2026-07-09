@@ -9,8 +9,10 @@ const getApiBaseUrl = () => {
 
 export interface DomainSafeScanRequest {
   domain: string;
-  scheme?: string;
-  scan_type?: string;
+  scheme: string;
+  confirm_authorized: boolean;
+  scan_type: string;
+  run_ai_proof_of_risk?: boolean;
 }
 
 export interface DomainSafeScanResponse {

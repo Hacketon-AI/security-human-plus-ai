@@ -408,7 +408,11 @@ export function AuthorizedDomainScanPanel() {
   const [authorized, setAuthorized] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
-  const [result, setResult] = React.useState<DomainSafeScanResponse | null>(null);
+
+  const globalResult = useApp(s => s.latestDomainSafeScanResult);
+  const globalDomain = useApp(s => s.latestDomainSafeScanDomain);
+  const setDomainSafeScanResult = useApp(s => s.setDomainSafeScanResult);
+  const clearDomainSafeScanResult = useApp(s => s.clearDomainSafeScanResult);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -416,15 +420,17 @@ export function AuthorizedDomainScanPanel() {
     
     setLoading(true);
     setError(null);
-    setResult(null);
+    clearDomainSafeScanResult();
 
     try {
       const res = await runDomainSafeScan({
-        domain,
+        domain: domain.trim(),
         scheme,
-        scan_type: "http_headers_only"
+        confirm_authorized: authorized,
+        scan_type: "http_security_headers",
+        run_ai_proof_of_risk: true
       });
-      setResult(res);
+      setDomainSafeScanResult(domain.trim(), res);
     } catch (err: any) {
       setError(err.message || "Failed to run scan");
     } finally {
@@ -435,17 +441,21 @@ export function AuthorizedDomainScanPanel() {
   const isButtonDisabled = !domain || !authorized || loading;
   let disabledReason = "";
   if (!domain) disabledReason = "Domain is required.";
-  else if (!authorized) disabledReason = "You must confirm authorization.";
+  else if (!authorized) disabledReason = "Please confirm you own this domain or have written permission.";
 
   return (
     <div className="ss-panel p-4 h-full flex flex-col border-t-2 border-indigo-500 overflow-hidden relative">
-      <div className="flex items-center gap-2 mb-4 border-b border-(--ss-hairline) pb-2">
+      <div className="flex items-center gap-2 mb-2 border-b border-(--ss-hairline) pb-2">
         <ShieldCheck className="w-4 h-4 text-indigo-400" />
-        <h3 className="text-sm font-semibold text-slate-100">Scan My Authorized Domain</h3>
+        <h3 className="text-sm font-semibold text-slate-100">Real Authorized Scan</h3>
+      </div>
+      <div className="text-[10px] text-indigo-300/80 mb-4 pb-2 border-b border-(--ss-hairline) border-dashed">
+        Using live HTTP response headers from the submitted authorized domain.<br />
+        <span className="font-semibold text-indigo-300">Non-destructive: headers only, no body, no exploit.</span>
       </div>
       
       <div className="flex-1 overflow-y-auto pr-2">
-        {!result ? (
+        {!globalResult ? (
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div className="flex gap-2">
               <div className="flex flex-col gap-1 w-24 shrink-0">
@@ -535,10 +545,10 @@ export function AuthorizedDomainScanPanel() {
           <div className="flex flex-col gap-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <StatusBadge status={result.status === "completed" ? "healthy" : "warning"} label={result.status} />
-                <span className="text-xs font-mono text-slate-400">{result.domain}</span>
+                <StatusBadge status={globalResult.scan_result?.status === "completed" ? "succeeded" : "failed"} />
+                <span className="text-xs font-mono text-slate-400">{globalDomain}</span>
               </div>
-              <CyberButton variant="ghost" size="sm" onClick={() => setResult(null)}>
+              <CyberButton variant="ghost" size="sm" onClick={() => clearDomainSafeScanResult()}>
                 New Scan
               </CyberButton>
             </div>
@@ -548,17 +558,33 @@ export function AuthorizedDomainScanPanel() {
                 <BrainCircuit className="w-3.5 h-3.5 text-cyan-400" />
                 <span className="text-[11px] uppercase tracking-wider text-slate-500">AI Summary</span>
               </div>
-              <p className="text-xs text-slate-300 leading-relaxed">{result.ai_summary}</p>
+              <p className="text-xs text-slate-300 leading-relaxed">{globalResult.ai_analysis_summary || "No AI summary available."}</p>
             </div>
 
-            {result.missing_headers && result.missing_headers.length > 0 && (
+            {globalResult.scan_result?.found_headers && Object.keys(globalResult.scan_result.found_headers).length > 0 && (
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                  <span className="text-[11px] uppercase tracking-wider text-slate-500">Found Headers</span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {Object.keys(globalResult.scan_result.found_headers).map(h => (
+                    <div key={h} className="text-[10px] font-mono text-emerald-300 bg-emerald-900/20 border border-emerald-900/40 px-2 py-1 rounded">
+                      {h}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {globalResult.scan_result?.missing_headers && globalResult.scan_result.missing_headers.length > 0 && (
               <div>
                 <div className="flex items-center gap-2 mb-2">
                   <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
                   <span className="text-[11px] uppercase tracking-wider text-slate-500">Missing Headers</span>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {result.missing_headers.map(h => (
+                  {globalResult.scan_result.missing_headers.map((h: string) => (
                     <div key={h} className="text-[10px] font-mono text-amber-300 bg-amber-900/20 border border-amber-900/40 px-2 py-1 rounded">
                       {h}
                     </div>
@@ -567,22 +593,29 @@ export function AuthorizedDomainScanPanel() {
               </div>
             )}
             
-            {result.missing_headers?.length === 0 && (
+            {globalResult.scan_result?.missing_headers?.length === 0 && (
               <div className="text-xs text-emerald-400 bg-emerald-900/10 border border-emerald-900/30 p-2 rounded flex items-center gap-2">
                 <CheckCircle2 className="w-3.5 h-3.5" />
                 All standard security headers are present.
               </div>
             )}
             
-            {result.attack_graph_preview && (
+            {globalResult.attack_graph ? (
               <div className="mt-2 border-t border-(--ss-hairline) pt-4">
                  <div className="flex items-center gap-2 mb-2">
                     <Share2 className="w-3.5 h-3.5 text-indigo-400" />
                     <span className="text-[11px] uppercase tracking-wider text-slate-500">Attack Graph Preview Nodes</span>
                  </div>
                  <div className="text-xs text-indigo-300 font-mono">
-                    {result.attack_graph_preview.nodes.length} nodes generated
+                    {globalResult.attack_graph.nodes?.length || 0} nodes generated
                  </div>
+              </div>
+            ) : (
+              <div className="mt-2 border-t border-(--ss-hairline) pt-4">
+                <div className="text-xs text-slate-400 bg-slate-900/20 border border-slate-700/50 p-2 rounded flex items-center gap-2">
+                  <AlertTriangle className="w-3.5 h-3.5" />
+                  AI graph not available yet. Scan findings were still captured successfully.
+                </div>
               </div>
             )}
           </div>

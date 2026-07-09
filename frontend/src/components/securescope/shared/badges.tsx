@@ -38,11 +38,11 @@ export function StatusBadge({
   className,
   pulse,
 }: {
-  status: ExecutionStatus;
+  status: ExecutionStatus | string;
   className?: string;
   pulse?: boolean;
 }) {
-  const s = STATUS_MAP[status];
+  const s = STATUS_MAP[status as ExecutionStatus] ?? STATUS_MAP.draft;
   return (
     <span
       className={cn(
@@ -73,47 +73,49 @@ export function OutcomeBadge({
   outcome,
   className,
 }: {
-  outcome: ExecutionOutcome;
+  outcome: ExecutionOutcome | string | null;
   className?: string;
 }) {
-  const s = OUTCOME_MAP[outcome];
+  if (!outcome) return null;
+  const o = OUTCOME_MAP[outcome as ExecutionOutcome] ?? OUTCOME_MAP.inconclusive;
   return (
     <span
       className={cn(
         "inline-flex items-center gap-1.5 rounded-sm border px-2 py-0.5 text-[11px] font-medium tracking-wide tnum",
-        s.text,
-        s.bg,
-        s.border,
+        o.text,
+        o.bg,
+        o.border,
         className
       )}
     >
-      <span className={cn(dotBase, s.dot)} />
-      {s.label}
+      <span className={cn(dotBase, o.dot)} />
+      {o.label}
     </span>
   );
 }
 
 /* ---------------- Risk tier ---------------- */
-const RISK_MAP: Record<RiskTier, { label: string; text: string; bg: string; border: string }> = {
-  low: { label: "Low Risk", text: "text-slate-300", bg: "bg-slate-500/10", border: "border-slate-500/30" },
-  moderate: { label: "Moderate Risk", text: "text-blue-300", bg: "bg-blue-500/10", border: "border-blue-500/30" },
-  high: { label: "High Risk", text: "text-amber-300", bg: "bg-amber-500/10", border: "border-amber-500/30" },
-  critical: { label: "Critical Risk", text: "text-red-300", bg: "bg-red-500/10", border: "border-red-500/30" },
+const RISK_MAP: Record<RiskTier, { label: string; text: string; bg: string; border: string; dot: string }> = {
+  low: { label: "Low Risk", text: "text-slate-300", bg: "bg-slate-500/10", border: "border-slate-500/30", dot: "bg-slate-400" },
+  moderate: { label: "Moderate Risk", text: "text-blue-300", bg: "bg-blue-500/10", border: "border-blue-500/30", dot: "bg-blue-400" },
+  high: { label: "High Risk", text: "text-amber-300", bg: "bg-amber-500/10", border: "border-amber-500/30", dot: "bg-amber-400" },
+  critical: { label: "Critical Risk", text: "text-red-300", bg: "bg-red-500/10", border: "border-red-500/30", dot: "bg-red-400" },
 };
 
-export function RiskTierBadge({ tier, className }: { tier: RiskTier; className?: string }) {
-  const s = RISK_MAP[tier];
+export function RiskTierBadge({ tier, className }: { tier: RiskTier | string; className?: string }) {
+  const r = RISK_MAP[tier as RiskTier] ?? RISK_MAP.moderate;
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 rounded-sm border px-2 py-0.5 text-[11px] font-medium tracking-wide",
-        s.text,
-        s.bg,
-        s.border,
+        "inline-flex items-center gap-1.5 rounded-sm border px-2 py-0.5 text-[11px] font-medium tracking-wide uppercase",
+        r.text,
+        r.bg,
+        r.border,
         className
       )}
     >
-      {s.label}
+      <span className={cn(dotBase, r.dot)} />
+      {r.label}
     </span>
   );
 }
@@ -127,8 +129,8 @@ const VERIF_MAP: Record<VerificationState, { label: string; text: string; bg: st
   cancelled: { label: "Cancelled", text: "text-slate-400", bg: "bg-slate-500/10", border: "border-slate-600/30", dot: "bg-slate-500" },
 };
 
-export function VerificationBadge({ state, className }: { state: VerificationState; className?: string }) {
-  const s = VERIF_MAP[state];
+export function VerificationBadge({ state, className }: { state: VerificationState | string; className?: string }) {
+  const s = VERIF_MAP[state as VerificationState] ?? VERIF_MAP.pending;
   return (
     <span className={cn("inline-flex items-center gap-1.5 rounded-sm border px-2 py-0.5 text-[11px] font-medium tnum", s.text, s.bg, s.border, className)}>
       <span className={cn(dotBase, s.dot)} />
@@ -145,8 +147,8 @@ const AUTH_STATE_MAP: Record<AuthorizationState, { label: string; text: string; 
   draft: { label: "Draft", text: "text-slate-300", bg: "bg-slate-500/10", border: "border-slate-500/30" },
 };
 
-export function AuthorizationStateBadge({ state, className }: { state: AuthorizationState; className?: string }) {
-  const s = AUTH_STATE_MAP[state];
+export function AuthorizationStateBadge({ state, className }: { state: AuthorizationState | string; className?: string }) {
+  const s = AUTH_STATE_MAP[state as AuthorizationState] ?? AUTH_STATE_MAP.draft;
   return (
     <span className={cn("inline-flex items-center gap-1 rounded-sm border px-2 py-0.5 text-[11px] font-medium", s.text, s.bg, s.border, className)}>
       {s.label}
@@ -163,8 +165,8 @@ const ENG_STATE_MAP: Record<EngagementState, { label: string; text: string; bg: 
   cancelled: { label: "Cancelled", text: "text-slate-400", bg: "bg-slate-500/10", border: "border-slate-600/30" },
 };
 
-export function EngagementStateBadge({ state, className }: { state: EngagementState; className?: string }) {
-  const s = ENG_STATE_MAP[state];
+export function EngagementStateBadge({ state, className }: { state: EngagementState | string; className?: string }) {
+  const s = ENG_STATE_MAP[state as EngagementState] ?? ENG_STATE_MAP.draft;
   return (
     <span className={cn("inline-flex items-center gap-1 rounded-sm border px-2 py-0.5 text-[11px] font-medium", s.text, s.bg, s.border, className)}>
       {s.label}
@@ -178,8 +180,8 @@ const CRED_STATE_MAP: Record<CredentialState, { label: string; text: string; bg:
   revoked: { label: "Revoked", text: "text-red-300", bg: "bg-red-500/10", border: "border-red-500/30" },
 };
 
-export function CredentialStateBadge({ state, className }: { state: CredentialState; className?: string }) {
-  const s = CRED_STATE_MAP[state];
+export function CredentialStateBadge({ state, className }: { state: CredentialState | string; className?: string }) {
+  const s = CRED_STATE_MAP[state as CredentialState] ?? CRED_STATE_MAP.revoked;
   return (
     <span className={cn("inline-flex items-center gap-1 rounded-sm border px-2 py-0.5 text-[11px] font-medium", s.text, s.bg, s.border, className)}>
       {s.label}
@@ -194,7 +196,7 @@ export function Pill({
   className,
 }: {
   children: React.ReactNode;
-  tone?: "slate" | "cyan" | "green" | "amber" | "red" | "blue";
+  tone?: "slate" | "cyan" | "green" | "amber" | "red" | "blue" | "danger" | "warning" | "success";
   className?: string;
 }) {
   const tones: Record<string, string> = {
@@ -204,12 +206,15 @@ export function Pill({
     amber: "text-amber-300 bg-amber-500/10 border-amber-500/30",
     red: "text-red-300 bg-red-500/10 border-red-500/30",
     blue: "text-blue-300 bg-blue-500/10 border-blue-500/30",
+    danger: "text-red-300 bg-red-500/10 border-red-500/30",
+    warning: "text-amber-300 bg-amber-500/10 border-amber-500/30",
+    success: "text-emerald-300 bg-emerald-500/10 border-emerald-500/30",
   };
   return (
     <span
       className={cn(
         "inline-flex items-center gap-1 rounded-sm border px-1.5 py-0.5 text-[10px] font-medium tracking-wide",
-        tones[tone],
+        tones[tone] ?? tones.slate,
         className
       )}
     >

@@ -58,6 +58,7 @@ class ScenarioType(StrEnum):
     missing_x_frame_options_clickjacking = "missing_x_frame_options_clickjacking"
     insecure_cookie_flag_risk = "insecure_cookie_flag_risk"
     permissive_cors_simulation = "permissive_cors_simulation"
+    generic_security_header_risk = "generic_security_header_risk"
 
 
 class ExploitSimulationType(StrEnum):
@@ -70,6 +71,7 @@ class ExploitSimulationType(StrEnum):
     clickjacking_frame_embed = "clickjacking_frame_embed"
     cookie_hijack_replay = "cookie_hijack_replay"
     cors_credential_theft = "cors_credential_theft"
+    missing_security_header_simulation = "missing_security_header_simulation"
 
 
 class RedactionCategory(StrEnum):

@@ -33,11 +33,13 @@ Safe Evidence → AI Attack Graph → Digital Twin → Sandbox Proof → Tribuna
 
 ## Slide 6: AMD / Fireworks Architecture
 **Show:**
+- Fireworks/Gemma live reasoning (active provider for this submission)
+- AMD ROCm local model routing provider (implemented, ready for activation)
+- Containerized deployment profile for AMD Developer Cloud (`amd-rocm` Docker profile)
 - Rule engine for deterministic checks
-- AMD ROCm local model provider for classification/routing
-- Fireworks/Gemma for deep reasoning
-- deterministic fallback for safety
-- containerized deployment
+- Deterministic fallback for safety
+
+> **Honest note:** Live ROCm validation is pending AMD Developer Cloud access. The ROCm provider code and Docker profile are complete and ready for deployment.
 
 ## Slide 7: Safety Model
 **Show:**

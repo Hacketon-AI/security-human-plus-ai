@@ -27,4 +27,15 @@
 | **Dashboard Attack Surface Preview** | *Store / API cache* | - | `attack_surface_graph` from store | Yes | ✅ Connected |
 | **Dashboard Digital Twin Preview** | *Store / API cache* | - | `digital_twin_scenarios`, `sandbox_proof_artifacts` from store | Yes | ✅ Connected |
 | **Dashboard Tribunal Preview** | *Store / API cache* | - | `tribunal_verdict` from store | Yes | ✅ Connected |
-| **Scan My Authorized Domain Panel** | `POST /domain-safe-scan/analyze` | `domain`, `scheme`, `scan_type` | `missing_headers`, `ai_summary`, `attack_graph_preview` | Yes | ✅ Connected |
+| **Scan My Authorized Domain Panel** | `POST /domain-safe-scan/analyze` | `domain`, `scheme`, `confirm_authorized`, `scan_type`, `run_ai_proof_of_risk` | `scan_result`, `ai_analysis_summary`, `attack_graph`, `scan_metadata` | No | ✅ Connected |
+
+### Information Architecture & State Management
+
+| State Element | Managed In | Source | Purpose |
+|---|---|---|---|
+| **`activeAnalysisSource`** | `Zustand store` (`useApp`) | UI Interaction (Dashboard / Domain Scan) | Differentiates between `manual_execution`, `demo_execution`, and `domain_safe_scan`. Drives conditional rendering across Dashboard and ExecutionDetailPage. |
+| **`latestScanMetadata`** | `Zustand store` (`useApp`) | `POST /domain-safe-scan/analyze` | Holds ephemeral `scan_id` (Session Scan ID) and `correlation_id` from the backend to ensure identifiers are accurate and not misleading. |
+| **`latestDomainSafeScanResult`** | `Zustand store` (`useApp`) | `POST /domain-safe-scan/analyze` | Contains full HTTP header scan results, routing trace, attack graph, and AI tribunal generated automatically by the backend. |
+| **`latestAiProofOfRiskAnalysis`** | `Zustand store` (`useApp`) | `POST /ai-proof-of-risk/executions/{id}/analyze` | Holds on-demand AI reasoning results for historic mock/manual executions. |
+| **Execution Detail Pages** | `ExecutionDetailPage.tsx` | UI State | Conditionally renders `Session Scan ID` vs `Execution ID` and suppresses persistent metadata (Scope/Safety) when visualizing an ephemeral `domain_safe_scan`. |
+| **Dashboard Panels** | `DashboardPage.tsx` | UI State | Explicitly separated into "Section A: Manual Backend Security Validation" and "Section B: AI Proof-of-Risk Intelligence" to clarify system capabilities. |

@@ -198,12 +198,17 @@ class AIProofOfRiskService:
             exploitability_hypotheses = ["Simulated attack hypothesis."]
 
             # Generate scenario
-            scenario = generate_scenario(
-                finding=normalized_findings[0],
-                execution_id=execution_id,
-                scenario_sequence=1,
-            )
-            digital_twin_scenarios.append(scenario)
+            try:
+                scenario = generate_scenario(
+                    finding=normalized_findings[0],
+                    execution_id=execution_id,
+                    scenario_sequence=1,
+                )
+                digital_twin_scenarios.append(scenario)
+            except ScenarioSafetyViolation as e:
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.info(f"Skipping digital twin scenario generation: {e}")
 
         # 9. Sandbox simulation
         sandbox_proof_artifacts = None

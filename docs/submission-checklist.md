@@ -12,6 +12,16 @@
 - [x] Demo script (`scripts/demo_ai_proof_of_risk.sh`) works
 - [x] Documentation is complete (design docs, pitch deck, script, etc.)
 
+## Provider Readiness Status
+
+| Component | Status |
+|---|---|
+| Fireworks AI live reasoning | ✅ Yes |
+| AMD Developer Cloud access | ⏳ Pending |
+| ROCm provider implementation | ✅ Yes (pluggable provider + Docker profile) |
+| ROCm live validation on AMD hardware | ⏳ Pending cloud access |
+| `local-amd-model-mock` | ✅ Demo fallback (deterministic, not real GPU) |
+
 ## Demo Commands
 
 Run these commands to verify the environment locally:

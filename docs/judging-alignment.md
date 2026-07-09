@@ -41,11 +41,14 @@ The submission is a fully containerized end-to-end product. It includes a fronte
 Effective and meaningful integration with AMD hardware/software (e.g., AMD Developer Cloud, ROCm, Fireworks AI).
 
 **How SecureScope satisfies it:**
-SecureScope implements a token-efficient Hybrid AI Router. It routes medium-complexity tasks to an **AMD ROCm local model** (simulated via mock for local testing, designed for AMD Developer Cloud deployment) to keep sensitive evidence local and reduce costs. For tasks requiring deep reasoning, it routes to **Fireworks AI / Gemma**.
+SecureScope includes an AMD ROCm-compatible local model provider and Docker Compose profile for AMD Developer Cloud deployment. Because cloud access was not available before submission, the live demo uses Fireworks/Gemma while preserving the ROCm integration path.
+
+The Hybrid AI Router routes medium-complexity tasks to a **local model endpoint** (currently served by a deterministic mock; designed for AMD Developer Cloud ROCm deployment) to keep sensitive evidence local and reduce costs. For tasks requiring deep reasoning, it routes to **Fireworks AI / Gemma** (live).
 
 **Proof / Location:**
 - `app/modules/ai_proof_of_risk/security_router.py` (Hybrid routing logic)
 - `docker-compose.hackathon.yml` (Local AMD model mock & ROCm profile)
+- `docker-compose.hackathon.yml` → `local-amd-model-rocm` service (ROCm profile, ready for cloud deployment)
 
 ## 5. Product/Market Potential
 **What judges are looking for:**

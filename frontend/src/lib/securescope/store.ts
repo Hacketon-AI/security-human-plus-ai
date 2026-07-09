@@ -42,6 +42,17 @@ interface AppState {
 
   isLoading: boolean;
   error: string | null;
+  workspaceWarning: string | null;
+  demoWorkspaceMode: "full" | "real_scan_standalone";
+
+  latestDomainSafeScanResult: any | null;
+  latestDomainSafeScanDomain: string | null;
+  latestDomainSafeScanAt: string | null;
+
+  activeSecurityWorkflow: "manual_validation" | "ai_proof_of_risk" | "domain_safe_scan" | "execution_detail" | null;
+  activeAnalysisSource: "manual_execution" | "domain_safe_scan" | "ai_proof_of_risk" | "demo_execution" | null;
+  latestManualValidationResult: any | null;
+  latestScanMetadata: any | null;
 
   go: (route: RouteKey) => void;
   openOrg: (id: string) => void;
@@ -80,6 +91,14 @@ interface AppState {
   latestAiProofOfRiskExecutionId: string | null;
   aiProofOfRiskLastRunAt: string | null;
   setLatestAiProofOfRiskAnalysis: (executionId: string, analysis: any) => void;
+
+  setDomainSafeScanResult: (domain: string, result: any) => void;
+  clearDomainSafeScanResult: () => void;
+  
+  setScanMetadata: (metadata: any) => void;
+  setActiveAnalysisSource: (source: "manual_execution" | "domain_safe_scan" | "ai_proof_of_risk" | "demo_execution" | null) => void;
+  setActiveSecurityWorkflow: (workflow: "manual_validation" | "ai_proof_of_risk" | "domain_safe_scan" | "execution_detail" | null) => void;
+  setLatestManualValidationResult: (result: any) => void;
 }
 
 // --------------------------------------------------
@@ -147,8 +166,19 @@ export const useApp = create<AppState>((set, get) => ({
   latestAiProofOfRiskExecutionId: null,
   aiProofOfRiskLastRunAt: null,
 
+  latestDomainSafeScanResult: null,
+  latestDomainSafeScanDomain: null,
+  latestDomainSafeScanAt: null,
+
+  activeSecurityWorkflow: null,
+  activeAnalysisSource: null,
+  latestManualValidationResult: null,
+  latestScanMetadata: null,
+
   isLoading: false,
   error: null,
+  workspaceWarning: null,
+  demoWorkspaceMode: "full",
 
   go: (route) => set({ route }),
   openOrg: (id) => set({ selectedOrgId: id, route: "organization_detail" }),
@@ -184,6 +214,16 @@ export const useApp = create<AppState>((set, get) => ({
       latestAiProofOfRiskAnalysis: null,
       latestAiProofOfRiskExecutionId: null,
       aiProofOfRiskLastRunAt: null,
+      latestDomainSafeScanResult: null,
+      latestDomainSafeScanDomain: null,
+      latestDomainSafeScanAt: null,
+      demoWorkspaceMode: "full",
+      error: null,
+      workspaceWarning: null,
+      activeSecurityWorkflow: null,
+      activeAnalysisSource: null,
+      latestManualValidationResult: null,
+      latestScanMetadata: null,
     }),
 
   initData: async () => {
@@ -210,10 +250,20 @@ export const useApp = create<AppState>((set, get) => ({
         currentOrgId = orgs[0].id;
       }
 
-      set({ organizations: orgs, selectedOrgId: currentOrgId });
+      set({ organizations: orgs, selectedOrgId: currentOrgId, demoWorkspaceMode: "full" });
       await get().fetchData();
     } catch (e: any) {
-      set({ error: e.message || "Failed to initialize data" });
+      console.warn("Failed to initialize workspace data. Falling back to real scan standalone mode.", e);
+      set({ 
+        demoWorkspaceMode: "real_scan_standalone", 
+        workspaceWarning: "Optional workspace context failed to load. Workspace seed data unavailable. Real authorized scan mode is still available.",
+        organizations: [],
+        projects: [],
+        assets: [],
+        authorizations: [],
+        engagements: [],
+        executions: []
+      });
     } finally {
       set({ isLoading: false });
     }
@@ -473,9 +523,14 @@ export const useApp = create<AppState>((set, get) => ({
         engagements: allEngs,
         executions: allExecs,
         organizations: orgsUpdated,
+        demoWorkspaceMode: "full"
       });
     } catch (e: any) {
-      set({ error: e.message || "Failed to fetch dashboard data" });
+      console.warn("Failed to fetch project data. Falling back to real scan standalone mode.", e);
+      set({ 
+        demoWorkspaceMode: "real_scan_standalone",
+        workspaceWarning: "Optional workspace context failed to load. Workspace seed data unavailable. Real authorized scan mode is still available.",
+      });
     } finally {
       set({ isLoading: false });
     }
@@ -652,6 +707,28 @@ export const useApp = create<AppState>((set, get) => ({
       aiProofOfRiskLastRunAt: new Date().toISOString(),
     });
   },
+
+  setDomainSafeScanResult: (domain, result) => {
+    set({
+      latestDomainSafeScanDomain: domain,
+      latestDomainSafeScanResult: result,
+      latestDomainSafeScanAt: new Date().toISOString()
+    });
+  },
+
+  clearDomainSafeScanResult: () => {
+    set({
+      latestDomainSafeScanDomain: null,
+      latestDomainSafeScanResult: null,
+      latestDomainSafeScanAt: null,
+      latestScanMetadata: null
+    });
+  },
+  
+  setScanMetadata: (metadata: any) => set({ latestScanMetadata: metadata }),
+  setActiveAnalysisSource: (source: AppState["activeAnalysisSource"]) => set({ activeAnalysisSource: source }),
+  setActiveSecurityWorkflow: (workflow: AppState["activeSecurityWorkflow"]) => set({ activeSecurityWorkflow: workflow }),
+  setLatestManualValidationResult: (result: any) => set({ latestManualValidationResult: result })
 }));
 
 // Convenience helpers

@@ -44,7 +44,7 @@ export function ProjectsListPage() {
         <PageHeader
           breadcrumbs={[{ label: "Projects" }]}
           title="Projects"
-          description="Projects group assets, authorizations, and engagements within an organization. Each project carries its own health and execution lineage."
+          description={<><span className="text-amber-400 font-semibold mr-2">Optional workspace context.</span> Projects group assets, authorizations, and engagements within an organization. Each project carries its own health and execution lineage.</>}
           right={<CyberButton size="sm" variant="primary" onClick={() => setShowCreate(true)}><Plus className="w-3 h-3" /> New project</CyberButton>}
         />
         <div className="px-4 lg:px-6 py-4">

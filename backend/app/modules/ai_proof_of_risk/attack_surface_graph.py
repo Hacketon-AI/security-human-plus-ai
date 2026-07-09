@@ -63,6 +63,34 @@ _FINDING_FRAGMENTS: dict[str, dict[str, str]] = {
         "risk": "Credential interception or session hijack via cleartext traffic",
         "remediation": "Enable HSTS with max-age ≥ 31536000 and includeSubDomains",
     },
+    "missing_referrer_policy": {
+        "control": "Referrer-Policy header",
+        "prerequisite": "User navigates from the application to an external site",
+        "impact": "Leakage of sensitive URL parameters via Referer header",
+        "risk": "Exposure of session tokens or PII to third parties",
+        "remediation": "Set Referrer-Policy to 'strict-origin-when-cross-origin' or 'no-referrer'",
+    },
+    "missing_permissions_policy": {
+        "control": "Permissions-Policy header",
+        "prerequisite": "Third-party scripts or frames loaded in the application",
+        "impact": "Unauthorized access to browser features (camera, microphone, geolocation)",
+        "risk": "Privacy violation and potential data exfiltration",
+        "remediation": "Deploy Permissions-Policy to explicitly allow or deny specific browser features",
+    },
+    "missing_x_content_type_options": {
+        "control": "X-Content-Type-Options header",
+        "prerequisite": "Application hosts user-uploaded content or untrusted data",
+        "impact": "MIME-sniffing leading to XSS execution",
+        "risk": "Malicious scripts executed in the context of the application",
+        "remediation": "Set X-Content-Type-Options: nosniff",
+    },
+    "missing_security_header": {
+        "control": "Standard HTTP Security Header",
+        "prerequisite": "Attacker leverages missing defense-in-depth controls",
+        "impact": "Increased susceptibility to various client-side attacks",
+        "risk": "Broader attack surface for client-side exploitation",
+        "remediation": "Implement missing recommended HTTP security headers",
+    },
 }
 
 

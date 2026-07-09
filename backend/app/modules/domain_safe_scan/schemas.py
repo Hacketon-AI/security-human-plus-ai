@@ -16,3 +16,4 @@ class DomainSafeScanResponse(BaseModel):
     digital_twin_scenarios: Optional[Any] = None
     remediation: Optional[Any] = None
     safety_statement: Optional[str] = None
+    scan_metadata: Optional[dict[str, Any]] = None

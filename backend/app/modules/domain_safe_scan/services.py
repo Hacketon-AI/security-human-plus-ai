@@ -10,22 +10,43 @@ from app.modules.ai_proof_of_risk.schemas import AIProofOfRiskAnalysisRequest
 from app.modules.ai_proof_of_risk.execution_evidence_provider import ExecutionEvidenceProvider
 
 class MockEvidenceProvider(ExecutionEvidenceProvider):
-    def __init__(self, headers: dict[str, str], domain: str):
+    def __init__(self, headers: dict[str, str], domain: str, missing_headers: list[str]):
         self.headers = headers
         self.domain = domain
+        self.missing_headers = missing_headers
 
     def get_execution_evidence(self, execution_id: UUID, context: dict[str, Any] | None = None) -> Any:
+        mapping = {
+            "Strict-Transport-Security": "missing_hsts",
+            "Content-Security-Policy": "missing_csp",
+            "X-Frame-Options": "missing_x_frame_options",
+            "Referrer-Policy": "missing_referrer_policy",
+            "Permissions-Policy": "missing_permissions_policy",
+            "X-Content-Type-Options": "missing_x_content_type_options"
+        }
+        
+        raw_steps = []
+        for header in self.missing_headers:
+            f_type = mapping.get(header, "missing_security_header")
+            raw_steps.append({
+                "step_id": f"missing_{header.lower()}",
+                "finding_refs": [f_type],
+                "evidence": {
+                    "finding_type": f_type,
+                    "title": f"Missing {header}",
+                    "severity": "medium",
+                    "affected_origin": self.domain,
+                    "observed_header_absent": header,
+                    "safe_evidence_summary": f"The {header} header is missing from the HTTP response.",
+                    "remediation_hint": f"Configure the server to include the {header} header."
+                }
+            })
+
         class MockEvidence:
             tenant_access_confirmed = True
             asset_verified = True
-            raw_step_results_to_be_redacted = [
-                {
-                    "step_id": "http_security_headers",
-                    "finding_refs": ["MissingSecurityHeaders"],
-                    "evidence": {"headers": self.headers},
-                }
-            ]
-            sanitized_step_results = raw_step_results_to_be_redacted
+            raw_step_results_to_be_redacted = raw_steps
+            sanitized_step_results = raw_steps
             original_target_hostname = self.domain
 
         return MockEvidence()
@@ -85,9 +106,35 @@ class DomainSafeScanService:
             "status": "completed"
         }
 
-        resp = DomainSafeScanResponse(scan_result=scan_result)
+        import uuid
+        session_scan_id = f"sscan_{uuid.uuid4().hex[:8]}"
+        correlation_id = f"corr_{uuid.uuid4().hex[:8]}"
+
+        scan_metadata = {
+            "source": "domain_safe_scan",
+            "scan_id": session_scan_id,
+            "correlation_id": correlation_id,
+            "domain": request.domain,
+            "scheme": request.scheme,
+            "scan_type": request.scan_type,
+            "authorization_confirmed": request.confirm_authorized,
+            "evidence_source": "live_http_response_headers",
+            "status": "completed",
+            "finding_count": len(missing_headers)
+        }
+
+        resp = DomainSafeScanResponse(scan_result=scan_result, scan_metadata=scan_metadata)
 
         if request.run_ai_proof_of_risk:
+            if not missing_headers:
+                resp.ai_analysis_summary = "All recommended security headers are present. No attack surface graph or remediation required."
+                resp.routing_trace = None
+                resp.attack_graph = None
+                resp.digital_twin_scenarios = None
+                resp.remediation = None
+                resp.safety_statement = "Safe: Target configuration adheres to HTTP security best practices."
+                return resp
+
             dummy_id = UUID("00000000-0000-0000-0000-000000000000")
             ai_req = AIProofOfRiskAnalysisRequest(
                 audience="executive",
@@ -96,7 +143,7 @@ class DomainSafeScanService:
                 force_remote_reasoning=False
             )
             
-            provider = MockEvidenceProvider(headers=headers, domain=domain)
+            provider = MockEvidenceProvider(headers=headers, domain=domain, missing_headers=missing_headers)
             ai_service = AIProofOfRiskService(evidence_provider=provider)
             
             try:

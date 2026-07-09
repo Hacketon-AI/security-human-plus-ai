@@ -11,13 +11,21 @@ SecureScope leverages AMD’s robust developer ecosystem:
 - **Use of AMD platforms**: Seamless integration with local AMD Developer Cloud infrastructure.
 - **Product/Market Potential**: Designed for enterprise zero-trust security ecosystems.
 
-## C. AMD Stack Usage
-- **Fireworks AI / Gemma**: For deep reasoning and complex finding analysis.
-- **AMD Developer Cloud + ROCm**: A local model endpoint for token-efficient local classification and hybrid routing.
-- **Open-source Python/FastAPI framework**: For performant, asynchronous API orchestration.
-- **Containerized deployment**: Ready-to-deploy Docker compose stack.
+## C. Fireworks-First Mode
 
-## D. Architecture
+For this hackathon submission, **Fireworks AI / Gemma is the live reasoning provider**. The Fireworks API key has been provisioned and all remote reasoning calls go through the Fireworks endpoint.
+
+**AMD ROCm local provider** is implemented as a pluggable provider within the hybrid AI router. It can be activated by switching the Docker Compose profile to `amd-rocm` and pointing `SECURESCOPE_AI_LOCAL_AMD_BASE_URL` to a real ROCm-served model when AMD Developer Cloud access becomes available.
+
+**`local-amd-model-mock`** is a deterministic compatibility fallback included in the default compose stack. It returns structured mock responses to keep the routing pipeline functional during development and demos. It does **not** perform real GPU inference.
+
+## D. AMD Stack Usage
+- **Fireworks AI / Gemma** (live): Deep reasoning and complex finding analysis.
+- **AMD ROCm local provider** (implemented, pending cloud access): Token-efficient local classification and hybrid routing via AMD Developer Cloud.
+- **Open-source Python/FastAPI framework**: Performant, asynchronous API orchestration.
+- **Containerized deployment**: Docker Compose stack with pluggable AMD ROCm profile.
+
+## E. Architecture
 - **Safe real-domain validation**: All evidence is routed through an AI redaction layer.
 - **AI redaction layer**: Removes secrets, tokens, and PII before any model sees it.
 - **Hybrid AI router**: Routes based on complexity (Rule-only -> Local AMD -> Fireworks AI).
@@ -26,13 +34,13 @@ SecureScope leverages AMD’s robust developer ecosystem:
 - **Digital twin sandbox proof**: Executes exploits securely outside the production boundary.
 - **Risk tribunal / Remediation**: Provides structured output on exploitability and required fixes.
 
-## E. Demo Modes
-1. **Fully deterministic local demo**: Set `AI_ROUTER_MODE=deterministic`. No external model calls are made.
-2. **Local AMD mock provider demo**: Included in the docker-compose stack. Use it to simulate the local endpoint when hardware isn't available.
-3. **Fireworks-enabled demo**: Set `SECURESCOPE_FIREWORKS_API_KEY` in your `.env`.
-4. **AMD Developer Cloud ROCm endpoint demo**: Start the optional ROCm container using the `amd-rocm` docker profile and configure `SECURESCOPE_AI_LOCAL_AMD_BASE_URL`.
+## F. Demo Modes
+1. **Fireworks-first demo (default for this submission)**: Set `SECURESCOPE_FIREWORKS_API_KEY` in `.env`. The router uses Fireworks/Gemma for deep reasoning and the local AMD mock for deterministic pre-classification.
+2. **Fully deterministic local demo**: Set `AI_ROUTER_MODE=deterministic`. No external model calls are made.
+3. **Local AMD mock provider demo**: Included in the default compose stack. Simulates the local endpoint with deterministic responses — not real GPU inference.
+4. **AMD Developer Cloud ROCm endpoint demo** (when access is available): Start the optional ROCm container using the `amd-rocm` Docker profile and configure `SECURESCOPE_AI_LOCAL_AMD_BASE_URL` to point to the real endpoint.
 
-## F. Run Commands
+## G. Run Commands
 ```bash
 # 1. Prepare environment
 cp .env.example .env
@@ -71,15 +79,15 @@ If you have configured `SECURESCOPE_FIREWORKS_API_KEY` and want to verify the re
 To point to AMD Developer Cloud local model endpoint:
 Start the compose stack with the AMD profile: `docker compose -f docker-compose.hackathon.yml --profile amd-rocm up -d`. Update `.env` `SECURESCOPE_AI_LOCAL_AMD_BASE_URL` to point to the real endpoint (e.g., `http://local-amd-model-rocm:8000/v1`).
 
-## G. Safety Statement
+## H. Safety Statement
 Real exploit validation is performed only inside controlled SecureScope digital twin sandbox. Production or authorized domains receive safe, non-destructive validation only. No payloads are executed on the host system.
 
-## H. What is Mocked
-- **local-amd-model-mock**: Only intended for local demonstration. 
-- **Real AMD ROCm endpoint**: Should be deployed on AMD Developer Cloud for the final production demo.
-- **Tests**: Validation runs do not strictly require a GPU to pass.
+## I. What is Mocked
+- **local-amd-model-mock**: A deterministic compatibility fallback. It does **not** perform real AMD GPU inference. It exists to keep the routing pipeline functional when AMD Developer Cloud hardware is not yet available.
+- **Real AMD ROCm endpoint**: Implemented as a pluggable provider and Docker Compose profile (`amd-rocm`). Ready for deployment on AMD Developer Cloud once access is granted.
+- **Tests**: Validation runs do not require a GPU to pass.
 
-## I. Frontend UI Demo Walkthrough
+## J. Frontend UI Demo Walkthrough
 You can run the full end-to-end demo using Docker Compose:
 
 1. Copy the environment template: `cp .env.example .env`
@@ -104,14 +112,14 @@ Note:
 - AMD Endpoint (`SECURESCOPE_AI_LOCAL_AMD_BASE_URL`) is optional for the local mock demo.
 - API Networking: The frontend uses `NEXT_PUBLIC_API_BASE_URL=http://localhost:8000` for client-side browser requests and `API_INTERNAL_BASE_URL=http://securescope-api:8000` for Docker internal server-side requests.
 
-## J. What Judges Should Evaluate
+## K. What Judges Should Evaluate
 - Product workflow and clarity of vision.
 - Intelligent AI routing design that balances cost, tokens, and logic.
 - Secure digital twin proof-of-risk guarantees.
 - Seamless AMD/Fireworks integration via standardized APIs.
 - Container reproducibility and configuration-driven design.
 
-## K. Track 3 Submission Materials
+## L. Track 3 Submission Materials
 - [Pitch Deck Outline](./pitch-deck-outline.md)
 - [3-Minute Demo Script](./demo-script-3-min.md)
 - [Judging Alignment](./judging-alignment.md)

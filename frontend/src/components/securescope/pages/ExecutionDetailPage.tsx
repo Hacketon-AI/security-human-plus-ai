@@ -42,13 +42,27 @@ export function ExecutionDetailPage() {
   const requestKillSwitch = useApp((s) => s.requestKillSwitch);
   const initialTab = useApp((s) => s.executionTab) as Tab || "Overview";
   const [tab, setTab] = React.useState<Tab>(initialTab);
+  
+  const activeAnalysisSource = useApp(s => s.activeAnalysisSource);
+  const scanMetadata = useApp(s => s.latestScanMetadata);
+  const domainSafeScanResult = useApp(s => s.latestDomainSafeScanResult);
 
   React.useEffect(() => {
     setTab(initialTab);
   }, [initialTab]);
 
   const executions = useApp((s) => s.executions);
-  const exec = executions.find((e) => e.id === execId) ?? { id: execId || "", code: execId ? `DEMO-${execId.slice(0, 8).toUpperCase()}` : "—", status: "failed" as const, outcome: "inconclusive" as const, organizationId: "", organizationName: "", projectId: "", projectName: "", assetId: "", assetName: "Demo Asset", assetTargetMasked: "demo.target", authorizationId: "", authorizationCode: "", engagementId: "", engagementCode: "", templateId: "", templateName: "AI Proof-of-Risk Demo", riskTier: "moderate" as const, queuedAt: null, dispatchingAt: null, workerStartedAt: null, workerFinishedAt: null, scopeSnapshot: { allowedPaths: [], excludedPaths: [], allowedPorts: [], maxRiskTier: "moderate" as const, scopedAssets: [] }, safetySnapshot: { assetVerified: false, authorizationActive: false, engagementActive: false, scopeMatch: false, windowValid: false, killSwitchInactive: false, riskTierAllowed: false, credentialIssued: false, dispatchBackendAvailable: false, workerAuthModeReady: false }, steps: [], events: [], credential: { id: "", organizationId: "", executionId: "", allowedActions: [], issuedAt: "", expiresAt: "", revokedAt: null, state: "expired" as const, source: "per_execution" as const, fallbackEnabled: false }, dispatchMessage: { messageId: "", queueName: "", routingKey: "", envelopeSchemaVersion: "", payloadHash: "", publishStatus: "failed" as const, workerState: "idle" as const, lastHeartbeat: "" } };
+  const mockExec = { id: execId || "", code: execId ? `DEMO-${execId.slice(0, 8).toUpperCase()}` : "—", status: "failed" as const, outcome: "inconclusive" as const, organizationId: "", organizationName: "", projectId: "", projectName: "", assetId: "", assetName: "Demo Asset", assetTargetMasked: "demo.target", authorizationId: "", authorizationCode: "", engagementId: "", engagementCode: "", templateId: "", templateName: "AI Proof-of-Risk Demo", riskTier: "moderate" as const, queuedAt: null, dispatchingAt: null, workerStartedAt: null, workerFinishedAt: null, scopeSnapshot: { allowedPaths: [], excludedPaths: [], allowedPorts: [], maxRiskTier: "moderate" as const, scopedAssets: [] }, safetySnapshot: { assetVerified: false, authorizationActive: false, engagementActive: false, scopeMatch: false, windowValid: false, killSwitchInactive: false, riskTierAllowed: false, credentialIssued: false, dispatchBackendAvailable: false, workerAuthModeReady: false }, steps: [], events: [], credential: { id: "", organizationId: "", executionId: "", allowedActions: [], issuedAt: "", expiresAt: "", revokedAt: null, state: "expired" as const, source: "per_execution" as const, fallbackEnabled: false }, dispatchMessage: { messageId: "", queueName: "", routingKey: "", envelopeSchemaVersion: "", payloadHash: "", publishStatus: "failed" as const, workerState: "idle" as const, lastHeartbeat: "" } };
+  const exec = executions.find((e) => e.id === execId) ?? mockExec;
+
+  const isDomainScan = activeAnalysisSource === "domain_safe_scan" && scanMetadata;
+  
+  const displayId = isDomainScan ? scanMetadata.scan_id : exec.id;
+  const displayCode = isDomainScan ? scanMetadata.scan_id : exec.code;
+  const displayTarget = isDomainScan ? scanMetadata.domain : exec.assetTargetMasked;
+  const displayTemplate = isDomainScan ? "Domain Safe Scan" : exec.templateName;
+  const displayOrg = isDomainScan ? "Session" : exec.organizationName;
+  const displayProj = isDomainScan ? "Ad-hoc Scan" : exec.projectName;
 
   return (
     <>
@@ -56,40 +70,44 @@ export function ExecutionDetailPage() {
       <div className="pt-[76px] min-h-screen">
         <PageHeader
           breadcrumbs={[
-            { label: "Executions", onClick: () => go("execution_wizard") },
-            { label: exec.code },
+            { label: isDomainScan ? "Scans" : "Executions", onClick: () => go("execution_wizard") },
+            { label: displayCode },
           ]}
           title={
             <div className="flex items-center gap-3 flex-wrap">
-              <span className="ss-mono text-cyan-200">{exec.code}</span>
-              <StatusBadge status={exec.status} />
-              {exec.outcome && <OutcomeBadge outcome={exec.outcome} />}
-              <RiskTierBadge tier={exec.riskTier} />
+              <span className="ss-mono text-cyan-200">{displayCode}</span>
+              {isDomainScan && <Pill tone="cyan">Session Scan ID</Pill>}
+              {activeAnalysisSource === "demo_execution" && <Pill tone="amber">Demo Execution</Pill>}
+              <StatusBadge status={isDomainScan ? scanMetadata.status : exec.status} />
+              {!isDomainScan && exec.outcome && <OutcomeBadge outcome={exec.outcome} />}
+              {!isDomainScan && <RiskTierBadge tier={exec.riskTier} />}
             </div>
           }
           description={
             <span>
-              {exec.templateName} against <code className="ss-mono-xs text-cyan-200">{exec.assetTargetMasked}</code> · {exec.organizationName} / {exec.projectName}
+              {displayTemplate} against <code className="ss-mono-xs text-cyan-200">{displayTarget}</code> · {displayOrg} / {displayProj}
             </span>
           }
           right={
-            <>
-              <CyberButton size="sm" variant="ghost" onClick={() => openAsset(exec.assetId)}>
-                <Network className="w-3 h-3" /> Asset
-              </CyberButton>
-              <CyberButton size="sm" variant="ghost" onClick={() => openEngagement(exec.engagementId)}>
-                <Shield className="w-3 h-3" /> Engagement
-              </CyberButton>
-              <CyberButton size="sm" variant="amber" onClick={() => requestKillSwitch(exec.engagementId)}>
-                <Lock className="w-3 h-3" /> Halt
-              </CyberButton>
-            </>
+            !isDomainScan ? (
+              <>
+                <CyberButton size="sm" variant="ghost" onClick={() => openAsset(exec.assetId)}>
+                  <Network className="w-3 h-3" /> Asset
+                </CyberButton>
+                <CyberButton size="sm" variant="ghost" onClick={() => openEngagement(exec.engagementId)}>
+                  <Shield className="w-3 h-3" /> Engagement
+                </CyberButton>
+                <CyberButton size="sm" variant="amber" onClick={() => requestKillSwitch(exec.engagementId)}>
+                  <Lock className="w-3 h-3" /> Halt
+                </CyberButton>
+              </>
+            ) : null
           }
           meta={
             <>
-              <Pill tone="cyan"><Hash className="w-2.5 h-2.5" /> {exec.id}</Pill>
-              <Pill tone="slate">{exec.templateName}</Pill>
-              <Pill tone="slate"><Clock className="w-2.5 h-2.5" /> Queued {exec.queuedAt?.slice(11, 19) ?? "—"}</Pill>
+              <Pill tone="cyan"><Hash className="w-2.5 h-2.5" /> {displayId}</Pill>
+              <Pill tone="slate">{displayTemplate}</Pill>
+              {!isDomainScan && <Pill tone="slate"><Clock className="w-2.5 h-2.5" /> Queued {exec.queuedAt?.slice(11, 19) ?? "—"}</Pill>}
             </>
           }
         />
@@ -129,12 +147,12 @@ export function ExecutionDetailPage() {
         </div>
 
         <div className="px-4 lg:px-6 py-5">
-          {tab === "Overview" && <OverviewTab exec={exec} />}
-          {tab === "Scope" && <ScopeTab exec={exec} />}
-          {tab === "Safety" && <SafetyTab exec={exec} />}
-          {tab === "Steps" && <StepsTab exec={exec} />}
-          {tab === "Audit" && <AuditTab exec={exec} />}
-          {tab === "AI Proof-of-Risk" && <AiProofOfRiskTab exec={exec} />}
+          {tab === "Overview" && <OverviewTab exec={exec} isDomainScan={isDomainScan} scanMetadata={scanMetadata} domainSafeScanResult={domainSafeScanResult} />}
+          {tab === "Scope" && <ScopeTab exec={exec} isDomainScan={isDomainScan} />}
+          {tab === "Safety" && <SafetyTab exec={exec} isDomainScan={isDomainScan} />}
+          {tab === "Steps" && <StepsTab exec={exec} isDomainScan={isDomainScan} scanMetadata={scanMetadata} domainSafeScanResult={domainSafeScanResult} />}
+          {tab === "Audit" && <AuditTab exec={exec} isDomainScan={isDomainScan} scanMetadata={scanMetadata} />}
+          {tab === "AI Proof-of-Risk" && <AiProofOfRiskTab exec={exec} isDomainScan={isDomainScan} />}
         </div>
       </div>
     </>
@@ -142,7 +160,54 @@ export function ExecutionDetailPage() {
 }
 
 /* ---------------- Overview tab ---------------- */
-function OverviewTab({ exec }: { exec: ValidationExecution }) {
+function OverviewTab({ exec, isDomainScan, scanMetadata, domainSafeScanResult }: { exec: ValidationExecution, isDomainScan: boolean, scanMetadata: any, domainSafeScanResult: any }) {
+  if (isDomainScan) {
+    return (
+      <div className="grid lg:grid-cols-[1.5fr_1fr] gap-4">
+        <div className="space-y-4">
+          <div className="ss-panel p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <Terminal className="w-3.5 h-3.5 text-cyan-400" />
+              <span className="text-xs font-semibold text-slate-100">Domain Scan Summary</span>
+            </div>
+            <div className="space-y-2">
+              <AlertBanner
+                tone="success"
+                title="Outcome · Completed"
+              >
+                Scan completed successfully using Session Scan ID {scanMetadata.scan_id}. 
+                Found {scanMetadata.finding_count} missing headers.
+              </AlertBanner>
+            </div>
+          </div>
+        </div>
+        <div className="space-y-4">
+          <div className="ss-panel-raised">
+             <div className="px-4 py-2.5 border-b border-(--ss-hairline-strong) flex items-center justify-between">
+               <div className="flex items-center gap-2">
+                 <Cpu className="w-3.5 h-3.5 text-cyan-400" />
+                 <span className="text-xs font-semibold text-slate-100">Scan Inspector</span>
+               </div>
+               <Pill tone="cyan">Session</Pill>
+             </div>
+             <div className="p-4 space-y-3">
+               <div>
+                 <div className="ss-eyebrow mb-1.5">Scan Metadata</div>
+                 <div className="grid grid-cols-2 gap-x-4 gap-y-0">
+                   <KeyValue k="Session ID" v={scanMetadata.scan_id} mono />
+                   <KeyValue k="Correlation" v={scanMetadata.correlation_id} mono />
+                   <KeyValue k="Target" v={scanMetadata.domain} mono />
+                   <KeyValue k="Scheme" v={scanMetadata.scheme} mono />
+                   <KeyValue k="Type" v={scanMetadata.scan_type} />
+                 </div>
+               </div>
+             </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="grid lg:grid-cols-[1.5fr_1fr] gap-4">
       {/* Left: timeline + steps summary */}
@@ -309,7 +374,15 @@ function ExecutionInspector({ exec }: { exec: ValidationExecution }) {
 }
 
 /* ---------------- Scope tab ---------------- */
-function ScopeTab({ exec }: { exec: ValidationExecution }) {
+function ScopeTab({ exec, isDomainScan }: { exec: ValidationExecution, isDomainScan: boolean }) {
+  if (isDomainScan) {
+    return (
+      <div className="ss-panel-flat p-8 text-center">
+        <div className="ss-eyebrow mb-1">Session Scope (Ad-hoc)</div>
+        <p className="text-xs text-slate-500">Domain safe scan was authorized ad-hoc for this session. Persistent scope configuration does not apply.</p>
+      </div>
+    );
+  }
   return (
     <div className="grid lg:grid-cols-2 gap-4">
       <div className="ss-panel p-4">
@@ -381,7 +454,15 @@ function ScopeTab({ exec }: { exec: ValidationExecution }) {
 }
 
 /* ---------------- Safety tab ---------------- */
-function SafetyTab({ exec }: { exec: ValidationExecution }) {
+function SafetyTab({ exec, isDomainScan }: { exec: ValidationExecution, isDomainScan: boolean }) {
+  if (isDomainScan) {
+    return (
+      <div className="ss-panel-flat p-8 text-center">
+        <div className="ss-eyebrow mb-1">Session Safety</div>
+        <p className="text-xs text-slate-500">Domain safe scan is intrinsically safe (HTTP HEAD/GET only). It does not use kill switches or worker credentials.</p>
+      </div>
+    );
+  }
   const rows: { k: keyof typeof exec.safetySnapshot; label: string; blocking: boolean }[] = [
     { k: "assetVerified", label: "Asset verified", blocking: true },
     { k: "authorizationActive", label: "Authorization active", blocking: true },
@@ -427,7 +508,43 @@ function SafetyTab({ exec }: { exec: ValidationExecution }) {
 }
 
 /* ---------------- Steps tab ---------------- */
-function StepsTab({ exec }: { exec: ValidationExecution }) {
+function StepsTab({ exec, isDomainScan, scanMetadata, domainSafeScanResult }: { exec: ValidationExecution, isDomainScan: boolean, scanMetadata: any, domainSafeScanResult: any }) {
+  if (isDomainScan) {
+    return (
+      <div className="ss-panel p-4">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <FileCheck2 className="w-3.5 h-3.5 text-cyan-400" />
+            <span className="text-xs font-semibold text-slate-100">Manual Backend Steps</span>
+          </div>
+          <Pill tone="cyan">Session Scan</Pill>
+        </div>
+        <ol className="space-y-3">
+          <li className="ss-panel-flat p-3">
+            <div className="flex items-start gap-3">
+              <div className="shrink-0">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center justify-between gap-2 mb-1">
+                  <div>
+                    <span className="ss-mono-xs text-slate-500">step 1</span>
+                    <span className="text-xs font-medium text-slate-200 ml-2">HTTP Security Headers Scan</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <Pill tone="green">completed</Pill>
+                  </div>
+                </div>
+                <p className="text-[11px] text-slate-400 mb-2">Live HTTP headers fetched from {scanMetadata?.domain}</p>
+                <SecureCodeBlock label="Evidence preview" value={JSON.stringify(domainSafeScanResult?.scan_result, null, 2)} copyable hint="sanitized headers" />
+              </div>
+            </div>
+          </li>
+        </ol>
+      </div>
+    );
+  }
+
   if (exec.steps.length === 0) {
     return (
       <div className="ss-panel-flat p-8 text-center">
@@ -483,8 +600,31 @@ function StepsTab({ exec }: { exec: ValidationExecution }) {
 }
 
 /* ---------------- Audit tab ---------------- */
-function AuditTab({ exec }: { exec: ValidationExecution }) {
+function AuditTab({ exec, isDomainScan, scanMetadata }: { exec: ValidationExecution, isDomainScan: boolean, scanMetadata: any }) {
   const go = useApp((s) => s.go);
+
+  if (isDomainScan) {
+    return (
+      <div className="ss-panel p-4">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <Radio className="w-3.5 h-3.5 text-cyan-400" />
+            <span className="text-xs font-semibold text-slate-100">Session Audit</span>
+          </div>
+        </div>
+        <EventTimeline
+          events={[{
+            id: scanMetadata?.scan_id || "scan_1",
+            at: new Date().toISOString(),
+            kind: "scan_completed",
+            label: "Domain Scan Completed",
+            safeMeta: { domain: scanMetadata?.domain }
+          }]}
+        />
+      </div>
+    );
+  }
+
   // Build a synthetic audit view focused on this execution
   const events = exec.events.map((e) => ({
     id: e.id,

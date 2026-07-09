@@ -18,6 +18,10 @@ KNOWN_FINDING_TYPES: frozenset[str] = frozenset(
         "insecure_cookie_flags",
         "permissive_cors",
         "missing_hsts",
+        "missing_referrer_policy",
+        "missing_permissions_policy",
+        "missing_x_content_type_options",
+        "missing_security_header",
     }
 )
 
