@@ -16,15 +16,16 @@ import {
   Workflow,
 } from "lucide-react";
 import { useApp } from "@/lib/securescope/store";
-import { dispatchQueues, workers } from "@/lib/securescope/data";
 import { Pill, StatusBadge } from "../shared/badges";
-import { AlertBanner, EmptyState, KeyValue, MaskedField } from "../shared/ui";
+import { EmptyState, KeyValue, MaskedField } from "../shared/ui";
 import { EventTimeline, SecureCodeBlock } from "../shared/lifecycle";
 import { TopNavCommandBar, PageHeader } from "../shell/TopNav";
 
 export function WorkersPage() {
   const openExecution = useApp((s) => s.openExecution);
   const executions = useApp((s) => s.executions);
+  const workers = useApp((s) => s.workers);
+  const dispatchQueues = useApp((s) => s.dispatchQueues);
 
   return (
     <>
@@ -108,14 +109,17 @@ export function WorkersPage() {
                   <Pill tone="green">online</Pill>
                 </div>
                 <div className="space-y-2">
-                  {dispatchQueues.map((q, i) => (
+                  {dispatchQueues.length === 0 ? (
+                    <EmptyState title="No queue data" icon={<ServerCog className="w-5 h-5" />} />
+                  ) : (
+                    dispatchQueues.map((q, i) => (
                     <div key={i} className="ss-panel-flat p-3">
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2">
-                          <code className="ss-mono-xs text-cyan-200">{q.queueName}</code>
-                          <Pill tone="slate">{q.routingKey}</Pill>
+                          <code className="ss-mono-xs text-cyan-200">{q.queue_name}</code>
+                          <Pill tone="slate">{q.routing_key}</Pill>
                         </div>
-                        <Pill tone={q.brokerStatus === "online" ? "green" : "red"}>{q.brokerStatus}</Pill>
+                        <Pill tone={q.broker_status === "online" ? "green" : "red"}>{q.broker_status}</Pill>
                       </div>
                       <div className="grid grid-cols-3 gap-2">
                         <div>
@@ -132,7 +136,8 @@ export function WorkersPage() {
                         </div>
                       </div>
                     </div>
-                  ))}
+                    ))
+                  )}
                 </div>
                 <MaskedField
                   label="Broker URL"
@@ -163,9 +168,12 @@ export function WorkersPage() {
                       </tr>
                     </thead>
                     <tbody>
-                      {workers.map((w) => (
-                        <tr key={w.workerId} className={cn("border-t border-(--ss-hairline)", w.state === "running" && "bg-cyan-500/5")}>
-                          <td className="px-3 py-2.5"><code className="ss-mono-xs text-cyan-200">{w.workerId}</code></td>
+                      {workers.length === 0 ? (
+                        <tr><td colSpan={5} className="px-3 py-4 text-center text-slate-500 text-xs">No workers registered</td></tr>
+                      ) : (
+                        workers.map((w) => (
+                        <tr key={w.worker_id} className={cn("border-t border-(--ss-hairline)", w.state === "running" && "bg-cyan-500/5")}>
+                          <td className="px-3 py-2.5"><code className="ss-mono-xs text-cyan-200">{w.worker_id}</code></td>
                           <td className="px-3 py-2.5 ss-mono-xs text-slate-400">{w.region}</td>
                           <td className="px-3 py-2.5">
                             <Pill tone={w.state === "running" ? "cyan" : w.state === "idle" ? "slate" : w.state === "finished" ? "green" : "red"}>
@@ -174,20 +182,21 @@ export function WorkersPage() {
                             </Pill>
                           </td>
                           <td className="px-3 py-2.5">
-                            {w.currentExecutionId ? (
+                            {w.current_execution_id ? (
                               <button onClick={() => {
-                                const exec = executions.find((e) => e.code === w.currentExecutionId);
+                                const exec = executions.find((e) => e.id === w.current_execution_id || e.code === w.current_execution_id);
                                 if (exec) openExecution(exec.id);
                               }} className="ss-mono-xs text-cyan-200 hover:underline">
-                                {w.currentExecutionId}
+                                {w.current_execution_id}
                               </button>
                             ) : (
                               <span className="text-slate-600">—</span>
                             )}
                           </td>
-                          <td className="px-3 py-2.5 ss-mono-xs text-slate-500">{w.lastHeartbeat === "—" ? "—" : w.lastHeartbeat.slice(11, 19)}</td>
+                          <td className="px-3 py-2.5 ss-mono-xs text-slate-500">{w.last_heartbeat ? w.last_heartbeat.slice(11, 19) : "—"}</td>
                         </tr>
-                      ))}
+                        ))
+                      )}
                     </tbody>
                   </table>
                 </div>
@@ -254,13 +263,13 @@ export function WorkersPage() {
                 <Activity className="w-3.5 h-3.5 text-cyan-400" />
                 <span className="text-xs font-semibold text-slate-100">Worker event timeline</span>
               </div>
-              <EventTimeline events={[
-                { id: "wt1", at: "2026-07-02T07:01:48Z", kind: "worker_started", label: "Heartbeat from wkr-eu-1-a07", safeMeta: { region: "eu-1", exec: "EXEC-2026-0702-002" } },
-                { id: "wt2", at: "2026-07-02T06:58:00Z", kind: "blocked_by_control", label: "Kill switch armed on ENG-CBV-001", safeMeta: { affected: "EXEC-2026-0702-002" } },
-                { id: "wt3", at: "2026-07-02T06:45:02Z", kind: "worker_started", label: "Worker started", safeMeta: { worker_id: "wkr-eu-1-a07", exec: "EXEC-2026-0702-002" } },
-                { id: "wt4", at: "2026-07-02T06:42:11Z", kind: "worker_finished", label: "Worker finished", safeMeta: { worker_id: "wkr-eu-1-d05", exec: "EXEC-2026-0702-003", outcome: "validated" } },
-                { id: "wt5", at: "2026-07-02T06:42:12Z", kind: "credential_revoked", label: "Credential revoked", safeMeta: { reason: "execution_finished" } },
-              ]} />
+              {(() => {
+                const exec = executions.find((e) => e.status === "executing");
+                if (!exec || exec.events.length === 0) {
+                  return <EmptyState title="No worker events" icon={<Activity className="w-5 h-5" />} />;
+                }
+                return <EventTimeline events={exec.events} />;
+              })()}
             </div>
 
             <div className="ss-panel p-4">
@@ -268,30 +277,31 @@ export function WorkersPage() {
                 <Shield className="w-3.5 h-3.5 text-amber-400" />
                 <span className="text-xs font-semibold text-slate-100">Failed dispatch alerts</span>
               </div>
-              <AlertBanner tone="warning" title="1 dispatch in dead-letter queue">
-                <code className="ss-mono-xs">msg_9c4d11</code> routed to <code className="ss-mono-xs">securescope.deadletter.v1</code> after kill switch activation. Manual requeue required.
-              </AlertBanner>
-              <div className="mt-3 ss-panel-flat p-3">
-                <div className="ss-eyebrow mb-1.5">Dispatch outcomes (24h)</div>
-                <div className="grid grid-cols-4 gap-2 text-center">
-                  <div>
-                    <div className="text-lg font-semibold tnum text-emerald-300">2</div>
-                    <div className="ss-eyebrow">published</div>
-                  </div>
-                  <div>
-                    <div className="text-lg font-semibold tnum text-cyan-300">1</div>
-                    <div className="ss-eyebrow">consumed</div>
-                  </div>
-                  <div>
-                    <div className="text-lg font-semibold tnum text-amber-300">1</div>
-                    <div className="ss-eyebrow">dead-lettered</div>
-                  </div>
-                  <div>
-                    <div className="text-lg font-semibold tnum text-slate-400">0</div>
-                    <div className="ss-eyebrow">lost</div>
+              {dispatchQueues.length === 0 ? (
+                <EmptyState title="No dispatch data" icon={<Shield className="w-5 h-5" />} />
+              ) : (
+                <div className="mt-3 ss-panel-flat p-3">
+                  <div className="ss-eyebrow mb-1.5">Dispatch outcomes (24h)</div>
+                  <div className="grid grid-cols-4 gap-2 text-center">
+                    <div>
+                      <div className="text-lg font-semibold tnum text-emerald-300">{(dispatchQueues[0].active ?? 0) + (dispatchQueues[0].pending ?? 0)}</div>
+                      <div className="ss-eyebrow">published</div>
+                    </div>
+                    <div>
+                      <div className="text-lg font-semibold tnum text-cyan-300">{dispatchQueues[0].active ?? 0}</div>
+                      <div className="ss-eyebrow">consumed</div>
+                    </div>
+                    <div>
+                      <div className="text-lg font-semibold tnum text-amber-300">{dispatchQueues[0].failed ?? 0}</div>
+                      <div className="ss-eyebrow">dead-lettered</div>
+                    </div>
+                    <div>
+                      <div className="text-lg font-semibold tnum text-slate-400">0</div>
+                      <div className="ss-eyebrow">lost</div>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </div>

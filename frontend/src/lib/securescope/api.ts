@@ -350,3 +350,23 @@ export async function cancelExecution(orgId: string, execId: string): Promise<an
     headers: { "X-Organization-Id": orgId },
   });
 }
+
+// 7. Audit Events
+export async function fetchAuditEvents(orgId: string, limit = 100): Promise<any[]> {
+  return request(`/api/v1/audit-events?limit=${limit}`, {
+    headers: { "X-Organization-Id": orgId },
+  });
+}
+
+// 8. Workers & Dispatch Queues
+export async function fetchWorkers(orgId: string): Promise<any[]> {
+  return request("/api/v1/workers", {
+    headers: { "X-Organization-Id": orgId },
+  });
+}
+
+export async function fetchDispatchQueues(orgId: string): Promise<any[]> {
+  return request("/api/v1/dispatch-queues", {
+    headers: { "X-Organization-Id": orgId },
+  });
+}

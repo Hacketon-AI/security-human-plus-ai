@@ -124,7 +124,9 @@ export function AuditPage() {
                 <Pill tone="slate">newest first</Pill>
               </div>
             </div>
-            {filtered.length === 0 ? (
+            {auditEvents.length === 0 ? (
+              <EmptyState eyebrow="No events" title="No audit events yet" icon={<Activity className="w-5 h-5" />} />
+            ) : filtered.length === 0 ? (
               <EmptyState eyebrow="No matches" title="No events match your filters" icon={<Filter className="w-5 h-5" />} />
             ) : (
               <ul className="divide-y divide-(--ss-hairline)">
@@ -163,10 +165,7 @@ export function AuditPage() {
                             {e.executionId && (
                               <button
                                 onClick={() => {
-                                  const exec = auditEvents.length;
-                                  // try to find the execution by id from data — fallback to dashboard
-                                  void exec;
-                                  openExecution("exec_002");
+                                  if (e.executionId) openExecution(e.executionId);
                                 }}
                                 className="ss-mono-xs text-cyan-300 hover:underline"
                               >

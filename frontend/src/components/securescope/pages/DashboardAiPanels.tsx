@@ -70,7 +70,7 @@ export function AiProofOfRiskCommandStrip() {
   ];
 
   return (
-    <div className="border-b border-(--ss-hairline-strong) bg-[#050810]/80 sticky top-[60px] z-10 backdrop-blur-md">
+    <div className="border-b border-(--ss-hairline-strong) bg-[#050810]/80 sticky top-(--ss-topnav-height) z-10 backdrop-blur-md">
       <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 divide-x divide-(--ss-hairline)">
         {items.map((it) => (
           <div key={it.label} className="p-3 px-4 relative group overflow-hidden">
@@ -143,7 +143,7 @@ export function AiProofOfRiskWorkflowRail() {
           <BrainCircuit className="w-4 h-4 text-cyan-400" />
           <h2 className="text-sm font-semibold text-slate-100">AI Proof-of-Risk Workflow Pipeline</h2>
         </div>
-        <CyberButton size="sm" variant="primary" onClick={runDemo}>
+        <CyberButton size="sm" variant="primary" onClick={() => runDemo()}>
           <Play className="w-3 h-3 mr-1.5" /> Run AI Proof-of-Risk Demo
         </CyberButton>
       </div>
@@ -151,7 +151,7 @@ export function AiProofOfRiskWorkflowRail() {
         {stages.map((stage, idx) => (
           <React.Fragment key={stage.label}>
             <button 
-              onClick={runDemo}
+              onClick={() => runDemo()}
               className="flex flex-col items-center group text-center w-28 hover:bg-(--ss-surface-2) p-2 rounded transition-colors border border-transparent hover:border-(--ss-hairline)"
             >
               <div className="w-8 h-8 rounded-full bg-(--ss-surface-2) border border-cyan-500/30 flex items-center justify-center mb-2 group-hover:bg-cyan-900/30 group-hover:border-cyan-500 transition-colors">
@@ -492,16 +492,15 @@ export function AuthorizedDomainScanPanel() {
             </div>
 
             <label className="flex items-start gap-2 mt-2 cursor-pointer group">
-              <div className="relative flex items-center justify-center mt-0.5">
+              <div className="relative w-4 h-4 mt-0.5">
                 <input 
                   type="checkbox" 
                   checked={authorized}
                   onChange={(e) => setAuthorized(e.target.checked)}
                   className="peer sr-only"
                 />
-                <div className="w-4 h-4 rounded border border-slate-600 bg-(--ss-surface-1) peer-checked:bg-indigo-500 peer-checked:border-indigo-500 transition-colors flex items-center justify-center">
-                  <CheckCircle2 className="w-3 h-3 text-white opacity-0 peer-checked:opacity-100 transition-opacity" />
-                </div>
+                <div className="w-4 h-4 rounded border border-slate-600 bg-(--ss-surface-1) peer-checked:bg-indigo-500 peer-checked:border-indigo-500 transition-colors" />
+                <CheckCircle2 className="absolute inset-0 w-3 h-3 m-auto text-white opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none" />
               </div>
               <span className="text-xs text-slate-400 group-hover:text-slate-300 leading-tight transition-colors">
                 I confirm I own this domain or have written permission to test it.

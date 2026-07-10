@@ -51,6 +51,7 @@
 
 :root {
   --radius: 0.375rem; /* sharp technical corners */
+  --ss-topnav-height: 76px; /* TopNav rendered height — used by sticky children */
 
   /* Base surfaces — near-black, graphite, blue-black */
   --background: #060912;          /* deep void */

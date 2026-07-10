@@ -31,7 +31,9 @@ from app.modules.projects.router import router as projects_router
 from app.modules.validation_executions.router import (
     router as validation_executions_router,
 )
+from app.modules.audit_events.router import router as audit_events_router
 from app.modules.domain_safe_scan.router import router as domain_safe_scan_router
+from app.modules.workers.router import router as workers_router
 from app.platform import health
 from app.platform.database import create_engine, create_session_factory
 from app.platform.error_handlers import install_error_handlers
@@ -143,4 +145,6 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(validation_executions_router)
     app.include_router(ai_proof_of_risk_router)
     app.include_router(domain_safe_scan_router)
+    app.include_router(audit_events_router)
+    app.include_router(workers_router)
     return app

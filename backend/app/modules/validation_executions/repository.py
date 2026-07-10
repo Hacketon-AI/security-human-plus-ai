@@ -97,6 +97,20 @@ class ValidationExecutionRepository:
         )
         return result.scalar_one_or_none()
 
+    async def list_for_org(
+        self,
+        org_id: UUID,
+        statuses: list[ExecutionStatus] | None = None,
+    ) -> Sequence[ValidationExecution]:
+        stmt = select(ValidationExecution).where(
+            ValidationExecution.organization_id == org_id,
+        )
+        if statuses:
+            stmt = stmt.where(ValidationExecution.status.in_(statuses))
+        stmt = stmt.order_by(ValidationExecution.created_at.desc())
+        result = await self._session.execute(stmt)
+        return result.scalars().all()
+
     async def list_for_project(
         self, project_id: UUID, organization_id: UUID
     ) -> Sequence[ValidationExecution]:

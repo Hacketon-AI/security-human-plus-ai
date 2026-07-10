@@ -16,7 +16,6 @@ import type {
   RiskTier,
   AuditEvent,
 } from "./types";
-import { auditEvents as mockAuditEvents } from "./data";
 import * as api from "./api";
 
 interface AppState {
@@ -39,6 +38,8 @@ interface AppState {
   engagements: Engagement[];
   executions: ValidationExecution[];
   auditEvents: AuditEvent[];
+  workers: any[];
+  dispatchQueues: any[];
 
   isLoading: boolean;
   error: string | null;
@@ -60,7 +61,7 @@ interface AppState {
   openAsset: (id: string) => void;
   openAuthorization: (id: string) => void;
   openEngagement: (id: string) => void;
-  openExecution: (id: string) => void;
+  openExecution: (id: string, tab?: string) => void;
   openInspector: (id: string | null) => void;
   requestKillSwitch: (engagementId: string | null) => void;
   login: () => void;
@@ -160,7 +161,9 @@ export const useApp = create<AppState>((set, get) => ({
   authorizations: [],
   engagements: [],
   executions: [],
-  auditEvents: mockAuditEvents,
+  auditEvents: [],
+  workers: [],
+  dispatchQueues: [],
 
   latestAiProofOfRiskAnalysis: null,
   latestAiProofOfRiskExecutionId: null,
@@ -211,6 +214,8 @@ export const useApp = create<AppState>((set, get) => ({
       authorizations: [],
       engagements: [],
       executions: [],
+      workers: [],
+      dispatchQueues: [],
       latestAiProofOfRiskAnalysis: null,
       latestAiProofOfRiskExecutionId: null,
       aiProofOfRiskLastRunAt: null,
@@ -516,6 +521,25 @@ export const useApp = create<AppState>((set, get) => ({
         };
       });
 
+      // Fetch audit events, workers, and dispatch queues
+      const [rawAuditEvents, rawWorkers, rawQueues] = await Promise.all([
+        api.fetchAuditEvents(orgId, 100).catch(() => []),
+        api.fetchWorkers(orgId).catch(() => []),
+        api.fetchDispatchQueues(orgId).catch(() => []),
+      ]);
+
+      const auditEvents: AuditEvent[] = rawAuditEvents.map((e: any) => ({
+        id: e.id,
+        at: e.at,
+        actor: e.actor,
+        actorType: e.actor_type,
+        action: e.action,
+        entityType: e.entity_type,
+        entityId: e.entity_id,
+        executionId: e.execution_id ?? null,
+        safeMetadata: e.safe_metadata ?? {},
+      }));
+
       set({
         assets,
         projects: projectsUpdated,
@@ -523,6 +547,9 @@ export const useApp = create<AppState>((set, get) => ({
         engagements: allEngs,
         executions: allExecs,
         organizations: orgsUpdated,
+        auditEvents,
+        workers: rawWorkers,
+        dispatchQueues: rawQueues,
         demoWorkspaceMode: "full"
       });
     } catch (e: any) {
@@ -541,21 +568,8 @@ export const useApp = create<AppState>((set, get) => ({
       await api.createOrganization({ name, slug });
       await get().initData();
     } catch (e: any) {
-      // If backend provisioning is not available, create a local demo organization
-      const demoId = `demo-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
-      const demoOrg = {
-        id: demoId,
-        name,
-        code: (slug || name).toUpperCase().replace(/\s+/g, '-').slice(0, 8),
-        status: 'healthy' as const,
-        projectsCount: 0,
-        verifiedAssets: 0,
-        activeEngagements: 0,
-        latestExecutionState: 'succeeded' as const,
-        latestExecutionId: '',
-        lastActivity: new Date().toISOString(),
-      };
-      set({ organizations: [...get().organizations, demoOrg] });
+      set({ error: e.message ?? "Failed to create organization" });
+      throw e;
     }
   },
 

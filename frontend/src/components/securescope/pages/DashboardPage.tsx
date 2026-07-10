@@ -21,6 +21,7 @@ import {
   BrainCircuit,
 } from "lucide-react";
 import { useApp } from "@/lib/securescope/store";
+import { computeRiskMatrix } from "@/lib/securescope/computeRiskMatrix";
 // Mock imports removed
 import { KpiCell, SectionHeader, StatusBadge, OutcomeBadge, RiskTierBadge, Pill } from "../shared/badges";
 import { AlertBanner, CyberButton, EmptyState, KeyValue } from "../shared/ui";
@@ -31,16 +32,72 @@ import { TopNavCommandBar } from "../shell/TopNav";
 // DispatchStatusStrip — full-width command strip
 // ============================================================
 
-function DispatchStatusStrip() {
+function relativeTime(iso: string): string {
+  const diffMs = Date.now() - new Date(iso).getTime();
+  if (diffMs < 0) return "just now";
+  const secs = Math.floor(diffMs / 1000);
+  if (secs < 60) return `${secs}s ago`;
+  const mins = Math.floor(secs / 60);
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  return `${Math.floor(hrs / 24)}d ago`;
+}
+
+export function DispatchStatusStrip() {
+  const executions = useApp((s) => s.executions);
+  const auditEvents = useApp((s) => s.auditEvents);
+  const engagements = useApp((s) => s.engagements);
+
+  const killSwitchActive = engagements.some((e) => e.killSwitch.state !== "inactive");
+  const runningCount = executions.filter((e) => e.status === "executing").length;
+
+  const cutoff = Date.now() - 24 * 60 * 60 * 1000;
+  const failedCount = executions.filter(
+    (e) =>
+      (e.status === "failed" || e.outcome === "failed_safely") &&
+      e.queuedAt != null &&
+      new Date(e.queuedAt).getTime() >= cutoff
+  ).length;
+  const blockedCount = executions.filter(
+    (e) =>
+      (e.status === "blocked" || e.outcome === "blocked_by_control") &&
+      e.queuedAt != null &&
+      new Date(e.queuedAt).getTime() >= cutoff
+  ).length;
+
+  const lastEvent = auditEvents[0];
+  const lastEventValue = lastEvent ? relativeTime(lastEvent.at) : "—";
+
   const items = [
     { label: "Environment", value: "Staging", tone: "amber" as const, hint: "Pre-prod mirror" },
     { label: "Dispatch Backend", value: "Celery", tone: "green" as const, hint: "online · eu-1" },
     { label: "Worker Auth Mode", value: "Per-execution", tone: "cyan" as const, hint: "credential" },
     { label: "Shared-token Fallback", value: "Disabled", tone: "default" as const, hint: "policy" },
-    { label: "Global Kill Switch", value: "Inactive", tone: "green" as const, hint: "armed: 1 engagement" },
-    { label: "Running Executions", value: "1", tone: "cyan" as const, hint: "EXEC-2026-0702-002" },
-    { label: "Failed / Blocked (24h)", value: "1 / 1", tone: "red" as const, hint: "see audit trail" },
-    { label: "Last Dispatch Event", value: "00:13s ago", tone: "blue" as const, hint: "worker heartbeat" },
+    {
+      label: "Global Kill Switch",
+      value: killSwitchActive ? "Active" : "Inactive",
+      tone: (killSwitchActive ? "red" : "green") as "red" | "green",
+      hint: killSwitchActive ? "kill switch engaged" : "no kill switch",
+    },
+    {
+      label: "Running Executions",
+      value: String(runningCount),
+      tone: (runningCount > 0 ? "cyan" : "default") as "cyan" | "default",
+      hint: runningCount > 0 ? `${runningCount} live` : "none active",
+    },
+    {
+      label: "Failed / Blocked (24h)",
+      value: `${failedCount} / ${blockedCount}`,
+      tone: (failedCount > 0 || blockedCount > 0 ? "red" : "default") as "red" | "default",
+      hint: "see audit trail",
+    },
+    {
+      label: "Last Dispatch Event",
+      value: lastEventValue,
+      tone: "blue" as const,
+      hint: lastEvent ? lastEvent.action : "no events",
+    },
   ];
   return (
     <div className="border-b border-(--ss-hairline-strong) bg-[#050810]/60">
@@ -105,7 +162,7 @@ function PipelineNodeCard({ node, onClick }: { node: PipelineNode; onClick?: () 
   );
 }
 
-function ValidationOperationsMap() {
+export function ValidationOperationsMap() {
   const go = useApp((s) => s.go);
   const openAsset = useApp((s) => s.openAsset);
   const openExecution = useApp((s) => s.openExecution);
@@ -149,34 +206,45 @@ function ValidationOperationsMap() {
         </div>
       </div>
 
-      <div className="relative">
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2">
+      <div>
+        {/* Small / medium viewport: 2–3 column grid, no arrows */}
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-2 lg:hidden">
+          {nodes.map((n) => (
+            <PipelineNodeCard
+              key={n.key}
+              node={n}
+              onClick={() => {
+                if (n.key === "assets") go("assets");
+                else if (n.key === "auths") go("authorizations");
+                else if (n.key === "engagements") go("engagements");
+                else if (n.key === "queued" || n.key === "executing" || n.key === "finished") go("execution_wizard");
+              }}
+            />
+          ))}
+        </div>
+
+        {/* Large+ viewport: flex row with interleaved arrows */}
+        <div className="hidden lg:flex items-center gap-0">
           {nodes.map((n, i) => (
             <React.Fragment key={n.key}>
-              <PipelineNodeCard
-                node={n}
-                onClick={() => {
-                  if (n.key === "assets") go("assets");
-                  else if (n.key === "auths") go("authorizations");
-                  else if (n.key === "engagements") go("engagements");
-                  else if (n.key === "queued" || n.key === "executing" || n.key === "finished") go("execution_wizard");
-                }}
-              />
-              {i < nodes.length - 1 && (
-                <div
-                  className="hidden lg:flex absolute items-center justify-center pointer-events-none"
-                  style={{
-                    left: `${((i + 1) / nodes.length) * 100}%`,
-                    top: "50%",
-                    transform: "translate(-50%, -50%)",
+              <div className="flex-1 min-w-0">
+                <PipelineNodeCard
+                  node={n}
+                  onClick={() => {
+                    if (n.key === "assets") go("assets");
+                    else if (n.key === "auths") go("authorizations");
+                    else if (n.key === "engagements") go("engagements");
+                    else if (n.key === "queued" || n.key === "executing" || n.key === "finished") go("execution_wizard");
                   }}
-                >
-                  <ArrowRight className="w-3 h-3 text-cyan-500/50" />
-                </div>
+                />
+              </div>
+              {i < nodes.length - 1 && (
+                <ArrowRight className="w-3 h-3 text-cyan-500/50 shrink-0 mx-1" />
               )}
             </React.Fragment>
           ))}
         </div>
+
         {/* connecting flow line */}
         <div className="hidden lg:block mt-3 h-px relative overflow-hidden">
           <div className="absolute inset-0 bg-(--ss-hairline)" />
@@ -203,74 +271,8 @@ function ValidationOperationsMap() {
 // ActivityRail — right-side live event rail
 // ============================================================
 
-function ActivityRail() {
-  const openExecution = useApp((s) => s.openExecution);
-  const openEngagement = useApp((s) => s.openEngagement);
-  const executions = useApp((s) => s.executions);
-
-  const events = [
-    {
-      id: "ar1",
-      kind: "worker_started",
-      tone: "cyan" as const,
-      title: "Worker started",
-      detail: "EXEC-2026-0702-002 · eu-1",
-      at: "00:13s ago",
-      target: "exec_002",
-    },
-    {
-      id: "ar2",
-      kind: "blocked_by_control",
-      tone: "amber" as const,
-      title: "Kill switch armed",
-      detail: "ENG-CBV-001 · by r.varga",
-      at: "3m ago",
-      target: "eng_002",
-    },
-    {
-      id: "ar3",
-      kind: "worker_finished",
-      tone: "green" as const,
-      title: "Execution validated",
-      detail: "EXEC-2026-0702-003 · 6/6 steps",
-      at: "20m ago",
-      target: "exec_003",
-    },
-    {
-      id: "ar4",
-      kind: "credential_revoked",
-      tone: "slate" as const,
-      title: "Credential revoked",
-      detail: "EXEC-2026-0702-003 · execution_finished",
-      at: "20m ago",
-      target: "exec_003",
-    },
-    {
-      id: "ar5",
-      kind: "failed_safely",
-      tone: "red" as const,
-      title: "Execution failed safely",
-      detail: "EXEC-2026-0701-014 · 2 missing headers",
-      at: "8h ago",
-      target: "exec_prev_1",
-    },
-    {
-      id: "ar6",
-      kind: "auth_expiry_warning",
-      tone: "amber" as const,
-      title: "Authorization expiry",
-      detail: "AUTH-CBV-001 · expires in 3d",
-      at: "1h ago",
-    },
-  ];
-
-  const toneDot = {
-    cyan: "bg-cyan-400",
-    green: "bg-emerald-400",
-    amber: "bg-amber-400",
-    red: "bg-red-400",
-    slate: "bg-slate-500",
-  };
+export function ActivityRail() {
+  const auditEvents = useApp((s) => s.auditEvents).slice(0, 6);
 
   return (
     <div className="ss-panel flex flex-col h-full">
@@ -285,34 +287,33 @@ function ActivityRail() {
         </Pill>
       </div>
       <div className="flex-1 overflow-y-auto ss-scroll p-2">
-        <ul className="space-y-1">
-          {events.map((e) => (
-            <li key={e.id}>
-              <button
-                onClick={() => {
-                  if (e.target?.startsWith("exec_")) {
-                    const exec = executions.find((x) => x.id === e.target);
-                    if (exec) openExecution(exec.id);
-                  } else if (e.target?.startsWith("eng_")) {
-                    openEngagement(e.target);
-                  }
-                }}
-                className="w-full text-left p-2 rounded-sm border border-transparent hover:border-(--ss-hairline-strong) hover:bg-(--ss-surface-3)/40 transition-colors"
-              >
-                <div className="flex items-start gap-2">
-                  <span className={cn("mt-1 w-1.5 h-1.5 rounded-full shrink-0", toneDot[e.tone], e.tone === "cyan" && "ss-pulse-cyan")} />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="text-[11px] font-medium text-slate-200 truncate">{e.title}</span>
-                      <span className="ss-mono-xs text-slate-500 shrink-0">{e.at}</span>
+        {auditEvents.length === 0 ? (
+          <EmptyState
+            eyebrow="Activity Rail"
+            title="No recent activity."
+            description="Audit events will appear here as operations occur."
+            icon={<Radio className="w-6 h-6" />}
+          />
+        ) : (
+          <ul className="space-y-1">
+            {auditEvents.map((e) => (
+              <li key={e.id}>
+                <div className="w-full text-left p-2 rounded-sm border border-transparent hover:border-(--ss-hairline-strong) hover:bg-(--ss-surface-3)/40 transition-colors">
+                  <div className="flex items-start gap-2">
+                    <span className="mt-1 w-1.5 h-1.5 rounded-full shrink-0 bg-cyan-400" />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-[11px] font-medium text-slate-200 truncate">{e.action}</span>
+                        <span className="ss-mono-xs text-slate-500 shrink-0">{e.at}</span>
+                      </div>
+                      <div className="text-[10px] text-slate-500 mt-0.5 ss-mono-xs truncate">{e.entityId}</div>
                     </div>
-                    <div className="text-[10px] text-slate-500 mt-0.5 ss-mono-xs truncate">{e.detail}</div>
                   </div>
                 </div>
-              </button>
-            </li>
-          ))}
-        </ul>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
       <div className="px-3 py-2 border-t border-(--ss-hairline-strong)">
         <button
@@ -449,12 +450,15 @@ function RiskDistributionMatrix() {
   // simple matrix: rows = risk tiers, cols = outcome states
   const rows = ["critical", "high", "moderate", "low"] as const;
   const cols = ["validated", "failed_safely", "blocked_by_control", "inconclusive"] as const;
-  const matrix: Record<string, Record<string, number>> = {
-    critical: { validated: 0, failed_safely: 0, blocked_by_control: 0, inconclusive: 0 },
-    high: { validated: 1, failed_safely: 0, blocked_by_control: 0, inconclusive: 0 },
-    moderate: { validated: 0, failed_safely: 0, blocked_by_control: 0, inconclusive: 0 },
-    low: { validated: 0, failed_safely: 1, blocked_by_control: 1, inconclusive: 0 },
-  };
+  const executions = useApp((s) => s.executions);
+  const computed = computeRiskMatrix(executions);
+  // Zero-fill missing cells at render time
+  const matrix: Record<string, Record<string, number>> = Object.fromEntries(
+    rows.map((r) => [
+      r,
+      Object.fromEntries(cols.map((c) => [c, computed[r]?.[c] ?? 0])),
+    ])
+  );
   return (
     <div className="ss-panel p-4">
       <SectionHeader
@@ -501,7 +505,8 @@ function RiskDistributionMatrix() {
         </table>
       </div>
       <div className="mt-2 text-[10px] text-slate-500">
-        <span className="ss-mono-xs">2 executions</span> resolved in the last 24h across <span className="ss-mono-xs">3 risk tiers</span>.
+        <span className="ss-mono-xs">{executions.length} execution{executions.length !== 1 ? "s" : ""}</span> resolved across{" "}
+        <span className="ss-mono-xs">{Object.keys(computed).length} risk tier{Object.keys(computed).length !== 1 ? "s" : ""}</span>.
       </div>
     </div>
   );
