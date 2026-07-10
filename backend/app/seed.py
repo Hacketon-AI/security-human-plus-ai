@@ -1,4 +1,4 @@
-"""Demo seed data — realistic Indonesian fintech & enterprise security scenarios.
+﻿"""Demo seed data — realistic Indonesian fintech & enterprise security scenarios.
 
 Three client organizations, each with real-looking projects, assets, active
 authorizations, engagements running right now, and a mix of completed, in-progress,
@@ -71,19 +71,19 @@ async def run_seed():
         print("Seeding organizations...")
 
         org1 = Organization(
-            id=UUID("00000000-0000-0000-0000-000000000001"),
+            id=UUID("a3f7c2d1-8b4e-4f9a-b6c3-2e1d5f8a9b0c"),
             name="BRI Ventures Digital",
             slug="bri-ventures",
             status=OrganizationStatus.active,
         )
         org2 = Organization(
-            id=UUID("00000000-0000-0000-0000-000000000002"),
+            id=UUID("b8e4d6f2-1c7a-4e2b-9d5f-3a0c8e7b4d1f"),
             name="Telkom Sigma Cloud",
             slug="telkom-sigma",
             status=OrganizationStatus.active,
         )
         org3 = Organization(
-            id=UUID("00000000-0000-0000-0000-000000000003"),
+            id=UUID("c1d9e5a3-4f2b-4c8d-a7e1-6b3d0f9c2e5a"),
             name="Mandiri Sekuritas",
             slug="mandiri-sek",
             status=OrganizationStatus.active,
@@ -99,7 +99,7 @@ async def run_seed():
 
         # BRI Ventures — two projects: consumer lending API and OJK compliance
         p1 = Project(
-            id=UUID("00000000-0000-0000-0000-000000000011"),
+            id=UUID("d4b7f1e8-2a5c-4d9b-8f3e-1c6a0d5e7b2f"),
             organization_id=org1.id,
             name="Pinjamanku Lending API",
             slug="pinjamanku-api",
@@ -110,7 +110,7 @@ async def run_seed():
             status=ProjectStatus.active,
         )
         p2 = Project(
-            id=UUID("00000000-0000-0000-0000-000000000012"),
+            id=UUID("e6c3a9d5-7f1b-4e8c-b2d4-9a0e3f6c1b8d"),
             organization_id=org1.id,
             name="OJK Compliance Portal",
             slug="ojk-portal",
@@ -123,7 +123,7 @@ async def run_seed():
 
         # Telkom Sigma — cloud management & SIEM dashboard
         p3 = Project(
-            id=UUID("00000000-0000-0000-0000-000000000013"),
+            id=UUID("f2e8b4c1-9d6a-4f3e-c5b7-0d2a8f1e4c9b"),
             organization_id=org2.id,
             name="SigmaCloud Management Console",
             slug="sigma-console",
@@ -135,7 +135,7 @@ async def run_seed():
             status=ProjectStatus.active,
         )
         p4 = Project(
-            id=UUID("00000000-0000-0000-0000-000000000014"),
+            id=UUID("07a5d2f9-3c8e-4b1d-e9f6-2b4c7a0d3e5f"),
             organization_id=org2.id,
             name="SIEM Event Ingest API",
             slug="siem-ingest",
@@ -148,7 +148,7 @@ async def run_seed():
 
         # Mandiri Sekuritas — trading platform and KYC service
         p5 = Project(
-            id=UUID("00000000-0000-0000-0000-000000000015"),
+            id=UUID("1b3e7c4d-6a0f-4d2e-f8b5-4c1d9a7e2f0b"),
             organization_id=org3.id,
             name="MOST Trading Platform",
             slug="most-trading",
@@ -172,7 +172,7 @@ async def run_seed():
 
         # BRI Ventures — Pinjamanku API (p1)
         a1 = Asset(
-            id=UUID("00000000-0000-0000-0000-000000000021"),
+            id=UUID("2c9f5a8e-1d4b-4e7c-a3f0-8b6e2c5d9a1f"),
             organization_id=org1.id,
             project_id=p1.id,
             name="Pinjamanku Partner API (Production)",
@@ -185,7 +185,7 @@ async def run_seed():
             verification_method=VerificationMethod.dns_txt_record,
         )
         a2 = Asset(
-            id=UUID("00000000-0000-0000-0000-000000000022"),
+            id=UUID("3d0e6b9f-2c5a-4f8d-b4e1-9c7f3d6e0b2a"),
             organization_id=org1.id,
             project_id=p1.id,
             name="Pinjamanku Staging Gateway",
@@ -198,7 +198,7 @@ async def run_seed():
             verification_method=VerificationMethod.dns_txt_record,
         )
         a3 = Asset(
-            id=UUID("00000000-0000-0000-0000-000000000023"),
+            id=UUID("4e1f7c0a-3d6b-4a9e-c5f2-0d8a4e7f1c3b"),
             organization_id=org1.id,
             project_id=p1.id,
             name="OAuth 2.0 Token Service",
@@ -213,7 +213,7 @@ async def run_seed():
 
         # BRI Ventures — OJK Portal (p2)
         a4 = Asset(
-            id=UUID("00000000-0000-0000-0000-000000000024"),
+            id=UUID("5f2a8d1b-4e7c-4b0f-d6a3-1e9b5f8a2d4c"),
             organization_id=org1.id,
             project_id=p2.id,
             name="OJK Reporting Portal (Web)",
@@ -229,7 +229,7 @@ async def run_seed():
 
         # Telkom Sigma — Cloud Console (p3)
         a5 = Asset(
-            id=UUID("00000000-0000-0000-0000-000000000025"),
+            id=UUID("6a3b9e2c-5f8d-4c1a-e7b4-2f0c6a9b3e5d"),
             organization_id=org2.id,
             project_id=p3.id,
             name="SigmaCloud Control Plane API",
@@ -242,7 +242,7 @@ async def run_seed():
             verification_method=VerificationMethod.dns_txt_record,
         )
         a6 = Asset(
-            id=UUID("00000000-0000-0000-0000-000000000026"),
+            id=UUID("7b4c0f3d-6a9e-4d2b-f8c5-3a1d7b0c4f6e"),
             organization_id=org2.id,
             project_id=p3.id,
             name="SigmaCloud Web Console",
@@ -257,7 +257,7 @@ async def run_seed():
 
         # Telkom Sigma — SIEM Ingest (p4)
         a7 = Asset(
-            id=UUID("00000000-0000-0000-0000-000000000027"),
+            id=UUID("8c5d1a4e-7b0f-4e3c-a9d6-4b2e8c1d5a7f"),
             organization_id=org2.id,
             project_id=p4.id,
             name="SIEM Collector Ingest Endpoint",
@@ -270,7 +270,7 @@ async def run_seed():
             verification_method=VerificationMethod.dns_txt_record,
         )
         a8 = Asset(
-            id=UUID("00000000-0000-0000-0000-000000000028"),
+            id=UUID("9d6e2b5f-8c1a-4f4d-b0e7-5c3f9d2e6b8a"),
             organization_id=org2.id,
             project_id=p4.id,
             name="SIEM Ingest (Preproduction)",
@@ -283,7 +283,7 @@ async def run_seed():
 
         # Mandiri Sekuritas — MOST Trading (p5)
         a9 = Asset(
-            id=UUID("00000000-0000-0000-0000-000000000029"),
+            id=UUID("0e7f3c6a-9d2b-4a5e-c1f8-6d4a0e3f7c9b"),
             organization_id=org3.id,
             project_id=p5.id,
             name="MOST Order Routing API",
@@ -296,7 +296,7 @@ async def run_seed():
             verification_method=VerificationMethod.dns_txt_record,
         )
         a10 = Asset(
-            id=UUID("00000000-0000-0000-0000-000000000030"),
+            id=UUID("1f8a4d7b-0e3c-4b6f-d2a9-7e5b1f4a8d0c"),
             organization_id=org3.id,
             project_id=p5.id,
             name="MOST Web Trading App",
@@ -321,7 +321,7 @@ async def run_seed():
 
         # BRI Ventures — Pinjamanku API annual pentest authorization
         auth1 = Authorization(
-            id=UUID("00000000-0000-0000-0000-000000000031"),
+            id=UUID("2a9b5e8c-1f4d-4c7a-e3b0-8f6c2a5d9e1b"),
             organization_id=org1.id,
             project_id=p1.id,
             reference_number="BRIV-PENTEST-2026-003",
@@ -339,7 +339,7 @@ async def run_seed():
 
         # BRI Ventures — OJK Portal compliance scan (tight window)
         auth2 = Authorization(
-            id=UUID("00000000-0000-0000-0000-000000000032"),
+            id=UUID("3b0c6f9d-2a5e-4d8b-f4c1-9a7d3b6e0f2c"),
             organization_id=org1.id,
             project_id=p2.id,
             reference_number="BRIV-OJK-2026-011",
@@ -357,7 +357,7 @@ async def run_seed():
 
         # Telkom Sigma — SigmaCloud control plane quarterly assessment
         auth3 = Authorization(
-            id=UUID("00000000-0000-0000-0000-000000000033"),
+            id=UUID("4c1d7a0e-3b6f-4e9c-a5d2-0b8e4c7f1a3d"),
             organization_id=org2.id,
             project_id=p3.id,
             reference_number="TSIG-INFRASEC-2026-007",
@@ -375,7 +375,7 @@ async def run_seed():
 
         # Telkom Sigma — SIEM ingest TLS hardening (upcoming, draft)
         auth4 = Authorization(
-            id=UUID("00000000-0000-0000-0000-000000000034"),
+            id=UUID("5d2e8b1f-4c7a-4f0d-b6e3-1c9f5d8a2b4e"),
             organization_id=org2.id,
             project_id=p4.id,
             reference_number="TSIG-SIEM-2026-002",
@@ -393,7 +393,7 @@ async def run_seed():
 
         # Mandiri Sekuritas — MOST trading platform pre-go-live security gate
         auth5 = Authorization(
-            id=UUID("00000000-0000-0000-0000-000000000035"),
+            id=UUID("6e3f9c2a-5d8b-4a1e-c7f4-2d0a6e9b3c5f"),
             organization_id=org3.id,
             project_id=p5.id,
             reference_number="MANSEK-MOST-2026-019",
@@ -419,7 +419,7 @@ async def run_seed():
         print("Seeding authorization scopes...")
 
         sc1 = AuthorizationScope(
-            id=UUID("00000000-0000-0000-0000-000000000081"),
+            id=UUID("7f4a0d3b-6e9c-4b2f-d8a5-3e1b7f0c4d6a"),
             organization_id=org1.id,
             authorization_id=auth1.id,
             asset_id=a1.id,
@@ -430,7 +430,7 @@ async def run_seed():
             maximum_concurrency=4,
         )
         sc2 = AuthorizationScope(
-            id=UUID("00000000-0000-0000-0000-000000000082"),
+            id=UUID("8a5b1e4c-7f0d-4c3a-e9b6-4f2c8a1d5e7b"),
             organization_id=org1.id,
             authorization_id=auth1.id,
             asset_id=a2.id,
@@ -441,7 +441,7 @@ async def run_seed():
             maximum_concurrency=6,
         )
         sc3 = AuthorizationScope(
-            id=UUID("00000000-0000-0000-0000-000000000083"),
+            id=UUID("9b6c2f5d-8a1e-4d4b-f0c7-5a3d9b2e6f8c"),
             organization_id=org1.id,
             authorization_id=auth2.id,
             asset_id=a4.id,
@@ -452,7 +452,7 @@ async def run_seed():
             maximum_concurrency=2,
         )
         sc4 = AuthorizationScope(
-            id=UUID("00000000-0000-0000-0000-000000000084"),
+            id=UUID("0c7d3a6e-9b2f-4e5c-a1d8-6b4e0c3f7a9d"),
             organization_id=org2.id,
             authorization_id=auth3.id,
             asset_id=a5.id,
@@ -463,7 +463,7 @@ async def run_seed():
             maximum_concurrency=5,
         )
         sc5 = AuthorizationScope(
-            id=UUID("00000000-0000-0000-0000-000000000085"),
+            id=UUID("1d8e4b7f-0c3a-4f6d-b2e9-7c5f1d4a8b0e"),
             organization_id=org2.id,
             authorization_id=auth3.id,
             asset_id=a6.id,
@@ -474,7 +474,7 @@ async def run_seed():
             maximum_concurrency=3,
         )
         sc6 = AuthorizationScope(
-            id=UUID("00000000-0000-0000-0000-000000000086"),
+            id=UUID("2e9f5c8a-1d4b-4a7e-c3f0-8d6a2e5b9c1f"),
             organization_id=org3.id,
             authorization_id=auth5.id,
             asset_id=a9.id,
@@ -485,7 +485,7 @@ async def run_seed():
             maximum_concurrency=3,
         )
         sc7 = AuthorizationScope(
-            id=UUID("00000000-0000-0000-0000-000000000087"),
+            id=UUID("3f0a6d9b-2e5c-4b8f-d4a1-9e7b3f6c0d2a"),
             organization_id=org3.id,
             authorization_id=auth5.id,
             asset_id=a10.id,
@@ -508,7 +508,7 @@ async def run_seed():
 
         # BRI Ventures — running now (started 90 min ago, ends in 6.5 hrs)
         eng1 = Engagement(
-            id=UUID("00000000-0000-0000-0000-000000000041"),
+            id=UUID("4a1b7e0c-3f6d-4c9a-e5b2-0f8c4a7d1e3b"),
             organization_id=org1.id,
             project_id=p1.id,
             authorization_id=auth1.id,
@@ -532,7 +532,7 @@ async def run_seed():
 
         # BRI Ventures — OJK compliance scan (started 2 hrs ago, narrow window)
         eng2 = Engagement(
-            id=UUID("00000000-0000-0000-0000-000000000042"),
+            id=UUID("5b2c8f1d-4a7e-4d0b-f6c3-1a9d5b8e2f4c"),
             organization_id=org1.id,
             project_id=p2.id,
             authorization_id=auth2.id,
@@ -556,7 +556,7 @@ async def run_seed():
 
         # Telkom Sigma — infrastructure assessment (started 30 min ago)
         eng3 = Engagement(
-            id=UUID("00000000-0000-0000-0000-000000000043"),
+            id=UUID("6c3d9a2e-5b8f-4e1c-a7d4-2b0e6c9f3a5d"),
             organization_id=org2.id,
             project_id=p3.id,
             authorization_id=auth3.id,
@@ -580,7 +580,7 @@ async def run_seed():
 
         # Mandiri Sekuritas — pre-release security gate (scheduled for tomorrow)
         eng4 = Engagement(
-            id=UUID("00000000-0000-0000-0000-000000000044"),
+            id=UUID("7d4e0b3f-6c9a-4f2d-b8e5-3c1f7d0a4b6e"),
             organization_id=org3.id,
             project_id=p5.id,
             authorization_id=auth5.id,
@@ -612,7 +612,7 @@ async def run_seed():
         print("Seeding engagement scopes...")
 
         es1 = EngagementScope(
-            id=UUID("00000000-0000-0000-0000-000000000091"),
+            id=UUID("8e5f1c4a-7d0b-4a3e-c9f6-4d2a8e1b5c7f"),
             organization_id=org1.id,
             engagement_id=eng1.id,
             asset_id=a1.id,
@@ -624,7 +624,7 @@ async def run_seed():
             concurrency_limit=4,
         )
         es2 = EngagementScope(
-            id=UUID("00000000-0000-0000-0000-000000000092"),
+            id=UUID("9f6a2d5b-8e1c-4b4f-d0a7-5e3b9f2c6d8a"),
             organization_id=org1.id,
             engagement_id=eng1.id,
             asset_id=a2.id,
@@ -636,7 +636,7 @@ async def run_seed():
             concurrency_limit=6,
         )
         es3 = EngagementScope(
-            id=UUID("00000000-0000-0000-0000-000000000093"),
+            id=UUID("0a7b3e6c-9f2d-4c5a-e1b8-6f4c0a3d7e9b"),
             organization_id=org1.id,
             engagement_id=eng2.id,
             asset_id=a4.id,
@@ -648,7 +648,7 @@ async def run_seed():
             concurrency_limit=2,
         )
         es4 = EngagementScope(
-            id=UUID("00000000-0000-0000-0000-000000000094"),
+            id=UUID("1b8c4f7d-0a3e-4d6b-f2c9-7a5d1b4e8f0c"),
             organization_id=org2.id,
             engagement_id=eng3.id,
             asset_id=a5.id,
@@ -660,7 +660,7 @@ async def run_seed():
             concurrency_limit=5,
         )
         es5 = EngagementScope(
-            id=UUID("00000000-0000-0000-0000-000000000095"),
+            id=UUID("2c9d5a8e-1b4f-4e7c-a3d0-8b6e2c5f9a1d"),
             organization_id=org2.id,
             engagement_id=eng3.id,
             asset_id=a6.id,
@@ -684,7 +684,7 @@ async def run_seed():
 
         # ── Execution 1: completed, validated (BRI Ventures prod API) ──
         exec1 = ValidationExecution(
-            id=UUID("00000000-0000-0000-0000-000000000051"),
+            id=UUID("3d0e6b9f-2c5a-4f8d-b4e1-9c7f3d6e0b2c"),
             organization_id=org1.id,
             project_id=p1.id,
             asset_id=a1.id,
@@ -728,7 +728,7 @@ async def run_seed():
 
         # ── Execution 2: completed, validated (BRI Ventures staging) ──
         exec2 = ValidationExecution(
-            id=UUID("00000000-0000-0000-0000-000000000052"),
+            id=UUID("4e1f7c0a-3d6b-4a9e-c5f2-0d8a4e7f1c3d"),
             organization_id=org1.id,
             project_id=p1.id,
             asset_id=a2.id,
@@ -773,7 +773,7 @@ async def run_seed():
 
         # ── Execution 3: currently executing (Telkom Sigma control plane) ──
         exec3 = ValidationExecution(
-            id=UUID("00000000-0000-0000-0000-000000000053"),
+            id=UUID("5f2a8d1b-4e7c-4b0f-d6a3-1e9b5f8a2d4e"),
             organization_id=org2.id,
             project_id=p3.id,
             asset_id=a5.id,
@@ -816,7 +816,7 @@ async def run_seed():
 
         # ── Execution 4: queued (OJK portal compliance scan) ──
         exec4 = ValidationExecution(
-            id=UUID("00000000-0000-0000-0000-000000000054"),
+            id=UUID("6a3b9e2c-5f8d-4c1a-e7b4-2f0c6a9b3e5f"),
             organization_id=org1.id,
             project_id=p2.id,
             asset_id=a4.id,
@@ -868,7 +868,7 @@ async def run_seed():
 
         # Steps for exec1 — BRI Ventures prod API (all passed)
         step1 = ValidationStepResult(
-            id=UUID("00000000-0000-0000-0000-000000000061"),
+            id=UUID("7b4c0f3d-6a9e-4d2b-f8c5-3a1d7b0c4f6f"),
             organization_id=org1.id,
             execution_id=exec1.id,
             step_name="TLS handshake and certificate verification",
@@ -885,7 +885,7 @@ async def run_seed():
             finished_at=now - timedelta(minutes=70, seconds=48),
         )
         step2 = ValidationStepResult(
-            id=UUID("00000000-0000-0000-0000-000000000062"),
+            id=UUID("8c5d1a4e-7b0f-4e3c-a9d6-4b2e8c1d5a80"),
             organization_id=org1.id,
             execution_id=exec1.id,
             step_name="HTTP Strict-Transport-Security header validation",
@@ -901,7 +901,7 @@ async def run_seed():
             finished_at=now - timedelta(minutes=70, seconds=36),
         )
         step3 = ValidationStepResult(
-            id=UUID("00000000-0000-0000-0000-000000000063"),
+            id=UUID("9d6e2b5f-8c1a-4f4d-b0e7-5c3f9d2e6b91"),
             organization_id=org1.id,
             execution_id=exec1.id,
             step_name="Security response headers inspection",
@@ -917,7 +917,7 @@ async def run_seed():
             finished_at=now - timedelta(minutes=70, seconds=20),
         )
         step4 = ValidationStepResult(
-            id=UUID("00000000-0000-0000-0000-000000000064"),
+            id=UUID("0e7f3c6a-9d2b-4a5e-c1f8-6d4a0e3f7c02"),
             organization_id=org1.id,
             execution_id=exec1.id,
             step_name="Authorization header and OAuth scope enforcement",
@@ -934,7 +934,7 @@ async def run_seed():
 
         # Steps for exec2 — BRI Ventures staging (all passed)
         step5 = ValidationStepResult(
-            id=UUID("00000000-0000-0000-0000-000000000065"),
+            id=UUID("1f8a4d7b-0e3c-4b6f-d2a9-7e5b1f4a8d13"),
             organization_id=org1.id,
             execution_id=exec2.id,
             step_name="TLS version enforcement check",
@@ -950,7 +950,7 @@ async def run_seed():
             finished_at=now - timedelta(minutes=63, seconds=44),
         )
         step6 = ValidationStepResult(
-            id=UUID("00000000-0000-0000-0000-000000000066"),
+            id=UUID("2a9b5e8c-1f4d-4c7a-e3b0-8f6c2a5d9e24"),
             organization_id=org1.id,
             execution_id=exec2.id,
             step_name="Cipher suite assessment",
@@ -965,7 +965,7 @@ async def run_seed():
             finished_at=now - timedelta(minutes=63, seconds=20),
         )
         step7 = ValidationStepResult(
-            id=UUID("00000000-0000-0000-0000-000000000067"),
+            id=UUID("3b0c6f9d-2a5e-4d8b-f4c1-9a7d3b6e0f35"),
             organization_id=org1.id,
             execution_id=exec2.id,
             step_name="HTTP Strict-Transport-Security header validation",
@@ -988,10 +988,11 @@ async def run_seed():
         print("+ Database seeding completed.")
         print()
         print("  Login with Organization ID:")
-        print("  BRI Ventures Digital   ->  00000000-0000-0000-0000-000000000001  (dev default)")
-        print("  Telkom Sigma Cloud     ->  00000000-0000-0000-0000-000000000002")
-        print("  Mandiri Sekuritas      ->  00000000-0000-0000-0000-000000000003")
+        print("  BRI Ventures Digital   ->  a3f7c2d1-8b4e-4f9a-b6c3-2e1d5f8a9b0c  (dev default)")
+        print("  Telkom Sigma Cloud     ->  b8e4d6f2-1c7a-4e2b-9d5f-3a0c8e7b4d1f")
+        print("  Mandiri Sekuritas      ->  c1d9e5a3-4f2b-4c8d-a7e1-6b3d0f9c2e5a")
 
 
 if __name__ == "__main__":
     asyncio.run(run_seed())
+
