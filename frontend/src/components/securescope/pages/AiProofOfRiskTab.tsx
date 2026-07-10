@@ -157,10 +157,13 @@ export function AiProofOfRiskTab({ exec, isDomainScan }: AiProofOfRiskTabProps) 
         {!isDomainScan && (
           <div className="mt-6 flex items-center justify-between border-t border-(--ss-hairline) pt-4">
             <div className="text-[11px] text-slate-500">
-              {!exec.id && <span className="text-amber-400">⚠ Execution ID is required</span>}
-              {exec.id && loading && <span className="text-cyan-400">Analysis is running…</span>}
+              {loading && <span className="text-cyan-400">Analysis is running…</span>}
             </div>
-            <CyberButton variant="primary" onClick={handleAnalyze} disabled={loading || !exec.id}>
+            <CyberButton
+              variant="primary"
+              onClick={handleAnalyze}
+              disabled={loading}
+            >
               {loading ? <span className="animate-pulse">Analyzing...</span> : <><Play className="w-4 h-4 mr-1" /> Run AI Analysis</>}
             </CyberButton>
           </div>
@@ -336,8 +339,10 @@ export function AiProofOfRiskTab({ exec, isDomainScan }: AiProofOfRiskTabProps) 
                         <div className="flex gap-2"><span className="text-slate-500">Pattern:</span> {scenario.vulnerability_pattern}</div>
                         <div className="flex gap-2"><span className="text-slate-500">Goal:</span> {scenario.safe_proof_goal}</div>
                         <div className="flex flex-wrap gap-1 mt-2">
-                          {scenario.sandbox_components.map(c => (
-                            <span key={c} className="text-[10px] bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700">{c}</span>
+                          {scenario.sandbox_components.map((c: any, i: number) => (
+                            <span key={typeof c === 'string' ? c : c.name || i} className="text-[10px] bg-slate-800 px-1.5 py-0.5 rounded border border-slate-700">
+                              {typeof c === 'string' ? c : c.name || JSON.stringify(c)}
+                            </span>
                           ))}
                         </div>
                       </div>

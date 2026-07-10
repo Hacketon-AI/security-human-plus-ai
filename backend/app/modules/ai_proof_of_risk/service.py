@@ -19,6 +19,7 @@ from app.modules.ai_proof_of_risk.digital_twin_scenario import (
 from app.modules.ai_proof_of_risk.enums import AIRoute, FindingComplexity
 from app.modules.ai_proof_of_risk.errors import (
     MissingExecutionError,
+    ScenarioSafetyViolation,
     UnverifiedAssetError,
 )
 from app.modules.ai_proof_of_risk.execution_evidence_provider import (

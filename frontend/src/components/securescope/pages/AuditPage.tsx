@@ -178,7 +178,11 @@ export function AuditPage() {
                               {Object.entries(e.safeMetadata).map(([k, v]) => (
                                 <span key={k} className="text-[10px] text-slate-500">
                                   <span className="text-slate-600">{k}:</span>{" "}
-                                  <code className="ss-mono-xs text-slate-400">{v}</code>
+                                  <code className="ss-mono-xs text-slate-400">
+                                    {typeof v === "object" && v !== null
+                                      ? JSON.stringify(v)
+                                      : String(v ?? "")}
+                                  </code>
                                 </span>
                               ))}
                             </div>

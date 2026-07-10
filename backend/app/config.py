@@ -130,6 +130,11 @@ class Settings(BaseSettings):
     ai_local_amd_max_tokens: int = 512
     ai_local_amd_temperature: float = 0.0
 
+    # AI Proof-of-Risk service-level config
+    ai_proof_of_risk_enabled: bool = True
+    ai_router_mode: str = "deterministic"
+    ai_sandbox_simulation_enabled: bool = False
+
     @field_validator("database_dsn")
     @classmethod
     def _require_postgresql(cls, value: SecretStr) -> SecretStr:
