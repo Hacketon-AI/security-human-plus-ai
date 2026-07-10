@@ -49,3 +49,5 @@ yarn-error.log*
 # Log files
 *.log
 .kiro
+# Ignore accidental literal Cursor folder
+/~/.cursor/
