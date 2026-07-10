@@ -1,22 +1,28 @@
-FROM node:20-alpine AS base
+# deps: install with Bun on the official pinned, glibc (non-Alpine) image.
+# Alpine/musl was the root cause of the @unrs/resolver-binding-linux-x64-musl
+# integrity failure (napi native binding built for musl vs. glibc mismatch).
+FROM oven/bun:1.3.14 AS deps
+WORKDIR /app
+COPY package.json bun.lock ./
+# Retry up to 3x on transient registry/integrity failures, clearing Bun's
+# package cache between attempts so a corrupted tarball isn't reused.
+RUN for attempt in 1 2 3; do \
+      bun install --frozen-lockfile && exit 0; \
+      echo "bun install failed (attempt $attempt/3)"; \
+      bun pm cache rm; \
+    done; \
+    echo "bun install failed after 3 attempts" && exit 1
+
+FROM oven/bun:1.3.14 AS builder
 WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1
-
-FROM base AS builder
-COPY package.json package-lock.json* bun.lock* ./
-# Install dependencies — use npm install (not npm ci) so npm resolves
-# platform-specific optional binaries for linux-musl (Alpine) correctly.
-# npm ci with a lockfile generated on macOS/Windows silently skips the
-# @tailwindcss/oxide musl native binding, breaking the Tailwind build.
-RUN if [ -f bun.lock ]; then npm install -g bun && bun install; \
-    else npm install; \
-    fi
-
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-# Pass build-time variables if needed
-RUN npm run build
+RUN bun run build
 
-FROM base AS runner
+# runner: glibc runtime for the Next.js standalone output
+FROM node:20-bookworm-slim AS runner
+WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3000
 
