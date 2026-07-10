@@ -48,3 +48,4 @@ yarn-error.log*
 
 # Log files
 *.log
+.kiro

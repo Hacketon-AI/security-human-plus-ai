@@ -5,6 +5,8 @@ import { Shield, Lock, Fingerprint, ArrowRight, AlertTriangle } from "lucide-rea
 import { useApp } from "@/lib/securescope/store";
 import { CyberButton } from "../shared/ui";
 
+const DEV_ORG_ID = process.env.NEXT_PUBLIC_DEFAULT_ORG_ID ?? "";
+
 export function LoginPage() {
   const login = useApp((s) => s.login);
   const error = useApp((s) => s.error);
@@ -14,6 +16,10 @@ export function LoginPage() {
   const [orgId, setOrgId] = React.useState("");
   const [submitting, setSubmitting] = React.useState(false);
   const [localError, setLocalError] = React.useState<string | null>(null);
+
+  const devLogin = () => {
+    login(DEV_ORG_ID);
+  };
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -220,6 +226,18 @@ export function LoginPage() {
                 </CyberButton>
               </form>
             </div>
+
+            {DEV_ORG_ID && (
+              <div className="mt-3">
+                <button
+                  type="button"
+                  onClick={devLogin}
+                  className="w-full px-3 py-2 text-[11px] uppercase tracking-[0.18em] text-amber-300/70 border border-amber-500/20 bg-amber-500/5 rounded-sm hover:bg-amber-500/10 hover:text-amber-300 transition-all"
+                >
+                  ⚡ Dev Login (bypass)
+                </button>
+              </div>
+            )}
 
             <div className="mt-4 flex items-start gap-2 px-3 py-2.5 border border-amber-500/20 bg-amber-500/5 rounded-sm">
               <AlertTriangle className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />
