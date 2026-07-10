@@ -7,13 +7,18 @@ import { CyberButton } from "../shared/ui";
 
 const DEV_ORG_ID = process.env.NEXT_PUBLIC_DEFAULT_ORG_ID ?? "";
 
+// Demo credentials shown when DEV_ORG_ID is set — development only.
+const DEV_EMAIL = "operator@briventures.co.id";
+const DEV_PASSWORD = "Dev@SecureScope2026!";
+const DEV_MFA = "000000";
+
 export function LoginPage() {
   const login = useApp((s) => s.login);
   const error = useApp((s) => s.error);
-  const [email, setEmail] = React.useState("");
-  const [password, setPassword] = React.useState("");
-  const [mfa, setMfa] = React.useState("");
-  const [orgId, setOrgId] = React.useState("");
+  const [email, setEmail] = React.useState(DEV_ORG_ID ? DEV_EMAIL : "");
+  const [password, setPassword] = React.useState(DEV_ORG_ID ? DEV_PASSWORD : "");
+  const [mfa, setMfa] = React.useState(DEV_ORG_ID ? DEV_MFA : "");
+  const [orgId, setOrgId] = React.useState(DEV_ORG_ID ? DEV_ORG_ID : "");
   const [submitting, setSubmitting] = React.useState(false);
   const [localError, setLocalError] = React.useState<string | null>(null);
 
@@ -137,7 +142,10 @@ export function LoginPage() {
 
               <form onSubmit={submit} className="space-y-3">
                 <div>
-                  <label className="block ss-eyebrow mb-1">Operator Email</label>
+                  <label className="block ss-eyebrow mb-1">
+                    Operator Email
+                    {DEV_ORG_ID && <span className="ml-2 text-[9px] text-amber-400/70 normal-case tracking-normal">dev prefilled</span>}
+                  </label>
                   <input
                     type="email"
                     value={email}
@@ -148,7 +156,10 @@ export function LoginPage() {
                   />
                 </div>
                 <div>
-                  <label className="block ss-eyebrow mb-1">Password</label>
+                  <label className="block ss-eyebrow mb-1">
+                    Password
+                    {DEV_ORG_ID && <span className="ml-2 text-[9px] text-amber-400/70 normal-case tracking-normal">dev prefilled</span>}
+                  </label>
                   <input
                     type="password"
                     value={password}

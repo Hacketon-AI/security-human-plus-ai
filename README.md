@@ -59,7 +59,12 @@ The default dev bypass button uses **BRI Ventures Digital**:
 
 ```
 Organization ID : a3f7c2d1-8b4e-4f9a-b6c3-2e1d5f8a9b0c
+Email           : operator@briventures.co.id
+Password        : Dev@SecureScope2026!
+MFA Code        : 000000
 ```
+
+All fields are **pre-filled automatically** when `NEXT_PUBLIC_DEFAULT_ORG_ID` is set. Just open the login page and click **Authenticate** — or click **⚡ Dev Login (bypass)** to skip the form entirely.
 
 This org has the most complete seed data:
 - 4 assets across 2 projects (3 verified, 1 pending)
