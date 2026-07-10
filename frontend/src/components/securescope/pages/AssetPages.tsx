@@ -21,7 +21,6 @@ import {
   XCircle,
 } from "lucide-react";
 import { useApp } from "@/lib/securescope/store";
-import { verificationAttempts } from "@/lib/securescope/data";
 import type { Asset, VerificationState, Authorization, Engagement, ValidationExecution } from "@/lib/securescope/types";
 import { Pill, RiskTierBadge, StatusBadge, VerificationBadge } from "../shared/badges";
 import { AlertBanner, CyberButton, EmptyState, KeyValue, MaskedField } from "../shared/ui";
@@ -174,9 +173,9 @@ export function AssetDetailPage() {
     if (!asset.target || asset.target === "—") return [];
     const parts = asset.target.split(".");
     const domainPart = parts.length >= 2 ? parts.slice(-2).join(".") : asset.target;
-    return verificationAttempts.filter(
-      (v) => v.challengeHost.includes(domainPart) || v.challengeHost.includes(asset.target)
-    );
+    // Real verification attempts come from the backend (asset_verifications module).
+    // Currently the store does not fetch them per-asset; show empty until wired.
+    return [] as { id: string; createdAt: string; state: string; method: string; challengeHost: string; durationMs: number; note: string }[];
   }, [asset.target]);
 
   return (
@@ -276,7 +275,7 @@ export function AssetDetailPage() {
 
         <div className="px-4 lg:px-6 py-5">
           {tab === "Overview" && <AssetOverview asset={asset} assetAuths={assetAuths} assetEngs={assetEngs} assetExecs={assetExecs} />}
-          {tab === "Verification" && <AssetVerification key={asset.id} asset={asset} attempts={attempts.length > 0 ? attempts : verificationAttempts} />}
+          {tab === "Verification" && <AssetVerification key={asset.id} asset={asset} attempts={attempts} />}
           {tab === "Authorizations" && <AssetAuthorizations assetAuths={assetAuths} />}
           {tab === "Engagements" && <AssetEngagements assetEngs={assetEngs} />}
           {tab === "Validation History" && <AssetValidationHistory assetExecs={assetExecs} />}
@@ -366,7 +365,7 @@ function AssetOverview({ asset, assetAuths, assetEngs, assetExecs }: {
 // Asset verification — DNS TXT challenge UI
 // ============================================================
 
-function AssetVerification({ asset, attempts }: { asset: Asset; attempts: typeof verificationAttempts }) {
+function AssetVerification({ asset, attempts }: { asset: Asset; attempts: { id: string; createdAt: string; state: string; method: string; challengeHost: string; durationMs: number; note: string }[] }) {
   const verifyAsset = useApp((s) => s.verifyAsset);
   const isLoading = useApp((s) => s.isLoading);
   const [isVerifying, setIsVerifying] = React.useState(false);

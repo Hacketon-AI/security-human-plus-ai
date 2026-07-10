@@ -22,8 +22,36 @@ import {
   Info,
 } from "lucide-react";
 import { useApp } from "@/lib/securescope/store";
-import { templates } from "@/lib/securescope/data";
 import { Pill, RiskTierBadge } from "../shared/badges";
+
+// Validation TEMPLATES are static configuration — they define available check
+// types, not runtime data. No backend endpoint exists for TEMPLATES yet.
+const TEMPLATES = [
+  {
+    id: "tpl_headers",
+    name: "HTTP Security Header Validation",
+    description: "Evaluates HSTS, CSP, X-Content-Type-Options, Referrer-Policy and related headers against baseline.",
+    steps: 6,
+    riskTier: "low" as const,
+    estimatedSeconds: 120,
+  },
+  {
+    id: "tpl_tls",
+    name: "Safe TLS Configuration Check",
+    description: "Inspects cipher suites, protocol versions and certificate chain depth without active exploitation.",
+    steps: 3,
+    riskTier: "moderate" as const,
+    estimatedSeconds: 90,
+  },
+  {
+    id: "tpl_availability",
+    name: "API Availability Safety Check",
+    description: "Performs bounded availability probing within authorized scope and rate limits.",
+    steps: 2,
+    riskTier: "low" as const,
+    estimatedSeconds: 45,
+  },
+];
 import { AlertBanner, CyberButton, KeyValue, MaskedField } from "../shared/ui";
 import { TopNavCommandBar, PageHeader } from "../shell/TopNav";
 
@@ -62,7 +90,7 @@ export function ExecutionWizardPage() {
     assetId: assets[0]?.id || "",
     authorizationId: authorizations[0]?.id || "",
     engagementId: engagements[0]?.id || "",
-    templateId: templates[0]?.id || "",
+    templateId: TEMPLATES[0]?.id || "",
   });
 
   React.useEffect(() => {
@@ -72,7 +100,7 @@ export function ExecutionWizardPage() {
       assetId: d.assetId || assets[0]?.id || "",
       authorizationId: d.authorizationId || authorizations[0]?.id || "",
       engagementId: d.engagementId || engagements[0]?.id || "",
-      templateId: d.templateId || templates[0]?.id || "",
+      templateId: d.templateId || TEMPLATES[0]?.id || "",
     }));
   }, [organizations, projects, assets, authorizations, engagements]);
 
@@ -537,11 +565,11 @@ function TemplateStep({ draft, update }: { draft: DraftState; update: (p: Partia
         </div>
         <h2 className="text-base font-semibold text-slate-100 mb-1">Pick a validation template</h2>
         <p className="text-xs text-slate-500 mb-4">
-          Templates define the sequence of safe checks performed by the worker. All templates are read-only and non-invasive.
+          TEMPLATES define the sequence of safe checks performed by the worker. All TEMPLATES are read-only and non-invasive.
         </p>
 
         <div className="space-y-2">
-          {templates.map((t) => {
+          {TEMPLATES.map((t) => {
             const active = draft.templateId === t.id;
             return (
               <button
@@ -570,7 +598,7 @@ function TemplateStep({ draft, update }: { draft: DraftState; update: (p: Partia
       <div className="ss-panel-flat p-4">
         <div className="ss-eyebrow mb-2">Template safety</div>
         <ul className="space-y-2 text-[11px] text-slate-400 leading-relaxed">
-          <li className="flex gap-2"><ShieldCheck className="w-3 h-3 text-emerald-400 shrink-0 mt-0.5" /> All templates operate within authorized scope only.</li>
+          <li className="flex gap-2"><ShieldCheck className="w-3 h-3 text-emerald-400 shrink-0 mt-0.5" /> All TEMPLATES operate within authorized scope only.</li>
           <li className="flex gap-2"><ShieldCheck className="w-3 h-3 text-emerald-400 shrink-0 mt-0.5" /> No exploitation payloads, no brute force, no credential stuffing.</li>
           <li className="flex gap-2"><ShieldCheck className="w-3 h-3 text-emerald-400 shrink-0 mt-0.5" /> Evidence is summarized; raw responses, cookies, and Authorization headers are never stored.</li>
         </ul>
@@ -588,7 +616,7 @@ function SafetyStep({ draft }: { draft: DraftState }) {
   const asset = assets.find((a) => a.id === draft.assetId);
   const auth = authorizations.find((a) => a.id === draft.authorizationId);
   const eng = engagements.find((e) => e.id === draft.engagementId);
-  const tpl = templates.find((t) => t.id === draft.templateId);
+  const tpl = TEMPLATES.find((t) => t.id === draft.templateId);
 
   // Build safety rows
   const rows: { label: string; explanation: string; passed: boolean; blocking: boolean; meta: string }[] = [
@@ -760,7 +788,7 @@ function ConfirmStep({ draft }: { draft: DraftState }) {
   const asset = assets.find((a) => a.id === draft.assetId);
   const auth = authorizations.find((a) => a.id === draft.authorizationId);
   const eng = engagements.find((e) => e.id === draft.engagementId);
-  const tpl = templates.find((t) => t.id === draft.templateId);
+  const tpl = TEMPLATES.find((t) => t.id === draft.templateId);
   const org = organizations.find((o) => o.id === draft.orgId);
   const proj = projects.find((p) => p.id === draft.projectId);
 
@@ -876,3 +904,4 @@ function ConfirmStep({ draft }: { draft: DraftState }) {
     </div>
   );
 }
+

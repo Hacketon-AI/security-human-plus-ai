@@ -4,7 +4,6 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 import { Building2, ChevronRight, Plus, Search } from "lucide-react";
 import { useApp } from "@/lib/securescope/store";
-import { auditEvents } from "@/lib/securescope/data";
 import { Pill, StatusBadge } from "../shared/badges";
 import { CyberButton, EmptyState, KeyValue } from "../shared/ui";
 import { TopNavCommandBar, PageHeader, SecondaryContextNav } from "../shell/TopNav";
