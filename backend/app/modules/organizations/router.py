@@ -36,6 +36,16 @@ async def create_organization(
     return OrganizationResponse.model_validate(organization)
 
 
+@router.get("")
+async def list_organizations(
+    tenant: TenantContext = Depends(require_tenant_context),
+    service: OrganizationService = Depends(_service),
+) -> list[OrganizationResponse]:
+    """List organizations visible to the authenticated tenant (always one)."""
+    organizations = await service.list_for_tenant(tenant)
+    return [OrganizationResponse.model_validate(o) for o in organizations]
+
+
 @router.get("/{organization_id}")
 async def get_organization(
     organization_id: UUID,

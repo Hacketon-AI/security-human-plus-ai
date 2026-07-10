@@ -26,26 +26,10 @@ async function request(path: string, options: RequestInit = {}) {
 }
 
 // 1. Organizations
-export async function fetchOrganizations(): Promise<any[]> {
-  // Since the backend doesn't support listing all organizations (multi-tenant isolation),
-  // we query the seeded organizations by their known UUIDs in development.
-  const seededIds = [
-    "00000000-0000-0000-0000-000000000001",
-    "00000000-0000-0000-0000-000000000002",
-    "00000000-0000-0000-0000-000000000003",
-  ];
-  const list: any[] = [];
-  for (const id of seededIds) {
-    try {
-      const org = await request(`/api/v1/organizations/${id}`, {
-        headers: { "X-Organization-Id": id },
-      });
-      list.push(org);
-    } catch (e) {
-      console.warn(`Seeded organization ${id} not found or inactive:`, e);
-    }
-  }
-  return list;
+export async function fetchOrganizations(orgId: string): Promise<any[]> {
+  return request("/api/v1/organizations", {
+    headers: { "X-Organization-Id": orgId },
+  });
 }
 
 export async function fetchOrganization(orgId: string): Promise<any> {

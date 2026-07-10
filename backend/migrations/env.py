@@ -21,6 +21,7 @@ from app.modules.engagements import models as engagement_models
 from app.modules.organizations import models as organization_models
 from app.modules.projects import models as project_models
 from app.modules.validation_executions import models as validation_execution_models
+from app.modules.audit_events import models as audit_event_models
 from app.platform.database import Base
 
 # Importing the domain model modules registers their tables on Base.metadata so
@@ -33,6 +34,7 @@ _REGISTERED_MODELS = (
     authorization_models,
     engagement_models,
     validation_execution_models,
+    audit_event_models,
 )
 
 config = context.config

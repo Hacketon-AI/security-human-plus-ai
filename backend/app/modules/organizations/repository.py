@@ -23,6 +23,13 @@ class OrganizationRepository:
     async def get(self, organization_id: UUID) -> Organization | None:
         return await self._session.get(Organization, organization_id)
 
+    async def list_for_tenant(self, organization_id: UUID) -> list[Organization]:
+        """Return the single organization the tenant belongs to."""
+        result = await self._session.execute(
+            select(Organization).where(Organization.id == organization_id)
+        )
+        return list(result.scalars().all())
+
     async def slug_exists(self, slug: str) -> bool:
         result = await self._session.execute(
             select(Organization.id).where(Organization.slug == slug).limit(1)

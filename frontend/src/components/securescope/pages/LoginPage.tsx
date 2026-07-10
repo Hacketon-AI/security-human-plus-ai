@@ -7,18 +7,33 @@ import { CyberButton } from "../shared/ui";
 
 export function LoginPage() {
   const login = useApp((s) => s.login);
-  const [email, setEmail] = React.useState("k.andrade@nasari.sec");
+  const error = useApp((s) => s.error);
+  const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [mfa, setMfa] = React.useState("");
+  const [orgId, setOrgId] = React.useState("");
   const [submitting, setSubmitting] = React.useState(false);
+  const [localError, setLocalError] = React.useState<string | null>(null);
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
+    setLocalError(null);
+    const trimmed = orgId.trim();
+    if (!trimmed) {
+      setLocalError("Organization ID is required.");
+      return;
+    }
+    const uuidRe = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRe.test(trimmed)) {
+      setLocalError("Enter a valid Organization ID (UUID format).");
+      return;
+    }
     setSubmitting(true);
-    setTimeout(() => {
+    try {
+      login(trimmed);
+    } finally {
       setSubmitting(false);
-      login();
-    }, 900);
+    }
   };
 
   return (
@@ -152,6 +167,26 @@ export function LoginPage() {
                     placeholder="······"
                   />
                 </div>
+                <div>
+                  <label className="block ss-eyebrow mb-1">Organization ID</label>
+                  <input
+                    type="text"
+                    value={orgId}
+                    onChange={(e) => { setOrgId(e.target.value); setLocalError(null); }}
+                    className="w-full px-3 py-2 text-sm bg-(--ss-surface-2) border border-(--ss-hairline-strong) rounded-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-cyan-400/50 focus:ss-glow-cyan transition-all ss-mono"
+                    placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+                    autoComplete="off"
+                    spellCheck={false}
+                    required
+                  />
+                </div>
+
+                {(localError || error) && (
+                  <div className="flex items-start gap-2 px-3 py-2 border border-red-500/30 bg-red-500/5 rounded-sm">
+                    <AlertTriangle className="w-3.5 h-3.5 text-red-400 shrink-0 mt-0.5" />
+                    <p className="text-[11px] text-red-300">{localError ?? error}</p>
+                  </div>
+                )}
 
                 <div className="flex items-center justify-between pt-1">
                   <label className="flex items-center gap-2 text-[11px] text-slate-400 cursor-pointer select-none">

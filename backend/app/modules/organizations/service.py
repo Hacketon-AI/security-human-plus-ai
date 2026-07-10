@@ -59,14 +59,14 @@ class OrganizationService:
     async def get_for_tenant(
         self, organization_id: UUID, tenant: TenantContext
     ) -> Organization:
-        """Return the organization only if it is the caller's own tenant.
-
-        A request for any other organization id yields the same not-found
-        result as a non-existent one: a UUID is not proof of authorization.
-        """
+        """Return the organization only if it is the caller's own tenant."""
         if organization_id != tenant.organization_id:
             raise OrganizationNotFound(_NOT_FOUND)
         organization = await self._organizations.get(organization_id)
         if organization is None:
             raise OrganizationNotFound(_NOT_FOUND)
         return organization
+
+    async def list_for_tenant(self, tenant: TenantContext) -> list[Organization]:
+        """Return the tenant's own organization as a single-element list."""
+        return await self._organizations.list_for_tenant(tenant.organization_id)

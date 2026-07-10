@@ -64,7 +64,7 @@ interface AppState {
   openExecution: (id: string, tab?: string) => void;
   openInspector: (id: string | null) => void;
   requestKillSwitch: (engagementId: string | null) => void;
-  login: () => void;
+  login: (orgId: string) => void;
   logout: () => void;
 
   initData: () => Promise<void>;
@@ -144,7 +144,7 @@ const mapAuthorizationState = (status: string): AuthorizationState => {
 
 export const useApp = create<AppState>((set, get) => ({
   route: "login",
-  selectedOrgId: "00000000-0000-0000-0000-000000000001", // Default Nasari Security Lab
+  selectedOrgId: null,
   selectedProjectId: null,
   selectedAssetId: null,
   selectedAuthorizationId: null,
@@ -192,15 +192,15 @@ export const useApp = create<AppState>((set, get) => ({
   openExecution: (id, tab = "Overview") => set({ selectedExecutionId: id, executionTab: tab, route: "execution_detail" }),
   openInspector: (id) => set({ inspectorExecutionId: id }),
   requestKillSwitch: (engagementId) => set({ killSwitchTarget: engagementId }),
-  login: () => {
-    set({ authenticated: true, route: "dashboard" });
+  login: (orgId: string) => {
+    set({ authenticated: true, route: "dashboard", selectedOrgId: orgId, error: null });
     get().initData();
   },
   logout: () =>
     set({
       authenticated: false,
       route: "login",
-      selectedOrgId: "00000000-0000-0000-0000-000000000001",
+      selectedOrgId: null,
       selectedProjectId: null,
       selectedAssetId: null,
       selectedAuthorizationId: null,
@@ -234,8 +234,10 @@ export const useApp = create<AppState>((set, get) => ({
   initData: async () => {
     set({ isLoading: true, error: null });
     try {
-      // First, fetch organizations
-      const rawOrgs = await api.fetchOrganizations();
+      // First, fetch organizations — selectedOrgId is set by login()
+      const orgId = get().selectedOrgId;
+      if (!orgId) throw new Error("No organization selected");
+      const rawOrgs = await api.fetchOrganizations(orgId);
       const orgs: Organization[] = rawOrgs.map((o) => ({
         id: o.id,
         name: o.name,
@@ -249,13 +251,11 @@ export const useApp = create<AppState>((set, get) => ({
         lastActivity: o.updated_at || o.created_at,
       }));
 
-      // Find initial org
-      let currentOrgId = get().selectedOrgId || "00000000-0000-0000-0000-000000000001";
-      if (orgs.length > 0 && !orgs.some((o) => o.id === currentOrgId)) {
-        currentOrgId = orgs[0].id;
+      if (orgs.length === 0) {
+        throw new Error("Organization not found. Check the Organization ID and try again.");
       }
 
-      set({ organizations: orgs, selectedOrgId: currentOrgId, demoWorkspaceMode: "full" });
+      set({ organizations: orgs, selectedOrgId: orgId, demoWorkspaceMode: "full" });
       await get().fetchData();
     } catch (e: any) {
       console.warn("Failed to initialize workspace data. Falling back to real scan standalone mode.", e);

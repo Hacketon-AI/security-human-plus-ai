@@ -4,9 +4,11 @@ ENV NEXT_TELEMETRY_DISABLED=1
 
 FROM base AS builder
 COPY package.json package-lock.json* bun.lock* ./
-# Install dependencies
-RUN if [ -f package-lock.json ]; then npm ci; \
-    elif [ -f bun.lock ]; then npm install -g bun && bun install; \
+# Install dependencies — use npm install (not npm ci) so npm resolves
+# platform-specific optional binaries for linux-musl (Alpine) correctly.
+# npm ci with a lockfile generated on macOS/Windows silently skips the
+# @tailwindcss/oxide musl native binding, breaking the Tailwind build.
+RUN if [ -f bun.lock ]; then npm install -g bun && bun install; \
     else npm install; \
     fi
 
