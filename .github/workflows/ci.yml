@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  backend-ci:
+    name: Backend CI
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Create Virtual Environment
+        working-directory: ./backend
+        run: python -m venv .venv
+
+      - name: Install Dependencies
+        run: make install
+
+      - name: Run Checks (Lint, Typecheck, Test)
+        run: make check
+
+  frontend-ci:
+    name: Frontend CI
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        working-directory: ./frontend
+        run: bun install
+
+      - name: Generate Prisma Client
+        working-directory: ./frontend
+        run: bun run db:generate
+
+      - name: Lint Frontend
+        working-directory: ./frontend
+        run: bun run lint
+
+      - name: Test Frontend
+        working-directory: ./frontend
+        run: bun run test
+
+      - name: Build Frontend
+        working-directory: ./frontend
+        env:
+          NEXT_TELEMETRY_DISABLED: 1
+        run: bun run build
