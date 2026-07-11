@@ -3,7 +3,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import DateTime, Index, JSON, String, Uuid, ForeignKey, func
+from sqlalchemy import JSON, DateTime, ForeignKey, Index, String, Uuid, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.platform.database import Base, TimestampMixin

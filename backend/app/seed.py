@@ -1,4 +1,4 @@
-﻿"""Demo seed data — realistic Indonesian fintech & enterprise security scenarios.
+"""Demo seed data — realistic Indonesian fintech & enterprise security scenarios.
 
 Three client organizations, each with real-looking projects, assets, active
 authorizations, engagements running right now, and a mix of completed, in-progress,
@@ -8,37 +8,38 @@ Run: python -m app.seed
 """
 
 import asyncio
-from datetime import datetime, timedelta, UTC
+from datetime import UTC, datetime, timedelta
 from uuid import UUID
+
 from sqlalchemy import delete
 
 from app.config import get_settings
-from app.platform.database import create_engine, create_session_factory
-from app.modules.organizations.models import Organization
-from app.modules.organizations.enums import OrganizationStatus
-from app.modules.projects.models import Project
-from app.modules.projects.enums import ProjectStatus
-from app.modules.assets.models import Asset
 from app.modules.assets.enums import (
-    AssetType,
-    AssetEnvironment,
     AssetCriticality,
+    AssetEnvironment,
     AssetStatus,
+    AssetType,
     VerificationMethod,
 )
-from app.modules.authorizations.models import Authorization, AuthorizationScope
+from app.modules.assets.models import Asset
 from app.modules.authorizations.enums import AuthorizationStatus, RiskTier
-from app.modules.engagements.models import Engagement, EngagementScope
+from app.modules.authorizations.models import Authorization, AuthorizationScope
 from app.modules.engagements.enums import EngagementStatus
+from app.modules.engagements.models import Engagement, EngagementScope
+from app.modules.organizations.enums import OrganizationStatus
+from app.modules.organizations.models import Organization
+from app.modules.projects.enums import ProjectStatus
+from app.modules.projects.models import Project
+from app.modules.validation_executions.enums import (
+    ExecutionOutcome,
+    ExecutionStatus,
+    StepStatus,
+)
 from app.modules.validation_executions.models import (
     ValidationExecution,
     ValidationStepResult,
 )
-from app.modules.validation_executions.enums import (
-    ExecutionStatus,
-    ExecutionOutcome,
-    StepStatus,
-)
+from app.platform.database import create_engine, create_session_factory
 
 
 async def run_seed():
@@ -90,7 +91,6 @@ async def run_seed():
         )
         session.add_all([org1, org2, org3])
         await session.flush()
-
 
         # ------------------------------------------------------------------ #
         # PROJECTS
@@ -163,7 +163,6 @@ async def run_seed():
         session.add_all([p1, p2, p3, p4, p5])
         await session.flush()
 
-
         # ------------------------------------------------------------------ #
         # ASSETS
         # Real-looking domain names, realistic criticality tiers, mixed status
@@ -225,7 +224,6 @@ async def run_seed():
             ownership_verified_at=now - timedelta(days=30),
             verification_method=VerificationMethod.dns_txt_record,
         )
-
 
         # Telkom Sigma — Cloud Console (p3)
         a5 = Asset(
@@ -311,7 +309,6 @@ async def run_seed():
 
         session.add_all([a1, a2, a3, a4, a5, a6, a7, a8, a9, a10])
         await session.flush()
-
 
         # ------------------------------------------------------------------ #
         # AUTHORIZATIONS
@@ -412,7 +409,6 @@ async def run_seed():
         session.add_all([auth1, auth2, auth3, auth4, auth5])
         await session.flush()
 
-
         # ------------------------------------------------------------------ #
         # AUTHORIZATION SCOPES
         # ------------------------------------------------------------------ #
@@ -498,7 +494,6 @@ async def run_seed():
 
         session.add_all([sc1, sc2, sc3, sc4, sc5, sc6, sc7])
         await session.flush()
-
 
         # ------------------------------------------------------------------ #
         # ENGAGEMENTS
@@ -605,7 +600,6 @@ async def run_seed():
         session.add_all([eng1, eng2, eng3, eng4])
         await session.flush()
 
-
         # ------------------------------------------------------------------ #
         # ENGAGEMENT SCOPES
         # ------------------------------------------------------------------ #
@@ -674,7 +668,6 @@ async def run_seed():
 
         session.add_all([es1, es2, es3, es4, es5])
         await session.flush()
-
 
         # ------------------------------------------------------------------ #
         # VALIDATION EXECUTIONS
@@ -770,7 +763,6 @@ async def run_seed():
             finished_at=now - timedelta(minutes=62),
         )
 
-
         # ── Execution 3: currently executing (Telkom Sigma control plane) ──
         exec3 = ValidationExecution(
             id=UUID("5f2a8d1b-4e7c-4b0f-d6a3-1e9b5f8a2d4e"),
@@ -859,7 +851,6 @@ async def run_seed():
         session.add_all([exec1, exec2, exec3, exec4])
         await session.flush()
 
-
         # ------------------------------------------------------------------ #
         # VALIDATION STEP RESULTS
         # Detailed evidence for the two completed executions
@@ -878,7 +869,9 @@ async def run_seed():
                 "cipher": "TLS_AES_256_GCM_SHA384",
                 "cert_issuer": "DigiCert TLS RSA SHA256 2020 CA1",
                 "cert_subject": "api.pinjamanku.co.id",
-                "cert_expiry": (now + timedelta(days=187)).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "cert_expiry": (now + timedelta(days=187)).strftime(
+                    "%Y-%m-%dT%H:%M:%SZ"
+                ),
                 "san_match": True,
             },
             started_at=now - timedelta(minutes=71),
@@ -925,7 +918,7 @@ async def run_seed():
             evidence={
                 "unauthenticated_returns_401": True,
                 "www_authenticate_present": True,
-                "www_authenticate": "Bearer realm=\"api.pinjamanku.co.id\"",
+                "www_authenticate": 'Bearer realm="api.pinjamanku.co.id"',
                 "bearer_without_scope_returns_403": True,
             },
             started_at=now - timedelta(minutes=70, seconds=20),
@@ -988,11 +981,12 @@ async def run_seed():
         print("+ Database seeding completed.")
         print()
         print("  Login with Organization ID:")
-        print("  BRI Ventures Digital   ->  a3f7c2d1-8b4e-4f9a-b6c3-2e1d5f8a9b0c  (dev default)")
+        print(
+            "  BRI Ventures Digital   ->  a3f7c2d1-8b4e-4f9a-b6c3-2e1d5f8a9b0c  (dev default)"  # noqa: E501
+        )
         print("  Telkom Sigma Cloud     ->  b8e4d6f2-1c7a-4e2b-9d5f-3a0c8e7b4d1f")
         print("  Mandiri Sekuritas      ->  c1d9e5a3-4f2b-4c8d-a7e1-6b3d0f9c2e5a")
 
 
 if __name__ == "__main__":
     asyncio.run(run_seed())
-

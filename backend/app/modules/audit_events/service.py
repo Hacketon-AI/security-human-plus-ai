@@ -2,7 +2,7 @@
 
 import uuid
 from collections.abc import Sequence
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import UUID
 
 from app.modules.audit_events.models import AuditEvent
@@ -19,7 +19,7 @@ class AuditEventService:
         event = AuditEvent(
             id=uuid.uuid4(),
             organization_id=org_id,
-            at=datetime.now(timezone.utc),
+            at=datetime.now(UTC),
             actor=payload.actor,
             actor_type=payload.actor_type,
             action=payload.action,

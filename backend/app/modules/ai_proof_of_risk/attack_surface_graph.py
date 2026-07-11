@@ -68,14 +68,14 @@ _FINDING_FRAGMENTS: dict[str, dict[str, str]] = {
         "prerequisite": "User navigates from the application to an external site",
         "impact": "Leakage of sensitive URL parameters via Referer header",
         "risk": "Exposure of session tokens or PII to third parties",
-        "remediation": "Set Referrer-Policy to 'strict-origin-when-cross-origin' or 'no-referrer'",
+        "remediation": "Set Referrer-Policy to 'strict-origin-when-cross-origin' or 'no-referrer'",  # noqa: E501
     },
     "missing_permissions_policy": {
         "control": "Permissions-Policy header",
         "prerequisite": "Third-party scripts or frames loaded in the application",
-        "impact": "Unauthorized access to browser features (camera, microphone, geolocation)",
+        "impact": "Unauthorized access to browser features (camera, microphone, geolocation)",  # noqa: E501
         "risk": "Privacy violation and potential data exfiltration",
-        "remediation": "Deploy Permissions-Policy to explicitly allow or deny specific browser features",
+        "remediation": "Deploy Permissions-Policy to explicitly allow or deny specific browser features",  # noqa: E501
     },
     "missing_x_content_type_options": {
         "control": "X-Content-Type-Options header",

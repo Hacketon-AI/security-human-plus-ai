@@ -24,15 +24,15 @@ from app.config import (
 from app.modules.ai_proof_of_risk.router import router as ai_proof_of_risk_router
 from app.modules.asset_verifications.router import router as asset_verifications_router
 from app.modules.assets.router import router as assets_router
+from app.modules.audit_events.router import router as audit_events_router
 from app.modules.authorizations.router import router as authorizations_router
+from app.modules.domain_safe_scan.router import router as domain_safe_scan_router
 from app.modules.engagements.router import router as engagements_router
 from app.modules.organizations.router import router as organizations_router
 from app.modules.projects.router import router as projects_router
 from app.modules.validation_executions.router import (
     router as validation_executions_router,
 )
-from app.modules.audit_events.router import router as audit_events_router
-from app.modules.domain_safe_scan.router import router as domain_safe_scan_router
 from app.modules.workers.router import router as workers_router
 from app.platform import health
 from app.platform.database import create_engine, create_session_factory
