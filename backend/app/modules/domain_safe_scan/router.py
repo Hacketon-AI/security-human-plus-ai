@@ -11,7 +11,7 @@ service = DomainSafeScanService()
 
 
 @router.post("/analyze", response_model=DomainSafeScanResponse)
-async def analyze_domain(request: DomainSafeScanRequest):
+async def analyze_domain(request: DomainSafeScanRequest) -> DomainSafeScanResponse:
     try:
         return await service.analyze(request)
     except ValueError as e:

@@ -42,7 +42,7 @@ from app.modules.validation_executions.models import (
 from app.platform.database import create_engine, create_session_factory
 
 
-async def run_seed():
+async def run_seed() -> None:
     settings = get_settings()
     engine = create_engine(settings)
     session_factory = create_session_factory(engine)

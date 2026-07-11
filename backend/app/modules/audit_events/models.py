@@ -2,6 +2,7 @@
 
 import uuid
 from datetime import datetime
+from typing import Any
 
 from sqlalchemy import JSON, DateTime, ForeignKey, Index, String, Uuid, func
 from sqlalchemy.orm import Mapped, mapped_column
@@ -35,4 +36,4 @@ class AuditEvent(TimestampMixin, Base):
     entity_type: Mapped[str] = mapped_column(String(100), nullable=False)
     entity_id: Mapped[str] = mapped_column(String(200), nullable=False)
     execution_id: Mapped[str | None] = mapped_column(String(200), nullable=True)
-    safe_metadata: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
+    safe_metadata: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False, default=dict)
