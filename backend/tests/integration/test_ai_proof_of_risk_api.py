@@ -9,6 +9,7 @@ from app.modules.ai_proof_of_risk.schemas import (
 from app.modules.ai_proof_of_risk.service import AIProofOfRiskService
 from fastapi.testclient import TestClient
 
+
 @pytest.fixture
 def client(migrated_dsn: str) -> TestClient:
     app = create_app()
