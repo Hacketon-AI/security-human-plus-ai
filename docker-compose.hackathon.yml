@@ -18,7 +18,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     ports:
-      - "8000:8000"
+      - "8005:8000"
     env_file:
       - .env
     environment:
@@ -37,10 +37,10 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     ports:
-      - "3000:3000"
+      - "3005:3000"
     environment:
       # API Base URL used by browser runtime
-      NEXT_PUBLIC_API_BASE_URL: "http://localhost:8000"
+      NEXT_PUBLIC_API_BASE_URL: "https://api.agungzippo.tech"
       NEXT_PUBLIC_USE_MOCK_API: "false"
       # API Base URL used by server-side proxy
       API_INTERNAL_BASE_URL: "http://securescope-api:8000"

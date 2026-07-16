@@ -1,0 +1,7 @@
+agungzippo.tech {
+    reverse_proxy securescope-frontend:3000
+}
+
+api.agungzippo.tech {
+    reverse_proxy securescope-api:8000
+}
