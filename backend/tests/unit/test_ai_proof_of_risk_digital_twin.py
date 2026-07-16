@@ -100,7 +100,7 @@ def test_scenario_has_expected_proof_token() -> None:
 
 
 def test_unsupported_finding_type_raises() -> None:
-    finding = _make_finding(finding_type="missing_hsts")
+    finding = _make_finding(finding_type="unsupported_type")
     with pytest.raises(ScenarioSafetyViolation):
         generate_scenario(
             finding=finding,

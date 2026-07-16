@@ -208,6 +208,7 @@ class AIProofOfRiskService:
                 digital_twin_scenarios.append(scenario)
             except ScenarioSafetyViolation as e:
                 import logging
+
                 logger = logging.getLogger(__name__)
                 logger.info(f"Skipping digital twin scenario generation: {e}")
 

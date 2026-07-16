@@ -83,7 +83,7 @@ def _celery_settings(**overrides: object) -> Settings:
 
 def test_app_construction_uses_broker_url_without_leaking_it_in_repr() -> None:
     settings = _celery_settings()
-    app = create_validation_celery_app(settings)
+    app = create_validation_celery_app(settings.celery_broker_url)
 
     assert isinstance(app, Celery)
     # The URL reaches Celery's internal config but stays out of any
@@ -94,7 +94,7 @@ def test_app_construction_uses_broker_url_without_leaking_it_in_repr() -> None:
 
 
 def test_app_has_result_backend_disabled() -> None:
-    app = create_validation_celery_app(_celery_settings())
+    app = create_validation_celery_app(_celery_settings().celery_broker_url)
     # ``conf.result_backend`` returns None for a disabled backend; the
     # default would be an empty string. Either way "no Redis result
     # backend" must hold.
@@ -103,12 +103,12 @@ def test_app_has_result_backend_disabled() -> None:
 
 
 def test_app_does_not_run_tasks_eagerly() -> None:
-    app = create_validation_celery_app(_celery_settings())
+    app = create_validation_celery_app(_celery_settings().celery_broker_url)
     assert app.conf.task_always_eager is False
 
 
 def test_app_refuses_non_json_serializers() -> None:
-    app = create_validation_celery_app(_celery_settings())
+    app = create_validation_celery_app(_celery_settings().celery_broker_url)
     assert app.conf.task_serializer == "json"
     assert list(app.conf.accept_content) == ["json"]
 
@@ -122,7 +122,7 @@ def test_app_construction_without_broker_url_raises() -> None:
         validation_dispatcher_backend=ValidationDispatcherBackend.unconfigured,
     )
     with pytest.raises(RuntimeError, match="celery_broker_url"):
-        create_validation_celery_app(settings)
+        create_validation_celery_app(settings.celery_broker_url)
 
 
 # --- make_celery_sender -----------------------------------------------------
@@ -407,6 +407,7 @@ def test_default_dispatcher_backend_remains_unconfigured() -> None:
     settings = Settings(
         environment=Environment.development,
         database_dsn=SecretStr(_DSN),
+        _env_file=None,
     )
     assert (
         settings.validation_dispatcher_backend

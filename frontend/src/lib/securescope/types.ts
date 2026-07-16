@@ -295,6 +295,9 @@ export interface DispatchQueueState {
 export type RouteKey =
   | "login"
   | "dashboard"
+  | "operations"
+  | "ai_intelligence"
+  | "pentest_audit"
   | "organizations"
   | "organization_detail"
   | "projects"

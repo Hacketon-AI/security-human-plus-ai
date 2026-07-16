@@ -9,11 +9,16 @@ from app.modules.ai_proof_of_risk.schemas import (
 from app.modules.ai_proof_of_risk.service import AIProofOfRiskService
 from fastapi.testclient import TestClient
 
-app = create_app()
-client = TestClient(app)
+
+@pytest.fixture
+def client(migrated_dsn: str) -> TestClient:
+    app = create_app()
+    return TestClient(app)
 
 
-def test_api_accepts_valid_request(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_api_accepts_valid_request(
+    monkeypatch: pytest.MonkeyPatch, client: TestClient
+) -> None:
     # We might need to mock the service layer to avoid actual processing
     mock_resp = AIProofOfRiskAnalysisResponse(
         analysis_id="analysis_1",
@@ -51,7 +56,7 @@ def test_api_accepts_valid_request(monkeypatch: pytest.MonkeyPatch) -> None:
     assert response.json()["execution_id"] == str(mock_resp.execution_id)
 
 
-def test_api_rejects_invalid_analysis_mode() -> None:
+def test_api_rejects_invalid_analysis_mode(client: TestClient) -> None:
     execution_id = uuid.uuid4()
     response = client.post(
         f"/ai-proof-of-risk/executions/{execution_id}/analyze",
@@ -61,7 +66,9 @@ def test_api_rejects_invalid_analysis_mode() -> None:
     assert response.status_code == 422  # FastAPI validation error
 
 
-def test_api_returns_no_secrets(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_api_returns_no_secrets(
+    monkeypatch: pytest.MonkeyPatch, client: TestClient
+) -> None:
     mock_resp = AIProofOfRiskAnalysisResponse(
         analysis_id="analysis_2",
         status="completed",
@@ -97,7 +104,7 @@ def test_api_returns_no_secrets(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def test_api_with_sandbox_disabled_does_not_produce_proof_artifact(
-    monkeypatch: pytest.MonkeyPatch,
+    monkeypatch: pytest.MonkeyPatch, client: TestClient
 ) -> None:
     mock_resp = AIProofOfRiskAnalysisResponse(
         analysis_id="analysis_3",

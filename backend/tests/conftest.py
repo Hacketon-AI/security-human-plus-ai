@@ -289,11 +289,11 @@ def app_client(migrated_dsn: str, engine: AsyncEngine) -> Callable[..., Any]:
         # Staging/production refuse to start without a worker credential, so a
         # deployed-shaped test app gets the explicit test token unless a test
         # overrides it (e.g. to assert the startup failure directly).
-        if (
-            environment in (Environment.staging, Environment.production)
-            and "worker_auth_token" not in overrides
-        ):
-            overrides["worker_auth_token"] = SecretStr(WORKER_AUTH_TOKEN)
+        if environment in (Environment.staging, Environment.production):
+            overrides.setdefault("worker_auth_token", SecretStr(WORKER_AUTH_TOKEN))
+            overrides.setdefault(
+                "jwt_secret", SecretStr("test-only-deployed-jwt-secret")
+            )
         settings = Settings(
             environment=environment,
             database_dsn=SecretStr(migrated_dsn),

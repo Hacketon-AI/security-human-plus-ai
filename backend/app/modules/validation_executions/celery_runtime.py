@@ -71,6 +71,11 @@ def create_validation_celery_app(
     The broker URL leaves :class:`SecretStr` only to be passed to Celery's
     internal config; no log, repr, or exception in this module includes it.
     """
+    if broker_url is None:
+        raise RuntimeError(
+            "celery_broker_url must be configured before constructing the "
+            "validation Celery app"
+        )
     app = Celery(app_name)
     app.conf.update(
         broker_url=broker_url.get_secret_value(),

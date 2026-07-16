@@ -22,6 +22,14 @@ const nextConfig: NextConfig = {
         source: "/domain-safe-scan/:path*",
         destination: `${internalApiBaseUrl}/domain-safe-scan/:path*`,
       },
+      {
+        source: "/pentest-audit/:path*",
+        destination: `${internalApiBaseUrl}/pentest-audit/:path*`,
+      },
+      {
+        source: "/auth/:path*",
+        destination: `${internalApiBaseUrl}/auth/:path*`,
+      },
     ];
   },
 };

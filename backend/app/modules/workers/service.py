@@ -1,7 +1,6 @@
 """Business logic for deriving worker and dispatch queue state."""
 
-from collections.abc import Sequence
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from uuid import UUID
 
 from sqlalchemy import func, select
@@ -26,14 +25,16 @@ class WorkersService:
             select(ValidationExecution)
             .where(
                 ValidationExecution.organization_id == org_id,
-                ValidationExecution.status.in_([
-                    ExecutionStatus.executing,
-                    ExecutionStatus.dispatching,
-                    ExecutionStatus.queued,
-                    ExecutionStatus.succeeded,
-                    ExecutionStatus.failed,
-                    ExecutionStatus.blocked,
-                ]),
+                ValidationExecution.status.in_(
+                    [
+                        ExecutionStatus.executing,
+                        ExecutionStatus.dispatching,
+                        ExecutionStatus.queued,
+                        ExecutionStatus.succeeded,
+                        ExecutionStatus.failed,
+                        ExecutionStatus.blocked,
+                    ]
+                ),
             )
             .order_by(ValidationExecution.updated_at.desc())
             .limit(20)
@@ -44,7 +45,11 @@ class WorkersService:
         for ex in executions:
             if ex.status == ExecutionStatus.executing:
                 state = "running"
-            elif ex.status in (ExecutionStatus.succeeded, ExecutionStatus.failed, ExecutionStatus.blocked):
+            elif ex.status in (
+                ExecutionStatus.succeeded,
+                ExecutionStatus.failed,
+                ExecutionStatus.blocked,
+            ):
                 state = "finished"
             else:
                 state = "idle"
@@ -54,22 +59,25 @@ class WorkersService:
             heartbeat = ex.updated_at.isoformat() if ex.updated_at else None
             exec_code = (
                 f"EXEC-{ex.created_at.strftime('%Y%m%d')}-{short_id.upper()}"
-                if ex.created_at else str(ex.id)[:8].upper()
+                if ex.created_at
+                else str(ex.id)[:8].upper()
             )
 
-            workers.append(WorkerStateResponse(
-                worker_id=worker_id,
-                region=_REGION,
-                state=state,
-                current_execution_id=exec_code if state == "running" else None,
-                last_heartbeat=heartbeat,
-            ))
+            workers.append(
+                WorkerStateResponse(
+                    worker_id=worker_id,
+                    region=_REGION,
+                    state=state,
+                    current_execution_id=exec_code if state == "running" else None,
+                    last_heartbeat=heartbeat,
+                )
+            )
 
         return workers
 
     async def get_dispatch_queue(self, org_id: UUID) -> DispatchQueueResponse:
         """Derive queue metrics from current execution status counts."""
-        cutoff = datetime.now(timezone.utc) - timedelta(hours=24)
+        cutoff = datetime.now(UTC) - timedelta(hours=24)
 
         # Count all statuses for this org in one query
         result = await self._session.execute(
@@ -85,17 +93,20 @@ class WorkersService:
             .select_from(ValidationExecution)
             .where(
                 ValidationExecution.organization_id == org_id,
-                ValidationExecution.status.in_([
-                    ExecutionStatus.failed,
-                    ExecutionStatus.blocked,
-                ]),
+                ValidationExecution.status.in_(
+                    [
+                        ExecutionStatus.failed,
+                        ExecutionStatus.blocked,
+                    ]
+                ),
                 ValidationExecution.updated_at >= cutoff,
             )
         )
         failed_24h = failed_result.scalar_one_or_none() or 0
 
-        pending = (counts.get(ExecutionStatus.queued, 0)
-                   + counts.get(ExecutionStatus.dispatching, 0))
+        pending = counts.get(ExecutionStatus.queued, 0) + counts.get(
+            ExecutionStatus.dispatching, 0
+        )
         active = counts.get(ExecutionStatus.executing, 0)
 
         return DispatchQueueResponse(

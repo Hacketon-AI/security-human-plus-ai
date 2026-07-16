@@ -62,7 +62,7 @@ def generate_remediation_plan(scenario: DigitalTwinScenario) -> RemediationPlan:
             risk_reduction="High",
         )
     # Generic fallback
-    return RemediationPlan(  # type: ignore[unreachable]
+    return RemediationPlan(
         immediate_fix="Address missing security controls.",
         developer_tasks=["Implement controls."],
         devops_tasks=[],

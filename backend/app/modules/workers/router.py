@@ -1,4 +1,4 @@
-"""HTTP routes for workers and dispatch queues. Thin: parse, authorize, delegate, map."""
+"""HTTP routes for workers and dispatch queues. Thin: parse, authorize, delegate, map."""  # noqa: E501
 
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession

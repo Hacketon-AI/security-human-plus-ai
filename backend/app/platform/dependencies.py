@@ -26,6 +26,13 @@ async def get_session(request: Request) -> AsyncIterator[AsyncSession]:
         yield session
 
 
+# Alias for the auth module — same implementation, clearer name.
+async def get_db_session(request: Request) -> AsyncIterator[AsyncSession]:
+    """Yield a request-scoped session (alias used by auth module)."""
+    async with transaction(request.app.state.session_factory) as session:
+        yield session
+
+
 def get_app_settings(request: Request) -> Settings:
     """Return the immutable settings bound to the running application.
 
@@ -34,3 +41,9 @@ def get_app_settings(request: Request) -> Settings:
     untyped, so the value is cast back to the known ``Settings`` type.
     """
     return cast(Settings, request.app.state.settings)
+
+
+def get_jwt_secret(request: Request) -> str:
+    """Return the JWT signing secret from application settings."""
+    settings = cast(Settings, request.app.state.settings)
+    return settings.jwt_secret.get_secret_value()

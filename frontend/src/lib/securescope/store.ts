@@ -100,6 +100,17 @@ interface AppState {
   setActiveAnalysisSource: (source: "manual_execution" | "domain_safe_scan" | "ai_proof_of_risk" | "demo_execution" | null) => void;
   setActiveSecurityWorkflow: (workflow: "manual_validation" | "ai_proof_of_risk" | "domain_safe_scan" | "execution_detail" | null) => void;
   setLatestManualValidationResult: (result: any) => void;
+
+  // Pentest Audit
+  latestPentestAuditResult: any | null;
+  latestPentestAuditTarget: string | null;
+  latestPentestAuditAt: string | null;
+  pentestAuditLoading: boolean;
+  pentestAuditError: string | null;
+  setPentestAuditResult: (target: string, result: any) => void;
+  clearPentestAuditResult: () => void;
+  setPentestAuditLoading: (loading: boolean) => void;
+  setPentestAuditError: (error: string | null) => void;
 }
 
 // --------------------------------------------------
@@ -173,6 +184,12 @@ export const useApp = create<AppState>((set, get) => ({
   latestDomainSafeScanDomain: null,
   latestDomainSafeScanAt: null,
 
+  latestPentestAuditResult: null,
+  latestPentestAuditTarget: null,
+  latestPentestAuditAt: null,
+  pentestAuditLoading: false,
+  pentestAuditError: null,
+
   activeSecurityWorkflow: null,
   activeAnalysisSource: null,
   latestManualValidationResult: null,
@@ -196,7 +213,12 @@ export const useApp = create<AppState>((set, get) => ({
     set({ authenticated: true, route: "dashboard", selectedOrgId: orgId, error: null });
     get().initData();
   },
-  logout: () =>
+  logout: () => {
+    // Clear JWT token and user from localStorage
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("securescope_token");
+      localStorage.removeItem("securescope_user");
+    }
     set({
       authenticated: false,
       route: "login",
@@ -229,7 +251,8 @@ export const useApp = create<AppState>((set, get) => ({
       activeAnalysisSource: null,
       latestManualValidationResult: null,
       latestScanMetadata: null,
-    }),
+    });
+  },
 
   initData: async () => {
     set({ isLoading: true, error: null });
@@ -742,12 +765,34 @@ export const useApp = create<AppState>((set, get) => ({
   setScanMetadata: (metadata: any) => set({ latestScanMetadata: metadata }),
   setActiveAnalysisSource: (source: AppState["activeAnalysisSource"]) => set({ activeAnalysisSource: source }),
   setActiveSecurityWorkflow: (workflow: AppState["activeSecurityWorkflow"]) => set({ activeSecurityWorkflow: workflow }),
-  setLatestManualValidationResult: (result: any) => set({ latestManualValidationResult: result })
+  setLatestManualValidationResult: (result: any) => set({ latestManualValidationResult: result }),
+
+  setPentestAuditResult: (target, result) => {
+    set({
+      latestPentestAuditTarget: target,
+      latestPentestAuditResult: result,
+      latestPentestAuditAt: new Date().toISOString(),
+      pentestAuditLoading: false,
+      pentestAuditError: null,
+    });
+  },
+  clearPentestAuditResult: () => {
+    set({
+      latestPentestAuditTarget: null,
+      latestPentestAuditResult: null,
+      latestPentestAuditAt: null,
+      pentestAuditError: null,
+    });
+  },
+  setPentestAuditLoading: (loading) => set({ pentestAuditLoading: loading }),
+  setPentestAuditError: (error) => set({ pentestAuditError: error, pentestAuditLoading: false }),
 }));
 
 // Convenience helpers
 export const NAV_ITEMS: { key: RouteKey; label: string }[] = [
-  { key: "dashboard", label: "Dashboard" },
+  { key: "dashboard", label: "Overview" },
+  { key: "operations", label: "Operations" },
+  { key: "ai_intelligence", label: "AI Intelligence" },
   { key: "organizations", label: "Organizations" },
   { key: "projects", label: "Projects" },
   { key: "assets", label: "Assets" },
@@ -755,6 +800,7 @@ export const NAV_ITEMS: { key: RouteKey; label: string }[] = [
   { key: "engagements", label: "Engagements" },
   { key: "execution_wizard", label: "Executions" },
   { key: "workers", label: "Workers" },
+  { key: "pentest_audit", label: "Pentest Audit" },
   { key: "audit", label: "Audit" },
   { key: "settings", label: "Settings" },
 ];

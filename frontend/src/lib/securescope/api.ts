@@ -1,5 +1,7 @@
 // API Client for SecureScope Control Plane
 
+import { getStoredToken } from "./authApi";
+
 const getApiBaseUrl = () => {
   if (typeof window !== "undefined") {
     // Client-side: relative to handle Next.js rewrites proxy
@@ -8,10 +10,16 @@ const getApiBaseUrl = () => {
   return process.env.API_INTERNAL_BASE_URL || process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:8000";
 };
 
-// Helper for HTTP requests
+// Helper for HTTP requests. Tenant identity is derived from the bearer token;
+// X-Organization-Id remains only for the backend's development fallback.
 async function request(path: string, options: RequestInit = {}) {
   const url = `${getApiBaseUrl()}${path}`;
-  const response = await fetch(url, options);
+  const headers = new Headers(options.headers);
+  const token = getStoredToken();
+  if (token && !headers.has("Authorization")) {
+    headers.set("Authorization", `Bearer ${token}`);
+  }
+  const response = await fetch(url, { ...options, headers });
 
   if (!response.ok) {
     const errorText = await response.text().catch(() => "Unknown error");
@@ -24,6 +32,10 @@ async function request(path: string, options: RequestInit = {}) {
 
   return response.json();
 }
+
+// Shared authenticated transport for control-plane feature clients that do not
+// use one of the resource-specific helpers below.
+export { request as authenticatedRequest };
 
 // 1. Organizations
 export async function fetchOrganizations(orgId: string): Promise<any[]> {

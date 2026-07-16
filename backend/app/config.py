@@ -7,9 +7,12 @@ repr — see ``.claude/rules/data-handling.md``.
 
 from enum import StrEnum
 from functools import lru_cache
+from uuid import UUID
 
-from pydantic import SecretStr, field_validator, model_validator
+from pydantic import EmailStr, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+_DEVELOPMENT_JWT_SECRET = "securescope-dev-jwt-secret-change-in-production-2026"  # noqa: S105
 
 
 class Environment(StrEnum):
@@ -53,6 +56,18 @@ class Settings(BaseSettings):
     # Carries database credentials; SecretStr keeps it out of logs and repr.
     # The async engine is constructed from this in the platform layer.
     database_dsn: SecretStr
+
+    # A source-visible fallback is permitted solely for local development and
+    # tests. Deployed environments must provide a distinct secret below.
+    jwt_secret: SecretStr = SecretStr(_DEVELOPMENT_JWT_SECRET)
+
+    # The initial administrator is opt-in, environment-provided, and bound to
+    # an existing organization. No application default credential exists.
+    bootstrap_admin_email: EmailStr | None = None
+    bootstrap_admin_username: str | None = None
+    bootstrap_admin_password: SecretStr | None = None
+    bootstrap_admin_organization_id: UUID | None = None
+    bootstrap_admin_full_name: str | None = None
 
     # Development-only adapters (header-based tenant auth and organization
     # provisioning). ``None`` means "derive from environment": enabled in
@@ -103,14 +118,6 @@ class Settings(BaseSettings):
     cors_origins: str = "*"
 
     # Transitional fallback gate for the shared ``worker_auth_token``.
-    # Default off in every environment: a worker must present a
-    # per-execution credential (see ``worker_credential_contracts``) to
-    # authenticate. Set to True only as an explicit transitional step
-    # while migrating workers to the per-execution model — staging /
-    # production must enable it deliberately, and the worker hook logs
-    # a deprecation warning every time the shared token is accepted
-    # (``.claude/rules/security-boundaries.md`` → least-privilege,
-    # single-scan worker credentials).
     worker_shared_token_fallback_enabled: bool = False
 
     # AI Proof-of-Risk Fireworks config
@@ -144,6 +151,41 @@ class Settings(BaseSettings):
         return value
 
     @model_validator(mode="after")
+    def _require_secure_jwt_secret_in_deployed_environments(self) -> "Settings":
+        if self.environment in (Environment.staging, Environment.production):
+            if self.jwt_secret.get_secret_value() == _DEVELOPMENT_JWT_SECRET:
+                raise ValueError(
+                    "jwt_secret must be configured to a non-development value "
+                    "in staging and production"
+                )
+        return self
+
+    @model_validator(mode="after")
+    def _validate_bootstrap_admin_configuration(self) -> "Settings":
+        required_values = (
+            self.bootstrap_admin_email,
+            self.bootstrap_admin_username,
+            self.bootstrap_admin_password,
+            self.bootstrap_admin_organization_id,
+        )
+        supplied_count = sum(value is not None for value in required_values)
+        if supplied_count not in (0, len(required_values)):
+            raise ValueError(
+                "bootstrap admin email, username, password, and organization ID "
+                "must be configured together"
+            )
+        if supplied_count:
+            password = self.bootstrap_admin_password
+            username = self.bootstrap_admin_username
+            if password is None or len(password.get_secret_value()) < 12:
+                raise ValueError(
+                    "bootstrap_admin_password must be at least 12 characters"
+                )
+            if username is None or not username.strip():
+                raise ValueError("bootstrap_admin_username must not be empty")
+        return self
+
+    @model_validator(mode="after")
     def _reject_development_adapters_outside_development(self) -> "Settings":
         if self.environment in (Environment.development, Environment.test):
             return self
@@ -167,15 +209,7 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def _require_worker_auth_token_in_deployed_environments(self) -> "Settings":
-        """Refuse to start a deployed environment without a worker credential.
-
-        Staging and production must configure ``worker_auth_token`` so the worker
-        transition hooks can authenticate a real worker. Without it the hooks
-        would fail closed at runtime — safe, but the worker pipeline could never
-        advance an execution, so this surfaces the misconfiguration at startup
-        instead. Development/test may omit it (the hooks simply stay closed until
-        a token is set). The token value is never included in the error.
-        """
+        """Refuse to start a deployed environment without a worker credential."""
         if (
             self.environment in (Environment.staging, Environment.production)
             and self.worker_auth_token is None
@@ -187,16 +221,7 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def _reject_in_memory_dispatcher_outside_development(self) -> "Settings":
-        """Refuse to start with the in-memory dispatcher outside development/test.
-
-        The in-memory adapter is a local development convenience: it stores
-        dispatch messages in process memory and runs no worker. Allowing it in
-        staging or production would mean executions are accepted but never
-        delivered to a real worker, defeating the fail-closed default
-        (``.claude/rules/security-boundaries.md``). Selecting it outside
-        development/test fails fast at startup rather than silently weakening
-        production.
-        """
+        """Refuse to start with the in-memory dispatcher outside development/test."""
         if (
             self.validation_dispatcher_backend is ValidationDispatcherBackend.in_memory
             and self.environment not in (Environment.development, Environment.test)
@@ -209,15 +234,7 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def _require_broker_url_for_celery_backend(self) -> "Settings":
-        """Refuse to start with the Celery backend selected but no broker URL.
-
-        The Celery publisher needs a broker URL to connect to RabbitMQ; without
-        one it would fail at dispatch time. Surfacing the misconfiguration at
-        startup keeps the contract honest in every environment — dev/test,
-        staging, and production. The broker URL itself is never echoed in the
-        error message; the value is a :class:`SecretStr` and the validator
-        names only the rule.
-        """
+        """Refuse to start with the Celery backend selected but no broker URL."""
         if (
             self.validation_dispatcher_backend is ValidationDispatcherBackend.celery
             and self.celery_broker_url is None
@@ -232,6 +249,24 @@ class Settings(BaseSettings):
         if explicit is None:
             return self.environment in (Environment.development, Environment.test)
         return explicit
+
+    @property
+    def bootstrap_admin(self) -> tuple[str, str, str, UUID, str | None] | None:
+        """Return the complete opt-in bootstrap configuration, if supplied."""
+        if self.bootstrap_admin_email is None:
+            return None
+        password = self.bootstrap_admin_password
+        organization_id = self.bootstrap_admin_organization_id
+        username = self.bootstrap_admin_username
+        if password is None or organization_id is None or username is None:
+            raise RuntimeError("validated bootstrap admin configuration is incomplete")
+        return (
+            str(self.bootstrap_admin_email),
+            username,
+            password.get_secret_value(),
+            organization_id,
+            self.bootstrap_admin_full_name,
+        )
 
     @property
     def development_auth_active(self) -> bool:
@@ -249,7 +284,7 @@ class Settings(BaseSettings):
         raw = self.cors_origins.strip()
         if not raw:
             return []
-        return [o.strip() for o in raw.split(",")]
+        return [origin.strip() for origin in raw.split(",")]
 
 
 @lru_cache
