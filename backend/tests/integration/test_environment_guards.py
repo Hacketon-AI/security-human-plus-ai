@@ -5,7 +5,7 @@ from typing import Any
 from uuid import uuid4
 
 import pytest
-from app.config import Environment, Settings
+from app.config import Environment, Settings, ValidationDispatcherBackend
 from pydantic import SecretStr, ValidationError
 from tests.conftest import tenant_headers
 
@@ -14,7 +14,16 @@ _DSN = "postgresql+asyncpg://securescope:secret@localhost:5432/securescope"
 
 def _settings(environment: Environment, **overrides: object) -> Settings:
     overrides.setdefault("jwt_secret", SecretStr("test-only-deployed-jwt-secret"))
-    return Settings(environment=environment, database_dsn=SecretStr(_DSN), **overrides)
+    overrides.setdefault(
+        "validation_dispatcher_backend",
+        ValidationDispatcherBackend.unconfigured,
+    )
+    return Settings(
+        environment=environment,
+        database_dsn=SecretStr(_DSN),
+        _env_file=None,
+        **overrides,
+    )
 
 
 @pytest.mark.parametrize("environment", [Environment.staging, Environment.production])

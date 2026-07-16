@@ -111,13 +111,15 @@ async def client(migrated_dsn: str, engine: AsyncEngine) -> AsyncIterator[AsyncC
 
     Depends on ``engine`` so the per-test truncation runs before the app starts.
     """
-    from app.config import Environment, Settings
+    from app.config import Environment, Settings, ValidationDispatcherBackend
     from app.main import create_app
     from pydantic import SecretStr
 
     settings = Settings(
         environment=Environment.development,
         database_dsn=SecretStr(migrated_dsn),
+        validation_dispatcher_backend=ValidationDispatcherBackend.unconfigured,
+        _env_file=None,
     )
     app = create_app(settings)
     async with app.router.lifespan_context(app):
@@ -184,7 +186,7 @@ async def verification_app(
     Yields ``(client, resolver, app)``; tests mutate ``resolver`` and may add
     further dependency overrides (e.g. a fixed clock) on ``app``.
     """
-    from app.config import Environment, Settings
+    from app.config import Environment, Settings, ValidationDispatcherBackend
     from app.main import create_app
     from app.modules.asset_verifications.dns_resolver import get_dns_txt_resolver
     from pydantic import SecretStr
@@ -192,6 +194,8 @@ async def verification_app(
     settings = Settings(
         environment=Environment.development,
         database_dsn=SecretStr(migrated_dsn),
+        validation_dispatcher_backend=ValidationDispatcherBackend.unconfigured,
+        _env_file=None,
     )
     app = create_app(settings)
     resolver = FakeDnsResolver()
@@ -239,7 +243,7 @@ async def validation_app(
     Yields ``(client, dispatcher, app)``; tests inspect ``dispatcher.dispatched``
     and may add further dependency overrides (e.g. a fixed clock) on ``app``.
     """
-    from app.config import Environment, Settings
+    from app.config import Environment, Settings, ValidationDispatcherBackend
     from app.main import create_app
     from app.modules.validation_executions.dispatcher import (
         get_validation_dispatcher,
@@ -249,6 +253,8 @@ async def validation_app(
     settings = Settings(
         environment=Environment.development,
         database_dsn=SecretStr(migrated_dsn),
+        validation_dispatcher_backend=ValidationDispatcherBackend.unconfigured,
+        _env_file=None,
         worker_auth_token=SecretStr(WORKER_AUTH_TOKEN),
         # The pre-existing API suite drives worker hooks with the shared
         # ``X-Worker-Authorization`` token. Step 3 makes per-execution
@@ -278,7 +284,7 @@ def app_client(migrated_dsn: str, engine: AsyncEngine) -> Callable[..., Any]:
     adapters being inactive in staging/production). Depends on ``engine`` so the
     per-test truncation runs first.
     """
-    from app.config import Environment, Settings
+    from app.config import Environment, Settings, ValidationDispatcherBackend
     from app.main import create_app
     from pydantic import SecretStr
 
@@ -289,6 +295,10 @@ def app_client(migrated_dsn: str, engine: AsyncEngine) -> Callable[..., Any]:
         # Staging/production refuse to start without a worker credential, so a
         # deployed-shaped test app gets the explicit test token unless a test
         # overrides it (e.g. to assert the startup failure directly).
+        overrides.setdefault(
+            "validation_dispatcher_backend",
+            ValidationDispatcherBackend.unconfigured,
+        )
         if environment in (Environment.staging, Environment.production):
             overrides.setdefault("worker_auth_token", SecretStr(WORKER_AUTH_TOKEN))
             overrides.setdefault(
@@ -297,6 +307,7 @@ def app_client(migrated_dsn: str, engine: AsyncEngine) -> Callable[..., Any]:
         settings = Settings(
             environment=environment,
             database_dsn=SecretStr(migrated_dsn),
+            _env_file=None,
             **overrides,
         )
         app = create_app(settings)

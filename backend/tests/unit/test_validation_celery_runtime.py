@@ -75,7 +75,9 @@ def _celery_settings(**overrides: object) -> Settings:
         "celery_broker_url": SecretStr(_BROKER_URL),
     }
     base.update(overrides)
-    return Settings(**base)  # type: ignore[arg-type]
+    if base["environment"] in (Environment.staging, Environment.production):
+        base.setdefault("jwt_secret", SecretStr("test-only-deployed-jwt-secret"))
+    return Settings(_env_file=None, **base)  # type: ignore[arg-type]
 
 
 # --- create_validation_celery_app -------------------------------------------
@@ -119,6 +121,7 @@ def test_app_construction_without_broker_url_raises() -> None:
     settings = Settings(
         environment=Environment.development,
         database_dsn=SecretStr(_DSN),
+        _env_file=None,
         validation_dispatcher_backend=ValidationDispatcherBackend.unconfigured,
     )
     with pytest.raises(RuntimeError, match="celery_broker_url"):
@@ -315,6 +318,7 @@ async def test_lifespan_does_not_bind_publisher_for_in_memory_backend() -> None:
     settings = Settings(
         environment=Environment.development,
         database_dsn=SecretStr(_DSN),
+        _env_file=None,
         validation_dispatcher_backend=ValidationDispatcherBackend.in_memory,
     )
     app = _build_app(settings)
@@ -329,6 +333,7 @@ async def test_lifespan_does_not_bind_publisher_for_unconfigured_backend() -> No
     settings = Settings(
         environment=Environment.development,
         database_dsn=SecretStr(_DSN),
+        _env_file=None,
         validation_dispatcher_backend=ValidationDispatcherBackend.unconfigured,
     )
     app = _build_app(settings)
@@ -380,8 +385,10 @@ def test_celery_backend_without_broker_url_fails_settings(
         "environment": environment,
         "database_dsn": SecretStr(_DSN),
         "validation_dispatcher_backend": ValidationDispatcherBackend.celery,
+        "_env_file": None,
     }
     if environment in (Environment.staging, Environment.production):
+        overrides["jwt_secret"] = SecretStr("test-only-deployed-jwt-secret")
         overrides["worker_auth_token"] = SecretStr("deployed-token")
     with pytest.raises(ValidationError) as exc_info:
         Settings(**overrides)  # type: ignore[arg-type]
@@ -396,6 +403,8 @@ def test_celery_backend_with_broker_url_allowed_in_deployed(
     settings = Settings(
         environment=environment,
         database_dsn=SecretStr(_DSN),
+        _env_file=None,
+        jwt_secret=SecretStr("test-only-deployed-jwt-secret"),
         validation_dispatcher_backend=ValidationDispatcherBackend.celery,
         celery_broker_url=SecretStr(_BROKER_URL),
         worker_auth_token=SecretStr("deployed-token"),

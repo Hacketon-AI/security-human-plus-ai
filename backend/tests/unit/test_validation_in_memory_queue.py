@@ -294,8 +294,10 @@ def test_in_memory_backend_rejected_outside_development(
         Settings(
             environment=environment,
             database_dsn=SecretStr(_DSN),
+            jwt_secret=SecretStr("test-only-deployed-jwt-secret"),
             worker_auth_token=SecretStr("deployed-token"),
             validation_dispatcher_backend=ValidationDispatcherBackend.in_memory,
+            _env_file=None,
         )
     # The error names the rule but not any sensitive value.
     message = str(exc_info.value)
@@ -310,6 +312,7 @@ def test_in_memory_backend_allowed_in_development_and_test(
     settings = Settings(
         environment=environment,
         database_dsn=SecretStr(_DSN),
+        _env_file=None,
         validation_dispatcher_backend=ValidationDispatcherBackend.in_memory,
     )
     assert (
@@ -329,10 +332,12 @@ def test_in_memory_backend_allowed_in_development_and_test(
 def test_default_dispatcher_backend_is_unconfigured(environment: Environment) -> None:
     overrides: dict[str, Any] = {}
     if environment in (Environment.staging, Environment.production):
+        overrides["jwt_secret"] = SecretStr("test-only-deployed-jwt-secret")
         overrides["worker_auth_token"] = SecretStr("deployed-token")
     settings = Settings(
         environment=environment,
         database_dsn=SecretStr(_DSN),
+        _env_file=None,
         **overrides,
     )
     assert (

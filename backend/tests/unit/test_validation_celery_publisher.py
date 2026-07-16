@@ -72,9 +72,12 @@ def _settings_value(**overrides: Any) -> Settings:
     base: dict[str, Any] = {
         "environment": Environment.development,
         "database_dsn": SecretStr(_DSN),
+        "validation_dispatcher_backend": ValidationDispatcherBackend.unconfigured,
     }
     base.update(overrides)
-    return Settings(**base)
+    if base["environment"] in (Environment.staging, Environment.production):
+        base.setdefault("jwt_secret", SecretStr("test-only-deployed-jwt-secret"))
+    return Settings(_env_file=None, **base)
 
 
 def _payload(
