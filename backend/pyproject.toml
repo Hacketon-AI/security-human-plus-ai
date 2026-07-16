@@ -27,6 +27,10 @@ dependencies = [
     # docs/validation-dispatch-broker-design.md.
     "celery>=5.4",
     "opentelemetry-api>=1.25",
+    # JWT authentication tokens
+    "pyjwt>=2.8",
+    # Email validation for auth schemas
+    "email-validator==2.3.0",
     "opentelemetry-sdk>=1.25",
     "opentelemetry-instrumentation-fastapi>=0.46b0",
 ]

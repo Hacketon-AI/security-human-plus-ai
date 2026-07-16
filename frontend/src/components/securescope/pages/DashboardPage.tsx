@@ -641,97 +641,113 @@ import {
   AuthorizedDomainScanPanel
 } from "./DashboardAiPanels";
 
-export function DashboardPage() {
-  const workspaceWarning = useApp(s => s.workspaceWarning);
-  const demoWorkspaceMode = useApp(s => s.demoWorkspaceMode);
-  
-  const showWarning = workspaceWarning || demoWorkspaceMode === "real_scan_standalone";
-  const warningMessage = workspaceWarning || "Optional workspace context failed to load. Workspace seed data unavailable. Real authorized scan mode is still available.";
+export type DashboardView = "overview" | "operations" | "ai";
+
+function OverviewDashboard() {
+  const go = useApp((state) => state.go);
+  const assets = useApp((state) => state.assets);
+  const authorizations = useApp((state) => state.authorizations);
+  const executions = useApp((state) => state.executions);
+  const engagements = useApp((state) => state.engagements);
+
+  const verifiedAssets = assets.filter((asset) => asset.verification === "verified").length;
+  const activeAuthorizations = authorizations.filter((authorization) => authorization.state === "active").length;
+  const runningExecutions = executions.filter((execution) => execution.status === "executing").length;
+  const attentionItems = [
+    {
+      count: assets.filter((asset) => asset.verification !== "verified").length,
+      title: "Asset verification",
+      detail: "Assets still need ownership verification before they can enter scope.",
+      action: () => go("assets"),
+    },
+    {
+      count: authorizations.filter((authorization) => authorization.state !== "active").length,
+      title: "Authorization readiness",
+      detail: "Draft, expired, or blocked authorizations need operator review.",
+      action: () => go("authorizations"),
+    },
+    {
+      count: engagements.filter((engagement) => engagement.killSwitch.state !== "inactive").length,
+      title: "Safety controls",
+      detail: "One or more engagements have an armed or active kill switch.",
+      action: () => go("engagements"),
+    },
+  ].filter((item) => item.count > 0);
 
   return (
-    <>
-      <TopNavCommandBar />
-      <div className="pt-[76px] min-h-screen pb-12">
-        <AiProofOfRiskCommandStrip />
-
-        <div className="px-4 lg:px-6 py-4 space-y-4">
-          {showWarning && (
-            <AlertBanner tone="amber" title="Optional workspace context failed to load">
-              {warningMessage}
-            </AlertBanner>
-          )}
-
-          {/* ============================================================ */}
-          {/* SECTION A: MANUAL BACKEND SECURITY VALIDATION                */}
-          {/* ============================================================ */}
-          <div className="mb-8 space-y-4">
-            <div className="flex items-center gap-2 mb-2">
-              <ShieldCheck className="w-5 h-5 text-emerald-400" />
-              <h2 className="text-lg font-semibold text-slate-100">Section A: Manual Backend Security Validation</h2>
-              <Pill tone="green">Deterministic Backend</Pill>
-            </div>
-            
-            <div className="grid lg:grid-cols-3 gap-4">
-              <div className="lg:col-span-1 flex flex-col gap-4">
-                <AuthorizedDomainScanPanel />
-              </div>
-              <div className="lg:col-span-2">
-                <ValidationOperationsMap />
-              </div>
-            </div>
-
-            <DispatchStatusStrip />
-
-            <div className="grid lg:grid-cols-[1.85fr_1fr] gap-4">
-              <ActiveExecutionFocus />
-              <div className="min-h-[320px]">
-                <ActivityRail />
-              </div>
-            </div>
-
-            <div className="grid lg:grid-cols-12 gap-4">
-              <div className="lg:col-span-5">
-                <RiskDistributionMatrix />
-              </div>
-              <div className="lg:col-span-3">
-                <AuthorizationExpiryRadar />
-              </div>
-              <div className="lg:col-span-4">
-                <AssetVerificationQueue />
-              </div>
-            </div>
-
-            <RecentAuditTrail />
-          </div>
-
-          <div className="h-px bg-(--ss-hairline-strong) my-8 relative">
-            <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#050810] px-4 text-xs font-semibold uppercase tracking-wider text-slate-500 flex items-center gap-2">
-              <ArrowRight className="w-4 h-4" /> AI Integration Boundary <ArrowRight className="w-4 h-4" />
-            </div>
-          </div>
-
-          {/* ============================================================ */}
-          {/* SECTION B: AI PROOF-OF-RISK INTELLIGENCE                     */}
-          {/* ============================================================ */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 mb-2">
-              <BrainCircuit className="w-5 h-5 text-cyan-400" />
-              <h2 className="text-lg font-semibold text-slate-100">Section B: AI Proof-of-Risk Intelligence</h2>
-              <Pill tone="cyan">Generative Intelligence</Pill>
-            </div>
-
-            <DashboardQuickActions />
-            <AiProofOfRiskWorkflowRail />
-
-            <div className="grid lg:grid-cols-4 gap-4">
-              <AiRoutingPipelinePanel />
-              <AttackSurfacePreviewPanel />
-              <DigitalTwinProofPanel />
-              <MultiAgentTribunalPanel />
-            </div>
-          </div>
+    <div className="px-4 lg:px-6 py-5 space-y-4">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <div className="ss-eyebrow mb-1">Admin Overview</div>
+          <h1 className="text-xl font-semibold text-slate-100">Security validation at a glance</h1>
+          <p className="mt-1 text-xs text-slate-500">Prioritize readiness and live safety signals; detailed work stays in dedicated views.</p>
+        </div>
+        <div className="flex gap-2">
+          <CyberButton size="sm" variant="ghost" onClick={() => go("operations")}>Open operations <ArrowRight className="w-3 h-3" /></CyberButton>
+          <CyberButton size="sm" onClick={() => go("ai_intelligence")}>AI intelligence <BrainCircuit className="w-3 h-3" /></CyberButton>
         </div>
       </div>
-    </>
+      <div className="grid grid-cols-2 xl:grid-cols-4 divide-x divide-(--ss-hairline) border border-(--ss-hairline-strong)">
+        <KpiCell label="Verified assets" value={String(verifiedAssets)} tone="green" hint={`${assets.length} total assets`} />
+        <KpiCell label="Active authorizations" value={String(activeAuthorizations)} tone="cyan" hint="scope-locked approvals" />
+        <KpiCell label="Live executions" value={String(runningExecutions)} tone={runningExecutions > 0 ? "cyan" : "default"} hint="currently executing" />
+        <KpiCell label="Needs attention" value={String(attentionItems.length)} tone={attentionItems.length > 0 ? "amber" : "green"} hint="priority queues" />
+      </div>
+      <div className="grid xl:grid-cols-[1.5fr_1fr] gap-4">
+        <section className="ss-panel p-4">
+          <SectionHeader eyebrow="Priority queue" title="Needs attention" right={<Pill tone={attentionItems.length ? "amber" : "green"}>{attentionItems.length ? "review required" : "all clear"}</Pill>} />
+          {attentionItems.length === 0 ? (
+            <EmptyState eyebrow="Ready" title="No priority items" description="Current assets, authorizations, and safety controls are ready for review." icon={<ShieldCheck className="w-6 h-6" />} />
+          ) : (
+            <ul className="divide-y divide-(--ss-hairline)">
+              {attentionItems.map((item) => (
+                <li key={item.title}>
+                  <button onClick={item.action} className="w-full py-3 text-left flex items-center gap-3 hover:bg-(--ss-surface-3)/40">
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-sm border border-amber-500/30 bg-amber-500/5 text-xs font-semibold text-amber-300">{item.count}</span>
+                    <span className="min-w-0 flex-1"><span className="block text-xs font-medium text-slate-200">{item.title}</span><span className="block mt-0.5 text-[11px] text-slate-500">{item.detail}</span></span>
+                    <ArrowRight className="h-3.5 w-3.5 text-cyan-400" />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+        <div className="min-h-[320px]"><ActivityRail /></div>
+      </div>
+    </div>
   );
+}
+
+function OperationsDashboard() {
+  return (
+    <div className="px-4 lg:px-6 py-5 space-y-4">
+      <div className="flex items-center gap-2"><ShieldCheck className="w-5 h-5 text-emerald-400" /><div><div className="ss-eyebrow">Operations</div><h1 className="text-xl font-semibold text-slate-100">Authorized validation operations</h1></div></div>
+      <div className="grid lg:grid-cols-3 gap-4"><div className="lg:col-span-1 flex flex-col gap-4"><AuthorizedDomainScanPanel /></div><div className="lg:col-span-2"><ValidationOperationsMap /></div></div>
+      <DispatchStatusStrip />
+      <div className="grid lg:grid-cols-[1.85fr_1fr] gap-4"><ActiveExecutionFocus /><div className="min-h-[320px]"><ActivityRail /></div></div>
+      <div className="grid lg:grid-cols-12 gap-4"><div className="lg:col-span-5"><RiskDistributionMatrix /></div><div className="lg:col-span-3"><AuthorizationExpiryRadar /></div><div className="lg:col-span-4"><AssetVerificationQueue /></div></div>
+      <RecentAuditTrail />
+    </div>
+  );
+}
+
+function AiIntelligenceDashboard() {
+  return (
+    <div className="px-4 lg:px-6 py-5 space-y-4">
+      <div className="flex items-center gap-2"><BrainCircuit className="w-5 h-5 text-cyan-400" /><div><div className="ss-eyebrow">AI Intelligence</div><h1 className="text-xl font-semibold text-slate-100">AI Proof-of-Risk intelligence</h1></div><Pill tone="cyan">Generative intelligence</Pill></div>
+      <AiProofOfRiskCommandStrip />
+      <DashboardQuickActions />
+      <AiProofOfRiskWorkflowRail />
+      <div className="grid lg:grid-cols-4 gap-4"><AiRoutingPipelinePanel /><AttackSurfacePreviewPanel /><DigitalTwinProofPanel /><MultiAgentTribunalPanel /></div>
+    </div>
+  );
+}
+
+export function DashboardPage({ view = "overview" }: { view?: DashboardView }) {
+  const workspaceWarning = useApp((state) => state.workspaceWarning);
+  const demoWorkspaceMode = useApp((state) => state.demoWorkspaceMode);
+  const warningMessage = workspaceWarning || "Optional workspace context failed to load. Workspace seed data unavailable. Real authorized scan mode is still available.";
+  const content = view === "operations" ? <OperationsDashboard /> : view === "ai" ? <AiIntelligenceDashboard /> : <OverviewDashboard />;
+
+  return <><TopNavCommandBar /><main className="pt-[76px] min-h-screen pb-12">{(workspaceWarning || demoWorkspaceMode === "real_scan_standalone") && <div className="px-4 lg:px-6 pt-4"><AlertBanner tone="amber" title="Optional workspace context failed to load">{warningMessage}</AlertBanner></div>}{content}</main></>;
 }

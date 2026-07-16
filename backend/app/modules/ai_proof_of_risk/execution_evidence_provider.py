@@ -50,10 +50,14 @@ class FakeExecutionEvidenceProvider:
     ) -> ExecutionEvidenceBundle:
         from uuid import uuid4
 
-        # Hardcoded fake data for tests
+        organization_id = uuid4()
+        if context is not None and "organization_id" in context:
+            organization_id = UUID(str(context["organization_id"]))
+
+        # Hardcoded fake data remains tenant-bound to the verified route context.
         return ExecutionEvidenceBundle(
             execution_id=execution_id,
-            organization_id=uuid4(),
+            organization_id=organization_id,
             project_id=uuid4(),
             asset_id=uuid4(),
             asset_target_safe=True,

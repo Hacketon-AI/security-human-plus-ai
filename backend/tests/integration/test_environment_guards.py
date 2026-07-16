@@ -13,6 +13,7 @@ _DSN = "postgresql+asyncpg://securescope:secret@localhost:5432/securescope"
 
 
 def _settings(environment: Environment, **overrides: object) -> Settings:
+    overrides.setdefault("jwt_secret", SecretStr("test-only-deployed-jwt-secret"))
     return Settings(environment=environment, database_dsn=SecretStr(_DSN), **overrides)
 
 

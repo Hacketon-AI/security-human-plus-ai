@@ -16,6 +16,7 @@ from sqlalchemy.ext.asyncio import create_async_engine
 from app.config import get_settings
 from app.modules.asset_verifications import models as asset_verification_models
 from app.modules.assets import models as asset_models
+from app.modules.auth import models as auth_models
 from app.modules.authorizations import models as authorization_models
 from app.modules.engagements import models as engagement_models
 from app.modules.organizations import models as organization_models
@@ -27,6 +28,7 @@ from app.platform.database import Base
 # Importing the domain model modules registers their tables on Base.metadata so
 # autogenerate can compare against them. The tuple keeps the imports referenced.
 _REGISTERED_MODELS = (
+    auth_models,
     organization_models,
     project_models,
     asset_models,

@@ -11,7 +11,7 @@ RUN addgroup --system appgroup && adduser --system --group appuser
 WORKDIR /app
 
 COPY pyproject.toml ./
-RUN pip install --no-cache-dir . uvicorn[standard] httpx
+RUN pip install --no-cache-dir --timeout=120 --retries=3 . uvicorn[standard] httpx
 
 COPY ./app ./app
 COPY ./alembic.ini ./

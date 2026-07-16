@@ -1,6 +1,7 @@
 import ipaddress
 import socket
 from typing import Any
+from urllib.parse import urlsplit
 from uuid import UUID
 
 import httpx
@@ -14,6 +15,62 @@ from app.modules.domain_safe_scan.schemas import (
     DomainSafeScanRequest,
     DomainSafeScanResponse,
 )
+
+
+def _normalize_domain_input(domain_input: str) -> str:
+    """Return a hostname from a bare domain or an HTTP(S) root URL."""
+    raw_domain = domain_input.strip()
+    if not raw_domain:
+        raise ValueError("Domain is required")
+
+    value_to_parse = raw_domain if "://" in raw_domain else f"//{raw_domain}"
+    try:
+        parsed = urlsplit(value_to_parse)
+        hostname = parsed.hostname
+    except ValueError as exc:
+        raise ValueError("Invalid domain or URL") from exc
+
+    if parsed.scheme and parsed.scheme.lower() not in {"http", "https"}:
+        raise ValueError("Only http and https URLs are allowed")
+
+    has_userinfo = (
+        parsed.username is not None
+        or parsed.password is not None
+        or "@" in parsed.netloc
+    )
+    if has_userinfo:
+        raise ValueError(
+            "Userinfo or port in domain is not allowed. "
+            "Please provide only the domain name."
+        )
+
+    # The colon in ``https://`` is outside netloc; a colon inside netloc is
+    # therefore an explicit port (or an unsupported IPv6 literal).
+    if ":" in parsed.netloc:
+        raise ValueError(
+            "Userinfo or port in domain is not allowed. "
+            "Please provide only the domain name."
+        )
+
+    has_path_or_url_suffix = (
+        parsed.path not in {"", "/"}
+        or parsed.query
+        or parsed.fragment
+        or "?" in raw_domain
+        or "#" in raw_domain
+    )
+    if has_path_or_url_suffix:
+        raise ValueError("Please provide only the domain name, without a path or query")
+
+    if hostname is None or any(character.isspace() for character in hostname):
+        raise ValueError("Invalid domain or URL")
+    if hostname.endswith(".."):
+        raise ValueError("Invalid domain or URL")
+
+    normalized_domain = hostname.lower().removesuffix(".")
+    if not normalized_domain:
+        raise ValueError("Invalid domain or URL")
+    return normalized_domain
 
 
 class MockEvidenceProvider(ExecutionEvidenceProvider):
@@ -66,11 +123,17 @@ class MockEvidenceProvider(ExecutionEvidenceProvider):
 
 
 class DomainSafeScanService:
-    async def analyze(self, request: DomainSafeScanRequest) -> DomainSafeScanResponse:
+    async def analyze(
+        self, request: DomainSafeScanRequest, *, organization_id: UUID
+    ) -> DomainSafeScanResponse:
         if not request.confirm_authorized:
             raise ValueError("Scan not authorized")
 
-        domain = request.domain
+        scheme = request.scheme.lower()
+        if scheme not in {"http", "https"}:
+            raise ValueError("Scheme must be http or https")
+
+        domain = _normalize_domain_input(request.domain)
 
         # Validation for localhost and .internal strings
         if (
@@ -79,12 +142,6 @@ class DomainSafeScanService:
             or domain.endswith(".internal")
         ):
             raise ValueError("Local or internal domains are not allowed")
-
-        # Block userinfo
-        if "@" in domain or ":" in domain:
-            raise ValueError(
-                "Userinfo or port in domain is not allowed. Please provide only the domain name."  # noqa: E501
-            )
 
         # Resolve IP to block private ranges
         try:
@@ -102,7 +159,7 @@ class DomainSafeScanService:
         except socket.gaierror:
             pass  # DNS resolution failed, let httpx handle or fail
 
-        url = f"{request.scheme}://{domain}"
+        url = f"{scheme}://{domain}"
 
         headers = {}
         missing_headers = []
@@ -142,6 +199,7 @@ class DomainSafeScanService:
 
         scan_metadata = {
             "source": "domain_safe_scan",
+            "organization_id": str(organization_id),
             "scan_id": session_scan_id,
             "correlation_id": correlation_id,
             "domain": request.domain,

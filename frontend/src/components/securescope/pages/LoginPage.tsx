@@ -1,269 +1,222 @@
 "use client";
 
 import * as React from "react";
-import { Shield, Lock, Fingerprint, ArrowRight, AlertTriangle } from "lucide-react";
+import * as THREE from "three";
+import { loginUser, saveToken, saveUser } from "@/lib/securescope/authApi";
 import { useApp } from "@/lib/securescope/store";
-import { CyberButton } from "../shared/ui";
-
-const DEV_ORG_ID = process.env.NEXT_PUBLIC_DEFAULT_ORG_ID ?? "";
-
-// Demo credentials shown when DEV_ORG_ID is set — development only.
-const DEV_EMAIL = "operator@briventures.co.id";
-const DEV_PASSWORD = "Dev@SecureScope2026!";
-const DEV_MFA = "000000";
 
 export function LoginPage() {
-  const login = useApp((s) => s.login);
-  const error = useApp((s) => s.error);
-  const [email, setEmail] = React.useState(DEV_ORG_ID ? DEV_EMAIL : "");
-  const [password, setPassword] = React.useState(DEV_ORG_ID ? DEV_PASSWORD : "");
-  const [mfa, setMfa] = React.useState(DEV_ORG_ID ? DEV_MFA : "");
-  const [orgId, setOrgId] = React.useState(DEV_ORG_ID ? DEV_ORG_ID : "");
+  const login = useApp((state) => state.login);
+  const [email, setEmail] = React.useState("");
+  const [password, setPassword] = React.useState("");
   const [submitting, setSubmitting] = React.useState(false);
-  const [localError, setLocalError] = React.useState<string | null>(null);
+  const [error, setError] = React.useState<string | null>(null);
+  const canvasRef = React.useRef<HTMLCanvasElement>(null);
+  const cardRef = React.useRef<HTMLDivElement>(null);
+  const rightPanelRef = React.useRef<HTMLDivElement>(null);
 
-  const devLogin = () => {
-    login(DEV_ORG_ID);
-  };
+  React.useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
 
-  const submit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setLocalError(null);
-    const trimmed = orgId.trim();
-    if (!trimmed) {
-      setLocalError("Organization ID is required.");
-      return;
+    let animationId = 0;
+    let disposed = false;
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(
+      75,
+      window.innerWidth / window.innerHeight,
+      1,
+      1000
+    );
+    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    camera.position.z = 30;
+
+    const particleCount = 1500;
+    const positions = new Float32Array(particleCount * 3);
+    const colors = new Float32Array(particleCount * 3);
+    const color1 = new THREE.Color(0x00f2ff);
+    const color2 = new THREE.Color(0x7d2ae8);
+    for (let index = 0; index < particleCount; index += 1) {
+      positions[index * 3] = (Math.random() - 0.5) * 100;
+      positions[index * 3 + 1] = (Math.random() - 0.5) * 100;
+      positions[index * 3 + 2] = (Math.random() - 0.5) * 100;
+      const mixedColor = color1.clone().lerp(color2, Math.random());
+      colors[index * 3] = mixedColor.r;
+      colors[index * 3 + 1] = mixedColor.g;
+      colors[index * 3 + 2] = mixedColor.b;
     }
-    const uuidRe = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-    if (!uuidRe.test(trimmed)) {
-      setLocalError("Enter a valid Organization ID (UUID format).");
+
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+    geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+    const material = new THREE.PointsMaterial({
+      size: 0.15,
+      vertexColors: true,
+      transparent: true,
+      opacity: 0.8,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+    });
+    const particles = new THREE.Points(geometry, material);
+    scene.add(particles);
+
+    const coreGeometry = new THREE.IcosahedronGeometry(6, 1);
+    const coreMaterial = new THREE.MeshBasicMaterial({
+      color: 0x00f2ff,
+      wireframe: true,
+      transparent: true,
+      opacity: 0.15,
+    });
+    const core = new THREE.Mesh(coreGeometry, coreMaterial);
+    scene.add(core);
+
+    let mouseX = 0;
+    let mouseY = 0;
+    const onMouseMove = (event: MouseEvent) => {
+      mouseX = (event.clientX / window.innerWidth) * 2 - 1;
+      mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
+    };
+    const onResize = () => {
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+    };
+    const animate = () => {
+      if (disposed) return;
+      animationId = requestAnimationFrame(animate);
+      particles.rotation.x += 0.0005;
+      particles.rotation.y += 0.001;
+      core.rotation.x += 0.003;
+      core.rotation.y += 0.005;
+      core.scale.setScalar(1 + Math.sin(Date.now() * 0.001) * 0.1);
+      camera.position.x += (mouseX * 5 - camera.position.x) * 0.05;
+      camera.position.y += (mouseY * 5 - camera.position.y) * 0.05;
+      camera.lookAt(scene.position);
+      renderer.render(scene, camera);
+    };
+
+    document.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("resize", onResize);
+    animate();
+    return () => {
+      disposed = true;
+      cancelAnimationFrame(animationId);
+      window.removeEventListener("resize", onResize);
+      document.removeEventListener("mousemove", onMouseMove);
+      renderer.dispose();
+      geometry.dispose();
+      material.dispose();
+      coreGeometry.dispose();
+      coreMaterial.dispose();
+    };
+  }, []);
+
+  React.useEffect(() => {
+    const panel = rightPanelRef.current;
+    const card = cardRef.current;
+    if (!panel || !card) return;
+    const onMove = (event: MouseEvent) => {
+      const rect = panel.getBoundingClientRect();
+      const rotateX = ((event.clientY - rect.top - rect.height / 2) / (rect.height / 2)) * -10;
+      const rotateY = ((event.clientX - rect.left - rect.width / 2) / (rect.width / 2)) * 10;
+      card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+    };
+    const onLeave = () => {
+      card.style.transform = "rotateX(0deg) rotateY(0deg)";
+    };
+    panel.addEventListener("mousemove", onMove);
+    panel.addEventListener("mouseleave", onLeave);
+    return () => {
+      panel.removeEventListener("mousemove", onMove);
+      panel.removeEventListener("mouseleave", onLeave);
+    };
+  }, []);
+
+  const submit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setError(null);
+    if (!email.trim() || !password) {
+      setError("Email and password are required.");
       return;
     }
     setSubmitting(true);
     try {
-      login(trimmed);
+      const response = await loginUser({ email: email.trim(), password });
+      if (!response.user.organization_id) {
+        setError("This account is not assigned to an organization. Contact an administrator.");
+        return;
+      }
+      saveToken(response.access_token);
+      saveUser(response.user);
+      login(response.user.organization_id);
+    } catch (reason: unknown) {
+      setError(reason instanceof Error ? reason.message : "Authentication failed");
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <div className="min-h-screen ss-vignette flex flex-col">
-      {/* Top thin strip */}
-      <div className="h-8 px-6 flex items-center justify-between text-[10px] uppercase tracking-[0.2em] text-slate-500 border-b border-(--ss-hairline)">
-        <div className="flex items-center gap-3">
-          <span className="flex items-center gap-1.5">
-            <span className="w-1 h-1 rounded-full bg-amber-400" />
-            Environment · Staging
-          </span>
-          <span className="text-slate-700">/</span>
-          <span>Region · eu-1</span>
-        </div>
-        <div className="flex items-center gap-3">
-          <span className="ss-mono-xs">Build 2026.07.02</span>
-          <span className="text-slate-700">/</span>
-          <span className="flex items-center gap-1">
-            <Lock className="w-2.5 h-2.5" />
-            TLS 1.3
-          </span>
-        </div>
-      </div>
-
-      <div className="flex-1 grid lg:grid-cols-[1.2fr_1fr]">
-        {/* Left: brand + context */}
-        <div className="relative hidden lg:flex flex-col justify-between p-12 ss-grid-bg">
-          <div className="absolute inset-0 pointer-events-none" style={{
-            background: "radial-gradient(ellipse 70% 50% at 30% 20%, rgba(34,211,238,0.08), transparent 60%)"
-          }} />
-          <div className="relative">
-            <div className="flex items-center gap-3 mb-12">
-              <div className="w-10 h-10 border border-cyan-400/50 bg-cyan-500/10 rounded-sm flex items-center justify-center ss-glow-cyan">
-                <Shield className="w-5 h-5 text-cyan-300" />
-              </div>
+    <>
+      <canvas ref={canvasRef} className="fixed inset-0 z-0 h-screen w-screen pointer-events-none" />
+      <div className="ss-login-container">
+        <div className="ss-login-left">
+          <h1 className="ss-login-logo">SecureScope</h1>
+          <p className="ss-login-tagline">
+            Orchestrate authorized security validation across your entire infrastructure.
+          </p>
+          <div className="ss-login-features">
+            <div className="ss-login-feature-item">
+              <div className="ss-login-feature-icon"><i className="fas fa-shield-halved" /></div>
               <div>
-                <div className="text-2xl font-semibold tracking-tight text-slate-100">
-                  Secure<span className="text-cyan-300">Scope</span>
-                </div>
-                <div className="text-[10px] uppercase tracking-[0.25em] text-slate-500 mt-0.5">
-                  Authorized Security Validation Control
-                </div>
+                <h4>Zero Trust Validation</h4>
+                <p>Continuously verify access requests.</p>
               </div>
             </div>
-
-            <div className="max-w-md">
-              <div className="text-[10px] uppercase tracking-[0.2em] text-cyan-400/80 mb-3">
-                Operator Briefing
+            <div className="ss-login-feature-item">
+              <div className="ss-login-feature-icon"><i className="fas fa-satellite-dish" /></div>
+              <div>
+                <h4>Real-time Threat Emulation</h4>
+                <p>Simulate authorized security scenarios safely.</p>
               </div>
-              <h2 className="text-2xl font-light text-slate-200 leading-snug mb-4">
-                Orchestrate authorized security validation against verified assets — within enforceable scope, time windows, and safety controls.
-              </h2>
-              <p className="text-xs text-slate-500 leading-relaxed">
-                Every execution is bound to an active authorization and engagement. Worker credentials are issued per-execution, never displayed, and revoked automatically on completion, kill switch, or expiry.
-              </p>
             </div>
-          </div>
-
-          <div className="relative grid grid-cols-3 gap-3">
-            {[
-              { label: "Asset Verification", v: "DNS TXT challenge", note: "ownership-bound" },
-              { label: "Authorization", v: "Scope-locked", note: "immutable active lock" },
-              { label: "Safety Controls", v: "Kill switch armed", note: "audited activation" },
-            ].map((x) => (
-              <div key={x.label} className="ss-panel-flat p-3">
-                <div className="ss-eyebrow mb-1">{x.label}</div>
-                <div className="text-xs font-medium text-cyan-200">{x.v}</div>
-                <div className="text-[10px] text-slate-500 mt-0.5">{x.note}</div>
-              </div>
-            ))}
           </div>
         </div>
-
-        {/* Right: login panel */}
-        <div className="flex items-center justify-center p-6 lg:p-12">
-          <div className="w-full max-w-sm">
-            <div className="lg:hidden flex items-center gap-3 mb-8 justify-center">
-              <div className="w-9 h-9 border border-cyan-400/50 bg-cyan-500/10 rounded-sm flex items-center justify-center">
-                <Shield className="w-4 h-4 text-cyan-300" />
+        <div className="ss-login-right" ref={rightPanelRef}>
+          <div className="ss-login-card-container" ref={cardRef}>
+            <div className="ss-login-card">
+              <div className="ss-login-header">
+                <h2>Operator Authentication</h2>
+                <p>Secure Access Gateway</p>
               </div>
-              <div className="text-xl font-semibold tracking-tight text-slate-100">
-                Secure<span className="text-cyan-300">Scope</span>
-              </div>
-            </div>
-
-            <div className="ss-panel p-6">
-              <div className="flex items-center gap-2 mb-1">
-                <Fingerprint className="w-4 h-4 text-cyan-400" />
-                <span className="text-[10px] uppercase tracking-[0.22em] text-cyan-300">Operator Authentication</span>
-              </div>
-              <h1 className="text-lg font-semibold text-slate-100">Access SecureScope</h1>
-              <p className="text-[11px] text-slate-500 mt-1 mb-5">
-                Restricted to authorized operators. All access is audited and bound to MFA.
-              </p>
-
-              <form onSubmit={submit} className="space-y-3">
-                <div>
-                  <label className="block ss-eyebrow mb-1">
-                    Operator Email
-                    {DEV_ORG_ID && <span className="ml-2 text-[9px] text-amber-400/70 normal-case tracking-normal">dev prefilled</span>}
-                  </label>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full px-3 py-2 text-sm bg-(--ss-surface-2) border border-(--ss-hairline-strong) rounded-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-cyan-400/50 focus:ss-glow-cyan transition-all"
-                    placeholder="operator@org.sec"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block ss-eyebrow mb-1">
-                    Password
-                    {DEV_ORG_ID && <span className="ml-2 text-[9px] text-amber-400/70 normal-case tracking-normal">dev prefilled</span>}
-                  </label>
-                  <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full px-3 py-2 text-sm bg-(--ss-surface-2) border border-(--ss-hairline-strong) rounded-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-cyan-400/50 focus:ss-glow-cyan transition-all"
-                    placeholder="••••••••••••"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="flex items-center justify-between ss-eyebrow mb-1">
-                    <span>MFA Code</span>
-                    <span className="text-slate-600 normal-case tracking-normal text-[10px]">TOTP · 6 digits</span>
-                  </label>
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    maxLength={6}
-                    value={mfa}
-                    onChange={(e) => setMfa(e.target.value.replace(/\D/g, ""))}
-                    className="w-full px-3 py-2 text-sm bg-(--ss-surface-2) border border-(--ss-hairline-strong) rounded-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-cyan-400/50 focus:ss-glow-cyan transition-all ss-mono tracking-[0.4em] text-center"
-                    placeholder="······"
-                  />
-                </div>
-                <div>
-                  <label className="block ss-eyebrow mb-1">Organization ID</label>
-                  <input
-                    type="text"
-                    value={orgId}
-                    onChange={(e) => { setOrgId(e.target.value); setLocalError(null); }}
-                    className="w-full px-3 py-2 text-sm bg-(--ss-surface-2) border border-(--ss-hairline-strong) rounded-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-cyan-400/50 focus:ss-glow-cyan transition-all ss-mono"
-                    placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-                    autoComplete="off"
-                    spellCheck={false}
-                    required
-                  />
-                </div>
-
-                {(localError || error) && (
-                  <div className="flex items-start gap-2 px-3 py-2 border border-red-500/30 bg-red-500/5 rounded-sm">
-                    <AlertTriangle className="w-3.5 h-3.5 text-red-400 shrink-0 mt-0.5" />
-                    <p className="text-[11px] text-red-300">{localError ?? error}</p>
+              <form onSubmit={submit}>
+                <div className="ss-login-input-group">
+                  <label htmlFor="operator-email">Operator Email</label>
+                  <div className="ss-login-input-wrapper">
+                    <i className="fas fa-envelope" />
+                    <input id="operator-email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="email" required />
                   </div>
-                )}
-
-                <div className="flex items-center justify-between pt-1">
-                  <label className="flex items-center gap-2 text-[11px] text-slate-400 cursor-pointer select-none">
-                    <input type="checkbox" className="accent-cyan-500 w-3 h-3" defaultChecked />
-                    Bind session to this device
-                  </label>
-                  <button
-                    type="button"
-                    className="text-[10px] uppercase tracking-wider text-slate-500 hover:text-cyan-300"
-                  >
-                    Forgot?
-                  </button>
                 </div>
-
-                <CyberButton
-                  type="submit"
-                  variant="primary"
-                  className="w-full mt-2"
-                >
-                  {submitting ? (
-                    <>
-                      <span className="w-3 h-3 border-2 border-cyan-300/40 border-t-cyan-300 rounded-full animate-spin" />
-                      Establishing secure session…
-                    </>
-                  ) : (
-                    <>
-                      Authenticate
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </>
-                  )}
-                </CyberButton>
+                <div className="ss-login-input-group">
+                  <label htmlFor="operator-password">Password</label>
+                  <div className="ss-login-input-wrapper">
+                    <i className="fas fa-key" />
+                    <input id="operator-password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="current-password" required />
+                  </div>
+                </div>
+                {error && <div className="ss-login-error"><i className="fas fa-circle-exclamation" /><span>{error}</span></div>}
+                <button type="submit" className="ss-login-btn-authenticate" disabled={submitting}>
+                  <i className={`fas ${submitting ? "fa-spinner fa-spin" : "fa-lock-open"}`} style={{ marginRight: 10 }} />
+                  {submitting ? "Authenticating..." : "Authenticate"}
+                </button>
+                <div className="ss-login-footer-warning"><i className="fas fa-triangle-exclamation" />Authorized personnel only. All actions are monitored.</div>
               </form>
             </div>
-
-            {DEV_ORG_ID && (
-              <div className="mt-3">
-                <button
-                  type="button"
-                  onClick={devLogin}
-                  className="w-full px-3 py-2 text-[11px] uppercase tracking-[0.18em] text-amber-300/70 border border-amber-500/20 bg-amber-500/5 rounded-sm hover:bg-amber-500/10 hover:text-amber-300 transition-all"
-                >
-                  ⚡ Dev Login (bypass)
-                </button>
-              </div>
-            )}
-
-            <div className="mt-4 flex items-start gap-2 px-3 py-2.5 border border-amber-500/20 bg-amber-500/5 rounded-sm">
-              <AlertTriangle className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />
-              <p className="text-[10px] text-amber-200/80 leading-relaxed">
-                <strong className="text-amber-300">Access restricted to authorized operators.</strong> Unauthorized access attempts are logged, attributed, and forwarded to the security operations center. By proceeding you accept the operator acceptable-use policy.
-              </p>
-            </div>
-
-            <div className="mt-4 flex items-center justify-between text-[10px] text-slate-600">
-              <span>SecureScope · v3.4.1</span>
-              <span className="ss-mono-xs">SOC 2 · ISO 27001</span>
-            </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

@@ -1,3 +1,5 @@
+import { authenticatedRequest } from "./api";
+
 export type AIAnalysisMode = "quick_summary" | "full_report" | "tribunal_only" | "graph_only";
 
 export interface AIProofOfRiskRequest {
@@ -129,13 +131,6 @@ export interface AIProofOfRiskResponse {
   safety_notes?: string[];
 }
 
-const getApiBaseUrl = () => {
-  if (typeof window !== "undefined") {
-    return "";
-  }
-  return process.env.API_INTERNAL_BASE_URL || process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:8000";
-};
-
 export const normalizeApiError = (err: any): string => {
   if (err instanceof Error) {
     if (err.message.includes("422")) {
@@ -244,25 +239,15 @@ export async function analyzeProofOfRisk(
     });
   }
 
-  const url = `${getApiBaseUrl()}/ai-proof-of-risk/executions/${executionId}/analyze`;
-  
   try {
-    const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text().catch(() => "Unknown error");
-      // Log safely
-      console.error(`HTTP error ${response.status}`);
-      throw new Error(`HTTP error ${response.status}`);
-    }
-
-    return response.json();
+    return (await authenticatedRequest(
+      `/ai-proof-of-risk/executions/${executionId}/analyze`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      }
+    )) as AIProofOfRiskResponse;
   } catch (error) {
     throw new Error(normalizeApiError(error));
   }

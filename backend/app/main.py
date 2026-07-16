@@ -25,10 +25,12 @@ from app.modules.ai_proof_of_risk.router import router as ai_proof_of_risk_route
 from app.modules.asset_verifications.router import router as asset_verifications_router
 from app.modules.assets.router import router as assets_router
 from app.modules.audit_events.router import router as audit_events_router
+from app.modules.auth.router import router as auth_router
 from app.modules.authorizations.router import router as authorizations_router
 from app.modules.domain_safe_scan.router import router as domain_safe_scan_router
 from app.modules.engagements.router import router as engagements_router
 from app.modules.organizations.router import router as organizations_router
+from app.modules.pentest_audit.router import router as pentest_audit_router
 from app.modules.projects.router import router as projects_router
 from app.modules.validation_executions.router import (
     router as validation_executions_router,
@@ -103,6 +105,28 @@ async def _lifespan(app: FastAPI) -> AsyncIterator[None]:
             SystemClock(),
         )
     try:
+        bootstrap_admin = settings.bootstrap_admin
+        if bootstrap_admin is not None:
+            from app.modules.auth.service import AuthService
+
+            email, username, password, organization_id, full_name = bootstrap_admin
+            async with app.state.session_factory() as bootstrap_session:
+                try:
+                    service = AuthService(
+                        bootstrap_session, settings.jwt_secret.get_secret_value()
+                    )
+                    await service.ensure_bootstrap_admin_exists(
+                        email=email,
+                        username=username,
+                        password=password,
+                        organization_id=organization_id,
+                        full_name=full_name,
+                    )
+                    await bootstrap_session.commit()
+                except Exception:
+                    await bootstrap_session.rollback()
+                    raise
+
         yield
     finally:
         await engine.dispose()
@@ -136,6 +160,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     install_error_handlers(app)
 
     app.include_router(health.router)
+    app.include_router(auth_router)
     app.include_router(organizations_router)
     app.include_router(projects_router)
     app.include_router(assets_router)
@@ -145,6 +170,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(validation_executions_router)
     app.include_router(ai_proof_of_risk_router)
     app.include_router(domain_safe_scan_router)
+    app.include_router(pentest_audit_router)
     app.include_router(audit_events_router)
     app.include_router(workers_router)
     return app

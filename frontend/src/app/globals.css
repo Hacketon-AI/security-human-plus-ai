@@ -8,6 +8,9 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-orbitron: var(--font-orbitron);
+  --font-rajdhani: var(--font-rajdhani);
+  --font-jetbrains: var(--font-jetbrains);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -148,10 +151,12 @@
   }
   body {
     background-image:
+      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(34, 211, 238, 0.03) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 60% at 100% 80%, rgba(99, 102, 241, 0.02) 0%, transparent 50%),
       linear-gradient(var(--ss-grid) 1px, transparent 1px),
       linear-gradient(90deg, var(--ss-grid) 1px, transparent 1px);
-    background-size: 48px 48px;
-    background-position: -1px -1px;
+    background-size: 100% 100%, 100% 100%, 48px 48px, 48px 48px;
+    background-position: center, center, -1px -1px, -1px -1px;
   }
 }
 
@@ -160,22 +165,43 @@
    ============================================================ */
 
 @layer components {
-  /* Glass panels — layered SOC surfaces */
+  /* Glass panels — premium layered SOC surfaces with glassmorphism */
   .ss-panel {
-    background: linear-gradient(180deg, rgba(19, 30, 51, 0.55) 0%, rgba(12, 19, 32, 0.85) 100%);
-    border: 1px solid var(--ss-hairline-strong);
-    border-radius: var(--radius);
-    backdrop-filter: blur(8px);
+    background: linear-gradient(180deg, rgba(19, 30, 51, 0.6) 0%, rgba(10, 16, 28, 0.9) 100%);
+    border: 1px solid rgba(34, 211, 238, 0.08);
+    border-radius: 0.5rem;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow:
+      0 4px 24px -2px rgba(0, 0, 0, 0.4),
+      0 0 0 1px rgba(148, 163, 184, 0.06),
+      inset 0 1px 0 rgba(255, 255, 255, 0.03);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  .ss-panel:hover {
+    border-color: rgba(34, 211, 238, 0.15);
+    box-shadow:
+      0 8px 32px -4px rgba(0, 0, 0, 0.5),
+      0 0 0 1px rgba(34, 211, 238, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.04);
   }
   .ss-panel-raised {
-    background: linear-gradient(180deg, rgba(26, 39, 64, 0.6) 0%, rgba(14, 22, 38, 0.9) 100%);
-    border: 1px solid var(--ss-hairline-strong);
-    border-radius: var(--radius);
+    background: linear-gradient(180deg, rgba(26, 39, 64, 0.65) 0%, rgba(12, 19, 32, 0.92) 100%);
+    border: 1px solid rgba(34, 211, 238, 0.12);
+    border-radius: 0.5rem;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow:
+      0 8px 40px -4px rgba(0, 0, 0, 0.5),
+      0 0 0 1px rgba(148, 163, 184, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
   }
   .ss-panel-flat {
-    background: rgba(10, 17, 30, 0.6);
-    border: 1px solid var(--ss-hairline);
-    border-radius: var(--radius);
+    background: rgba(10, 17, 30, 0.65);
+    border: 1px solid rgba(148, 163, 184, 0.08);
+    border-radius: 0.5rem;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
   }
   .ss-hairline-t { border-top: 1px solid var(--ss-hairline); }
   .ss-hairline-b { border-bottom: 1px solid var(--ss-hairline); }
@@ -185,26 +211,31 @@
 
   /* Mono references — only for IDs/targets/technical values */
   .ss-mono {
-    font-family: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-family: 'JetBrains Mono', var(--font-jetbrains), var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
     font-feature-settings: "zero", "ss01";
     letter-spacing: -0.01em;
   }
-  .ss-mono-xs { font-family: var(--font-geist-mono), ui-monospace, monospace; font-size: 11px; letter-spacing: -0.01em; }
+  .ss-mono-xs {
+    font-family: 'JetBrains Mono', var(--font-jetbrains), var(--font-geist-mono), ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: -0.01em;
+  }
 
-  /* Section eyebrow label */
+  /* Section eyebrow label — now uses Orbitron for premium feel */
   .ss-eyebrow {
     text-transform: uppercase;
-    letter-spacing: 0.16em;
+    letter-spacing: 0.18em;
     font-size: 10px;
     font-weight: 600;
     color: var(--muted-foreground);
+    font-family: 'JetBrains Mono', var(--font-jetbrains), var(--font-geist-mono), monospace;
   }
 
-  /* Glow for active states only */
-  .ss-glow-cyan { box-shadow: 0 0 0 1px rgba(34,211,238,0.4), 0 0 18px -2px var(--ss-cyan-glow); }
-  .ss-glow-green { box-shadow: 0 0 0 1px rgba(16,185,129,0.4), 0 0 18px -2px var(--ss-green-glow); }
-  .ss-glow-amber { box-shadow: 0 0 0 1px rgba(245,158,11,0.45), 0 0 18px -2px var(--ss-amber-glow); }
-  .ss-glow-red { box-shadow: 0 0 0 1px rgba(239,68,68,0.45), 0 0 18px -2px var(--ss-red-glow); }
+  /* Glow for active states only — enhanced with larger spread */
+  .ss-glow-cyan { box-shadow: 0 0 0 1px rgba(34,211,238,0.35), 0 0 24px -4px var(--ss-cyan-glow), 0 0 8px -2px rgba(34,211,238,0.2); }
+  .ss-glow-green { box-shadow: 0 0 0 1px rgba(16,185,129,0.35), 0 0 24px -4px var(--ss-green-glow), 0 0 8px -2px rgba(16,185,129,0.2); }
+  .ss-glow-amber { box-shadow: 0 0 0 1px rgba(245,158,11,0.4), 0 0 24px -4px var(--ss-amber-glow), 0 0 8px -2px rgba(245,158,11,0.2); }
+  .ss-glow-red { box-shadow: 0 0 0 1px rgba(239,68,68,0.4), 0 0 24px -4px var(--ss-red-glow), 0 0 8px -2px rgba(239,68,68,0.2); }
 
   .ss-text-cyan { color: var(--ss-cyan); }
   .ss-text-blue { color: var(--ss-blue); }
@@ -219,14 +250,14 @@
   .ss-grid-bg {
     background-color: #060912;
     background-image:
-      linear-gradient(rgba(34,211,238,0.05) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(34,211,238,0.05) 1px, transparent 1px);
-    background-size: 32px 32px;
+      linear-gradient(rgba(34,211,238,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(34,211,238,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
   }
   .ss-grid-bg-fine {
     background-image:
-      linear-gradient(rgba(148,163,184,0.04) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(148,163,184,0.04) 1px, transparent 1px);
+      linear-gradient(rgba(148,163,184,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(148,163,184,0.03) 1px, transparent 1px);
     background-size: 16px 16px;
   }
 
@@ -292,3 +323,441 @@
 
 /* Tabular numerics for counters */
 .tnum { font-variant-numeric: tabular-nums; }
+
+/* ============================================================
+   SecureScope Dashboard — Premium Visual Enhancements
+   ============================================================ */
+
+/* KPI cells in status strips — subtle gradient + better typography */
+.ss-login-container ~ * [class*="divide-x"] > div,
+div[class*="grid"][class*="divide-x"] > div {
+  transition: background 0.2s ease;
+}
+
+/* Section headers enhancement */
+h2.text-lg {
+  font-family: 'Rajdhani', var(--font-rajdhani), sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+/* Pipeline node cards — gradient top accent on hover */
+.ss-panel button.group {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.ss-panel button.group:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px -4px rgba(0, 0, 0, 0.4);
+}
+
+/* Status strip — frosted glass effect */
+div[class*="border-b"][class*="bg-\\[\\#050810\\]"] {
+  background: linear-gradient(180deg, rgba(5, 8, 16, 0.7) 0%, rgba(8, 12, 20, 0.85) 100%) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* Alert banners — subtle animation on entrance */
+[class*="AlertBanner"],
+div[class*="border-amber"] {
+  animation: ss-fade-in 0.3s ease-out;
+}
+
+@keyframes ss-fade-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Active execution focus panel — premium top border gradient */
+.ss-panel:has(> div > .ss-pulse-cyan) {
+  border-top: 2px solid transparent;
+  border-image: linear-gradient(90deg, rgba(34, 211, 238, 0.4), rgba(99, 102, 241, 0.3), rgba(34, 211, 238, 0.4)) 1;
+}
+
+/* Safety snapshot badges — micro animation */
+div[class*="border-emerald"],
+div[class*="border-red-500"] {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+div[class*="border-emerald"]:hover,
+div[class*="border-red-500"]:hover {
+  transform: scale(1.02);
+}
+
+/* Table cells in risk matrix — smooth hover */
+table td div {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+table td div:hover {
+  transform: scale(1.15);
+}
+
+/* Pill components — subtle glass effect */
+span[class*="inline-flex"][class*="rounded-full"] {
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+/* Activity rail events — stagger animation */
+.ss-panel ul li {
+  animation: ss-slide-in 0.3s ease-out backwards;
+}
+.ss-panel ul li:nth-child(1) { animation-delay: 0ms; }
+.ss-panel ul li:nth-child(2) { animation-delay: 50ms; }
+.ss-panel ul li:nth-child(3) { animation-delay: 100ms; }
+.ss-panel ul li:nth-child(4) { animation-delay: 150ms; }
+.ss-panel ul li:nth-child(5) { animation-delay: 200ms; }
+.ss-panel ul li:nth-child(6) { animation-delay: 250ms; }
+
+@keyframes ss-slide-in {
+  from { opacity: 0; transform: translateX(-8px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* Progress bars in authorization expiry — animated gradient fill */
+div[class*="h-1"][class*="rounded-full"] > div {
+  background-image: linear-gradient(90deg, currentColor 0%, currentColor 80%, rgba(255,255,255,0.2) 100%);
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* CyberButton — enhanced glow on hover */
+button[class*="ss-glow"],
+button[class*="border-cyan"] {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Scrollbar enhancement for dashboard */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(34, 211, 238, 0.15);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(34, 211, 238, 0.3);
+}
+
+/* Page-level subtle radial glow behind main content area */
+.pt-\\[76px\\] {
+  background:
+    radial-gradient(ellipse 60% 30% at 20% 10%, rgba(34, 211, 238, 0.02) 0%, transparent 50%),
+    radial-gradient(ellipse 40% 40% at 80% 60%, rgba(99, 102, 241, 0.015) 0%, transparent 50%);
+}
+
+/* ============================================================
+   SecureScope Login Page — Exact Design from HTML
+   ============================================================ */
+
+:root {
+  --ss-login-primary: #00f2ff;
+  --ss-login-secondary: #7d2ae8;
+  --ss-login-bg-dark: #050508;
+  --ss-login-glass: rgba(12, 12, 20, 0.6);
+  --ss-login-border: rgba(0, 242, 255, 0.2);
+  --ss-login-text-main: #ffffff;
+  --ss-login-text-muted: #8b8b9e;
+}
+
+.ss-login-container {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  perspective: 1000px;
+  z-index: 1;
+  position: relative;
+  font-family: 'Rajdhani', var(--font-rajdhani), sans-serif;
+  color: var(--ss-login-text-main);
+  background-color: transparent;
+  overflow: hidden;
+}
+
+/* Left Panel */
+.ss-login-left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 60px;
+  position: relative;
+}
+
+.ss-login-logo {
+  font-family: 'Orbitron', var(--font-orbitron), sans-serif;
+  font-size: 3rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, var(--ss-login-primary), var(--ss-login-secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  margin-bottom: 20px;
+}
+
+.ss-login-tagline {
+  font-size: 1.5rem;
+  margin-bottom: 40px;
+  font-weight: 300;
+  max-width: 500px;
+  border-left: 3px solid var(--ss-login-primary);
+  padding-left: 20px;
+  color: var(--ss-login-text-main);
+}
+
+.ss-login-features {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 400px;
+}
+
+.ss-login-feature-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: transform 0.3s ease, border-color 0.3s ease;
+}
+
+.ss-login-feature-item:hover {
+  transform: translateX(10px);
+  border-color: var(--ss-login-primary);
+}
+
+.ss-login-feature-item h4 {
+  font-size: 1rem;
+  margin-bottom: 2px;
+}
+
+.ss-login-feature-icon {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  background: rgba(0, 242, 255, 0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ss-login-primary);
+  font-size: 1.2rem;
+}
+
+/* Right Panel */
+.ss-login-right {
+  flex: 0.8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+
+.ss-login-card-container {
+  width: 100%;
+  max-width: 450px;
+  transform-style: preserve-3d;
+  transition: transform 0.1s ease-out;
+}
+
+.ss-login-card {
+  background: var(--ss-login-glass);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--ss-login-border);
+  border-radius: 16px;
+  padding: 40px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5),
+              inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  position: relative;
+  overflow: hidden;
+  transform: translateZ(20px);
+}
+
+/* Glowing scan line */
+.ss-login-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--ss-login-primary), transparent);
+  animation: ss-scan 3s linear infinite;
+}
+
+@keyframes ss-scan {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.ss-login-header {
+  text-align: center;
+  margin-bottom: 30px;
+  transform: translateZ(40px);
+}
+
+.ss-login-header h2 {
+  font-family: 'Orbitron', var(--font-orbitron), sans-serif;
+  font-size: 1.5rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--ss-login-primary);
+}
+
+.ss-login-header p {
+  color: var(--ss-login-text-muted);
+  font-size: 0.9rem;
+  margin-top: 5px;
+  font-family: 'JetBrains Mono', var(--font-jetbrains), monospace;
+}
+
+.ss-login-input-group {
+  margin-bottom: 20px;
+  transform: translateZ(30px);
+}
+
+.ss-login-input-group label {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--ss-login-text-muted);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-family: 'JetBrains Mono', var(--font-jetbrains), monospace;
+}
+
+.ss-login-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.ss-login-input-wrapper i {
+  position: absolute;
+  left: 15px;
+  color: var(--ss-login-primary);
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.ss-login-input-wrapper input {
+  width: 100%;
+  padding: 14px 14px 14px 45px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: var(--ss-login-text-main);
+  font-family: 'JetBrains Mono', var(--font-jetbrains), monospace;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.ss-login-input-wrapper input:focus {
+  outline: none;
+  border-color: var(--ss-login-primary);
+  box-shadow: 0 0 15px rgba(0, 242, 255, 0.2);
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.ss-login-input-wrapper input::placeholder {
+  color: rgba(255, 255, 255, 0.25);
+}
+
+.ss-login-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: rgba(255, 50, 50, 0.1);
+  border: 1px solid rgba(255, 50, 50, 0.3);
+  border-radius: 8px;
+  margin-bottom: 15px;
+  font-size: 0.85rem;
+  color: #ff6b6b;
+}
+
+.ss-login-error i {
+  font-size: 0.9rem;
+}
+
+.ss-login-btn-authenticate {
+  width: 100%;
+  padding: 15px;
+  background: linear-gradient(135deg, var(--ss-login-primary), var(--ss-login-secondary));
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-family: 'Orbitron', var(--font-orbitron), sans-serif;
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 10px;
+  transform: translateZ(50px);
+  position: relative;
+  overflow: hidden;
+}
+
+.ss-login-btn-authenticate:hover:not(:disabled) {
+  box-shadow: 0 10px 30px rgba(0, 242, 255, 0.4);
+  transform: translateZ(60px) scale(1.02);
+}
+
+.ss-login-btn-authenticate:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.ss-login-btn-dev {
+  width: 100%;
+  padding: 12px;
+  margin-top: 15px;
+  background: transparent;
+  border: 1px dashed var(--ss-login-text-muted);
+  color: var(--ss-login-text-muted);
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: 'JetBrains Mono', var(--font-jetbrains), monospace;
+  font-size: 0.8rem;
+  transition: all 0.3s ease;
+  transform: translateZ(20px);
+}
+
+.ss-login-btn-dev:hover:not(:disabled) {
+  border-color: var(--ss-login-secondary);
+  color: var(--ss-login-secondary);
+}
+
+.ss-login-btn-dev:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ss-login-footer-warning {
+  margin-top: 25px;
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--ss-login-text-muted);
+  font-family: 'JetBrains Mono', var(--font-jetbrains), monospace;
+  transform: translateZ(10px);
+}
+
+.ss-login-footer-warning i {
+  color: #ff4d4d;
+  margin-right: 5px;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .ss-login-left { display: none; }
+  .ss-login-right { flex: 1; padding: 20px; }
+}

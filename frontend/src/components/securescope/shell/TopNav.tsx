@@ -156,64 +156,28 @@ function NotificationBell() {
 
 function UserMenu() {
   const [open, setOpen] = React.useState(false);
-  const logout = useApp((s) => s.logout);
+  const logout = useApp((state) => state.logout);
+  const user = React.useMemo(() => {
+    if (typeof window === "undefined") return null;
+    const raw = localStorage.getItem("securescope_user");
+    if (!raw) return null;
+    try {
+      return JSON.parse(raw) as { email: string; full_name: string | null; role: string; username: string };
+    } catch {
+      return null;
+    }
+  }, []);
+  const displayName = user?.full_name || user?.username || "Operator";
+  const initials = displayName.slice(0, 2).toUpperCase();
+
   return (
     <div className="relative">
-      <button
-        onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-2 pl-1.5 pr-2 py-1 rounded-sm border border-(--ss-hairline-strong) bg-(--ss-surface-2) hover:bg-(--ss-surface-3) transition-colors"
-      >
-        <div className="w-6 h-6 rounded-sm bg-linear-to-br from-cyan-500/30 to-blue-600/20 border border-cyan-400/30 flex items-center justify-center">
-          <span className="text-[10px] font-semibold text-cyan-200">KA</span>
-        </div>
-        <div className="hidden sm:block leading-none text-left">
-          <div className="text-[11px] font-medium text-slate-200">k.andrade</div>
-          <div className="text-[9px] text-slate-500 uppercase tracking-wider">Operator</div>
-        </div>
+      <button onClick={() => setOpen((value) => !value)} className="flex items-center gap-2 pl-1.5 pr-2 py-1 rounded-sm border border-(--ss-hairline-strong) bg-(--ss-surface-2) hover:bg-(--ss-surface-3) transition-colors">
+        <div className="w-6 h-6 rounded-sm bg-linear-to-br from-cyan-500/30 to-blue-600/20 border border-cyan-400/30 flex items-center justify-center"><span className="text-[10px] font-semibold text-cyan-200">{initials}</span></div>
+        <div className="hidden sm:block leading-none text-left"><div className="text-[11px] font-medium text-slate-200">{user?.username || "operator"}</div><div className="text-[9px] text-slate-500 uppercase tracking-wider">{user?.role || "operator"}</div></div>
         <ChevronDown className="w-3 h-3 text-slate-500" />
       </button>
-      {open && (
-        <>
-          <div className="fixed inset-0 z-30" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 top-10 z-40 w-56 ss-panel-raised shadow-2xl">
-            <div className="px-3 py-2.5 border-b border-(--ss-hairline-strong)">
-              <div className="text-xs font-medium text-slate-200">Karim Andrade</div>
-              <div className="text-[10px] text-slate-500">k.andrade@nasari.sec</div>
-              <div className="mt-1 flex items-center gap-1.5">
-                <span className="text-[9px] uppercase tracking-wider text-emerald-300 border border-emerald-500/30 bg-emerald-500/5 px-1.5 py-0.5 rounded-sm">
-                  MFA Verified
-                </span>
-                <span className="text-[9px] uppercase tracking-wider text-cyan-300 border border-cyan-500/30 bg-cyan-500/5 px-1.5 py-0.5 rounded-sm">
-                  Pentest Coordinator
-                </span>
-              </div>
-            </div>
-            <ul className="py-1">
-              {[
-                { icon: User, label: "Operator profile" },
-                { icon: Globe, label: "Region · eu-1" },
-                { icon: Settings, label: "Settings" },
-              ].map((it) => (
-                <li key={it.label}>
-                  <button className="w-full flex items-center gap-2.5 px-3 py-1.5 text-[11px] text-slate-300 hover:bg-(--ss-surface-3)/50 hover:text-slate-100">
-                    <it.icon className="w-3 h-3 text-slate-500" />
-                    {it.label}
-                  </button>
-                </li>
-              ))}
-            </ul>
-            <div className="py-1 border-t border-(--ss-hairline-strong)">
-              <button
-                onClick={logout}
-                className="w-full flex items-center gap-2.5 px-3 py-1.5 text-[11px] text-red-300 hover:bg-red-500/5"
-              >
-                <LogOut className="w-3 h-3" />
-                Sign out
-              </button>
-            </div>
-          </div>
-        </>
-      )}
+      {open && <><div className="fixed inset-0 z-30" onClick={() => setOpen(false)} /><div className="absolute right-0 top-10 z-40 w-56 ss-panel-raised shadow-2xl"><div className="px-3 py-2.5 border-b border-(--ss-hairline-strong)"><div className="text-xs font-medium text-slate-200">{displayName}</div><div className="text-[10px] text-slate-500">{user?.email || ""}</div><div className="mt-1"><span className="text-[9px] uppercase tracking-wider text-cyan-300 border border-cyan-500/30 bg-cyan-500/5 px-1.5 py-0.5 rounded-sm">{user?.role || "operator"}</span></div></div><ul className="py-1">{[{ icon: User, label: "Operator profile" }, { icon: Globe, label: "Region · eu-1" }, { icon: Settings, label: "Settings" }].map((item) => <li key={item.label}><button className="w-full flex items-center gap-2.5 px-3 py-1.5 text-[11px] text-slate-300 hover:bg-(--ss-surface-3)/50 hover:text-slate-100"><item.icon className="w-3 h-3 text-slate-500" />{item.label}</button></li>)}</ul><div className="py-1 border-t border-(--ss-hairline-strong)"><button onClick={logout} className="w-full flex items-center gap-2.5 px-3 py-1.5 text-[11px] text-red-300 hover:bg-red-500/5"><LogOut className="w-3 h-3" />Sign out</button></div></div></>}
     </div>
   );
 }
