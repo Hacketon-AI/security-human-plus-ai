@@ -7,6 +7,7 @@ import { useApp } from "@/lib/securescope/store";
 
 export function LoginPage() {
   const login = useApp((state) => state.login);
+  const go = useApp((state) => state.go);
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [submitting, setSubmitting] = React.useState(false);
@@ -188,6 +189,14 @@ export function LoginPage() {
           <div className="ss-login-card-container" ref={cardRef}>
             <div className="ss-login-card">
               <div className="ss-login-header">
+                <button
+                  type="button"
+                  onClick={() => go("landing")}
+                  className="mb-3 inline-flex items-center gap-1.5 text-xs font-mono text-cyan-400 hover:text-cyan-300 transition-colors cursor-pointer"
+                >
+                  <i className="fas fa-arrow-left text-[11px]" />
+                  <span>Lihat Live System Overview</span>
+                </button>
                 <h2>Operator Authentication</h2>
                 <p>Secure Access Gateway</p>
               </div>

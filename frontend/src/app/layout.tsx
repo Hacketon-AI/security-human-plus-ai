@@ -44,7 +44,7 @@ export const metadata: Metadata = {
     "offensive security orchestration",
   ],
   authors: [{ name: "SecureScope" }],
-  icons: { icon: "https://z-cdn.chatglm.cn/z-ai/static/logo.svg" },
+  icons: { icon: "/securescope-favicon.png" },
 };
 
 export default function RootLayout({

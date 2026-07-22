@@ -3,6 +3,7 @@
 import * as React from "react";
 import { getStoredToken, verifyToken, clearAuth } from "@/lib/securescope/authApi";
 import { useApp } from "@/lib/securescope/store";
+import { LandingPage } from "@/components/securescope/pages/LandingPage";
 import { LoginPage } from "@/components/securescope/pages/LoginPage";
 import { DashboardPage } from "@/components/securescope/pages/DashboardPage";
 import { PentestAuditPage } from "@/components/securescope/pages/PentestAuditPage";
@@ -58,8 +59,12 @@ export default function Page() {
     );
   }
 
-  if (!authenticated || route === "login") {
+  if (route === "login") {
     return <><LoginPage />{modal}</>;
+  }
+
+  if (route === "landing" || !authenticated) {
+    return <><LandingPage />{modal}</>;
   }
 
   let content: React.ReactNode;

@@ -154,7 +154,7 @@ const mapAuthorizationState = (status: string): AuthorizationState => {
 };
 
 export const useApp = create<AppState>((set, get) => ({
-  route: "login",
+  route: "landing",
   selectedOrgId: null,
   selectedProjectId: null,
   selectedAssetId: null,
@@ -221,7 +221,7 @@ export const useApp = create<AppState>((set, get) => ({
     }
     set({
       authenticated: false,
-      route: "login",
+      route: "landing",
       selectedOrgId: null,
       selectedProjectId: null,
       selectedAssetId: null,

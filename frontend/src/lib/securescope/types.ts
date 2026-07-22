@@ -293,6 +293,7 @@ export interface DispatchQueueState {
 }
 
 export type RouteKey =
+  | "landing"
   | "login"
   | "dashboard"
   | "operations"
