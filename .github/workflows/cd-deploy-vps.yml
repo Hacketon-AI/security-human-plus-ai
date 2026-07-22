@@ -2,7 +2,7 @@ name: CD VPS Deployment
 
 on:
   push:
-    branches: ["main"]
+    branches: [ "main" ]
   workflow_dispatch:
 
 jobs:
@@ -13,14 +13,15 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Execute Native SSH Deployment to VPS
+      - name: Setup SSH Key
         run: |
-          echo "==> Configuring SSH Key..."
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
-
-          # Default ED25519 OpenSSH Private Key
-          cat << 'EOF' > ~/.ssh/id_ed25519
+          
+          if [ -n "${{ secrets.VPS_SSH_KEY }}" ]; then
+            echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_ed25519
+          else
+            cat << 'EOF' > ~/.ssh/id_ed25519
 -----BEGIN OPENSSH PRIVATE KEY-----
 b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAMwAAAAtzc2gtZW
 QyNTUxOQAAACDc1FtQmdv11jXEhkOGKoglChXmlmBlEDkzTmxi6Oq1TAAAAJj9dlOz/XZT
@@ -29,35 +30,10 @@ AAAEDg12PPL8JmqPPzFx34FHvKIBuRlxCz7FZ7J4UjMiLhVtzUW1CZ2/XWNcSGQ4YqiCUK
 FeaWYGUQOTNObGLo6rVMAAAAFGdpdGh1Yi1jZEBzcnYxNjkxMTYwAQ==
 -----END OPENSSH PRIVATE KEY-----
 EOF
-
-          # Override with secret if populated
-          SECRET_KEY="${{ secrets.VPS_SSH_KEY }}"
-          if [ -n "$SECRET_KEY" ]; then
-            echo "$SECRET_KEY" > ~/.ssh/id_ed25519
           fi
-
           chmod 600 ~/.ssh/id_ed25519
 
-          VPS_USER="${{ secrets.VPS_USERNAME || 'root' }}"
-          VPS_HOST="${{ secrets.VPS_HOST || 'srv1691160.hstgr.cloud' }}"
-          VPS_PORT="${{ secrets.VPS_PORT || '22' }}"
-          TARGET_PATH="${{ secrets.VPS_DEPLOY_PATH || '/opt/security-human-plus-ai' }}"
-
-          echo "==> Connecting via SSH to $VPS_USER@$VPS_HOST:$VPS_PORT..."
-          ssh -o StrictHostKeyChecking=no -p "$VPS_PORT" -i ~/.ssh/id_ed25519 "$VPS_USER@$VPS_HOST" << EOF
-            set -e
-            echo "==> Arrived at VPS. Navigating to $TARGET_PATH..."
-            mkdir -p $TARGET_PATH
-            cd $TARGET_PATH
-
-            if [ ! -d ".git" ]; then
-              echo "==> Initializing Git Repository at $TARGET_PATH..."
-              git clone https://github.com/${{ github.repository }}.git .
-            else
-              echo "==> Fetching & Pulling Latest Code..."
-              git pull origin main || true
-            fi
-
-            chmod +x scripts/deploy-vps.sh
-            ./scripts/deploy-vps.sh
-EOF
+      - name: Deploy to VPS
+        run: |
+          chmod +x scripts/vps-remote-exec.sh
+          bash scripts/vps-remote-exec.sh "${{ secrets.VPS_USERNAME || 'root' }}" "${{ secrets.VPS_HOST || 'srv1691160.hstgr.cloud' }}" "${{ secrets.VPS_PORT || '22' }}" "${{ secrets.VPS_DEPLOY_PATH || '/opt/security-human-plus-ai' }}"
