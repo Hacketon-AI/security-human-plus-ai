@@ -14,17 +14,17 @@ echo "----------------------------------------------------"
 # 1. Ensure Environment Configuration (.env)
 if [ ! -f ".env" ]; then
     echo "⚠️  No root .env file found! Creating from .env.example..."
-    cp .env.example .env
+    [ -f ".env.example" ] && cp .env.example .env || touch .env
 fi
 
 if [ ! -f "backend/.env" ]; then
     echo "⚠️  No backend/.env file found! Creating from backend/.env.example..."
-    cp backend/.env.example backend/.env
+    [ -f "backend/.env.example" ] && cp backend/.env.example backend/.env || touch backend/.env
 fi
 
 if [ ! -f "frontend/.env" ]; then
     echo "⚠️  No frontend/.env file found! Creating from frontend/.env.example..."
-    cp frontend/.env.example frontend/.env
+    [ -f "frontend/.env.example" ] && cp frontend/.env.example frontend/.env || touch frontend/.env
 fi
 
 # 2. Build Docker Containers
