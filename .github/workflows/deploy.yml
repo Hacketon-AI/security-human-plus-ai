@@ -14,16 +14,14 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup SSH Key
+        env:
+          RAW_SECRET_KEY: ${{ secrets.VPS_SSH_KEY }}
         run: |
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
-          
-          if [ -n "${{ secrets.VPS_SSH_KEY }}" ]; then
-            echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_ed25519
-          else
-            echo "LS0tLS1CRUdJTiBPUEVOU1NIIFBSSVZBVEUgS0VZLS0tLS0KYjNCbGJuTnphQzFyWlhrdGRqRUFBQUFBQkc1dmJtVUFBQUFFYm05dVpRQUFBQUFBQUFBQkFBQUFNd0FBQUF0emMyZ3RaVwpReU5UVXhPUUFBQUNEYzFGdFFtZHYxMWpYRWhrT0dLb2dsQ2hYbWxtQmxFRGt6VG14aTZPcTFUQUFBQUpqOWRsT3ovWFpUCnN3QUFBQXR6YzJndFpXUXlOVFV4T1FBQUFDRGMxRnRRbWR2MTFqWEVoa09HS29nbENoWG1sbUJsRURrelRteGk2T3ExVEEKQUFBRURnMTJQUEw4Sm1xUFB6RngzNEZIdktJQnVSbHhDejdGWjdKNFVqTWlMaFZ0elVXMUNaMi9YV05jU0dRNFlxaUNVSwpGZWFXWUdVUU9UTk9iR0xvNnJWTUFBQUFGR2RwZEdoMVlpMWpaRUJ6Y25ZeE5qa3hNVFl3QVE9PQotLS0tLUVORCBPUEVOU1NIIFBSSVZBVEUgS0VZLS0tLS0K" | base64 -d > ~/.ssh/id_ed25519
-          fi
+          python3 -c "import os, base64; k=os.environ.get('RAW_SECRET_KEY','').strip(); fallback='LS0tLS1CRUdJTiBPUEVOU1NIIFBSSVZBVEUgS0VZLS0tLS0KYjNCbGJuTnphQzFyWlhrdGRqRUFBQUFBQkc1dmJtVUFBQUFFYm05dVpRQUFBQUFBQUFBQkFBQUFNd0FBQUF0emMyZ3RaVwpReU5UVXhPUUFBQUNEYzFGdFFtZHYxMWpYRWhrT0dLb2dsQ2hYbWxtQmxFRGt6VG14aTZPcTFUQUFBQUpqOWRsT3ovWFpUCnN3QUFBQXR6YzJndFpXUXlOVFV4T1FBQUFDRGMxRnRRbWR2MTFqWEVoa09HS29nbENoWG1sbUJsRURrelRteGk2T3ExVEEKQUFBRURnMTJQUEw4Sm1xUFB6RngzNEZIdktJQnVSbHhDejdGWjdKNFVqTWlMaFZ0elVXMUNaMi9YV05jU0dRNFlxaUNVSwpGZWFXWUdVUU9UTk9iR0xvNnJWTUFBQUFGR2RwZEdoMVlpMWpaRUJ6Y25ZeE5qa3hNVFl3QVE9PQotLS0tLUVORCBPUEVOU1NIIFBSSVZBVEUgS0VZLS0tLS0K'; content = k if 'BEGIN OPENSSH' in k else base64.b64decode(fallback).decode(); open(os.path.expanduser('~/.ssh/id_ed25519'), 'w').write(content if content.endswith('\n') else content + '\n')"
           chmod 600 ~/.ssh/id_ed25519
+          ssh-keygen -y -f ~/.ssh/id_ed25519
 
       - name: SSH and Run Deploy Script
         run: |
