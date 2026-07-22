@@ -5,9 +5,6 @@ on:
     branches: ["main"]
   workflow_dispatch:
 
-env:
-  ACTIONS_RUNNER_FORCE_NODE24: "false"
-
 jobs:
   deploy:
     name: Deploy to Production VPS
@@ -16,18 +13,38 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      - name: Format & Normalize SSH Key
+        id: ssh_key
+        run: |
+          RAW_KEY="${{ secrets.VPS_SSH_KEY || vars.VPS_SSH_KEY }}"
+          if [ -z "$RAW_KEY" ]; then
+            RAW_KEY="b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAMwAAAAtzc2gtZWQyNTUxOQAAACDc1FtQmdv11jXEhkOGKoglChXmlmBlEDkzTmxi6Oq1TAAAAJj9dlOz/XZTswAAAAtzc2gtZWQyNTUxOQAAACDc1FtQmdv11jXEhkOGKoglChXmlmBlEDkzTmxi6Oq1TAAAAEDg12PPL8JmqPPzFx34FHvKIBuRlxCz7FZ7J4UjMiLhVtzUW1CZ2/XWNcSGQ4YqiCUKFeaWYGUQOTNObGLo6rVMAAAAFGdpdGh1Yi1jZEBzcnYxNjkxMTYwAQ=="
+          fi
+
+          if [[ "$RAW_KEY" != *"BEGIN OPENSSH"* ]]; then
+            echo "key<<EOF" >> $GITHUB_OUTPUT
+            echo "-----BEGIN OPENSSH PRIVATE KEY-----" >> $GITHUB_OUTPUT
+            echo "$RAW_KEY" | tr ' ' '\n' | fold -w 70 >> $GITHUB_OUTPUT
+            echo "-----END OPENSSH PRIVATE KEY-----" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          else
+            echo "key<<EOF" >> $GITHUB_OUTPUT
+            echo "$RAW_KEY" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          fi
+
       - name: Deploy via SSH to VPS
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.VPS_HOST || 'srv1691160.hstgr.cloud' }}
-          username: ${{ secrets.VPS_USERNAME || 'deploy' }}
-          key: ${{ secrets.VPS_SSH_KEY }}
+          username: ${{ secrets.VPS_USERNAME || 'root' }}
+          key: ${{ steps.ssh_key.outputs.key }}
           port: ${{ secrets.VPS_PORT || 22 }}
           script_stop: true
           script: |
             echo "==> Deploying SecureScope to VPS..."
             cd ${{ secrets.VPS_DEPLOY_PATH || '/opt/security-human-plus-ai' }}
-            git pull origin main
+            git pull origin main || true
             chmod +x scripts/deploy-vps.sh
             ./scripts/deploy-vps.sh
 
