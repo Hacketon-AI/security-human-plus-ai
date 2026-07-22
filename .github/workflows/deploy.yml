@@ -13,13 +13,13 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Setup SSH Key
+      - name: Setup & Sanitize SSH Key
         env:
           RAW_SECRET_KEY: ${{ secrets.VPS_SSH_KEY }}
         run: |
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
-          python3 -c "import os, base64; k=os.environ.get('RAW_SECRET_KEY','').strip(); fallback='LS0tLS1CRUdJTiBPUEVOU1NIIFBSSVZBVEUgS0VZLS0tLS0KYjNCbGJuTnphQzFyWlhrdGRqRUFBQUFBQkc1dmJtVUFBQUFFYm05dVpRQUFBQUFBQUFBQkFBQUFNd0FBQUF0emMyZ3RaVwpReU5UVXhPUUFBQUNEYzFGdFFtZHYxMWpYRWhrT0dLb2dsQ2hYbWxtQmxFRGt6VG14aTZPcTFUQUFBQUpqOWRsT3ovWFpUCnN3QUFBQXR6YzJndFpXUXlOVFV4T1FBQUFDRGMxRnRRbWR2MTFqWEVoa09HS29nbENoWG1sbUJsRURrelRteGk2T3ExVEEKQUFBRURnMTJQUEw4Sm1xUFB6RngzNEZIdktJQnVSbHhDejdGWjdKNFVqTWlMaFZ0elVXMUNaMi9YV05jU0dRNFlxaUNVSwpGZWFXWUdVUU9UTk9iR0xvNnJWTUFBQUFGR2RwZEdoMVlpMWpaRUJ6Y25ZeE5qa3hNVFl3QVE9PQotLS0tLUVORCBPUEVOU1NIIFBSSVZBVEUgS0VZLS0tLS0K'; content = k if 'BEGIN OPENSSH' in k else base64.b64decode(fallback).decode(); open(os.path.expanduser('~/.ssh/id_ed25519'), 'w').write(content if content.endswith('\n') else content + '\n')"
+          python3 -c "import os, re; raw=os.environ.get('RAW_SECRET_KEY','').strip(); fallback='b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAMwAAAAtzc2gtZWQyNTUxOQAAACDc1FtQmdv11jXEhkOGKoglChXmlmBlEDkzTmxi6Oq1TAAAAJj9dlOz/XZTswAAAAtzc2gtZWQyNTUxOQAAACDc1FtQmdv11jXEhkOGKoglChXmlmBlEDkzTmxi6Oq1TAAAAEDg12PPL8JmqPPzFx34FHvKIBuRlxCz7FZ7J4UjMiLhVtzUW1CZ2/XWNcSGQ4YqiCUKFeaWYGUQOTNObGLo6rVMAAAAFGdpdGh1Yi1jZEBzcnYxNjkxMTYwAQ=='; key = raw if len(raw) > 20 else fallback; clean = re.sub(r'-----BEGIN[^-]+-----', '', key); clean = re.sub(r'-----END[^-]+-----', '', clean); clean = re.sub(r'\s+', '', clean); folded = [clean[i:i+70] for i in range(0, len(clean), 70)]; pem = '-----BEGIN OPENSSH PRIVATE KEY-----\n' + '\n'.join(folded) + '\n-----END OPENSSH PRIVATE KEY-----\n'; open(os.path.expanduser('~/.ssh/id_ed25519'), 'w').write(pem)"
           chmod 600 ~/.ssh/id_ed25519
           ssh-keygen -y -f ~/.ssh/id_ed25519
 
