@@ -1,0 +1,57 @@
+name: CD VPS Deployment
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+jobs:
+  validate:
+    name: Run Quality Gates Before Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install Frontend Dependencies
+        working-directory: ./frontend
+        run: bun install --frozen-lockfile
+
+      - name: Validate Frontend Build
+        working-directory: ./frontend
+        env:
+          NEXT_TELEMETRY_DISABLED: 1
+        run: bun run build
+
+  deploy:
+    name: Deploy to Production VPS
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Deploy via SSH to VPS
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          script_stop: true
+          script: |
+            echo "==> Deploying SecureScope to VPS..."
+            cd ${{ secrets.VPS_DEPLOY_PATH || '/opt/security-human-plus-ai' }}
+            git pull origin main
+            chmod +x scripts/deploy-vps.sh
+            ./scripts/deploy-vps.sh
