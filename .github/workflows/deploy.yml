@@ -1,4 +1,4 @@
-name: CD VPS Deployment
+name: Deploy VPS
 
 on:
   push:
@@ -7,10 +7,10 @@ on:
 
 jobs:
   deploy:
-    name: Deploy to Production VPS
+    name: Deploy to Hostinger VPS
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repository
+      - name: Checkout Code
         uses: actions/checkout@v4
 
       - name: Setup SSH Key
@@ -33,7 +33,17 @@ EOF
           fi
           chmod 600 ~/.ssh/id_ed25519
 
-      - name: Deploy to VPS
+      - name: SSH and Run Deploy Script
         run: |
-          chmod +x scripts/vps-remote-exec.sh
-          bash scripts/vps-remote-exec.sh "${{ secrets.VPS_USERNAME || 'root' }}" "${{ secrets.VPS_HOST || 'srv1691160.hstgr.cloud' }}" "${{ secrets.VPS_PORT || '22' }}" "${{ secrets.VPS_DEPLOY_PATH || '/opt/security-human-plus-ai' }}"
+          ssh -o StrictHostKeyChecking=no root@srv1691160.hstgr.cloud "
+            set -e
+            mkdir -p /opt/security-human-plus-ai
+            cd /opt/security-human-plus-ai
+            if [ ! -d '.git' ]; then
+              git clone https://github.com/Hacketon-AI/security-human-plus-ai.git .
+            else
+              git pull origin main || true
+            fi
+            chmod +x scripts/deploy-vps.sh
+            ./scripts/deploy-vps.sh
+          "
