@@ -27,6 +27,8 @@ from app.modules.authorizations.models import Authorization, AuthorizationScope
 from app.modules.engagements.enums import EngagementStatus
 from app.modules.engagements.models import Engagement, EngagementScope
 from app.modules.organizations.enums import OrganizationStatus
+from app.modules.auth.models import User, UserRole
+from app.modules.auth.security import hash_password
 from app.modules.organizations.models import Organization
 from app.modules.projects.enums import ProjectStatus
 from app.modules.projects.models import Project
@@ -57,6 +59,7 @@ async def run_seed() -> None:
         await session.execute(delete(Authorization))
         await session.execute(delete(Asset))
         await session.execute(delete(Project))
+        await session.execute(delete(User))
         await session.execute(delete(Organization))
         await session.commit()
 
@@ -90,6 +93,31 @@ async def run_seed() -> None:
             status=OrganizationStatus.active,
         )
         session.add_all([org1, org2, org3])
+        await session.flush()
+
+        # ------------------------------------------------------------------ #
+        # USERS
+        # ------------------------------------------------------------------ #
+        print("Seeding users...")
+        u1 = User(
+            id=UUID("d42f56a1-0f7e-4b9d-a76c-3e2b1d5c9a8f"),
+            email="agungzippo@legaltechz.com",
+            username="agungzippo",
+            password_hash=hash_password("agung140793@"),
+            full_name="Agung Zippo",
+            role=UserRole.admin,
+            organization_id=org1.id,
+        )
+        u2 = User(
+            id=UUID("e53067b2-108f-5cea-b87d-4f3c2e6d0b90"),
+            email="admin@agungzippo.com",
+            username="admin",
+            password_hash=hash_password("op98342"),
+            full_name="Admin",
+            role=UserRole.admin,
+            organization_id=org1.id,
+        )
+        session.add_all([u1, u2])
         await session.flush()
 
         # ------------------------------------------------------------------ #

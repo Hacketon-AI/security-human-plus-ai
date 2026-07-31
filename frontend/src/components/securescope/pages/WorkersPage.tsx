@@ -30,7 +30,7 @@ export function WorkersPage() {
   return (
     <>
       <TopNavCommandBar />
-      <div className="pt-[76px] min-h-screen">
+      <div className="pt-19 min-h-screen">
         <PageHeader
           breadcrumbs={[{ label: "Workers · Dispatch Monitoring" }]}
           title="Dispatch & Worker Monitoring"

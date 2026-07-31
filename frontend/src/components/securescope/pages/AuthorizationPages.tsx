@@ -24,7 +24,7 @@ export function AuthorizationsListPage() {
   return (
     <>
       <TopNavCommandBar />
-      <div className="pt-[76px] min-h-screen">
+      <div className="pt-19 min-h-screen">
         <PageHeader
           breadcrumbs={[{ label: "Authorizations" }]}
           title="Authorizations"
@@ -85,7 +85,7 @@ export function AuthorizationDetailPage() {
   return (
     <>
       <TopNavCommandBar />
-      <div className="pt-[76px] min-h-screen">
+      <div className="pt-19 min-h-screen">
         {/* Status banner */}
         <div className={cn(
           "px-4 lg:px-6 pt-4 pb-3 border-b",
@@ -223,14 +223,14 @@ export function AuthorizationDetailPage() {
               <div className="ss-panel-flat p-4">
                 <div className="ss-eyebrow mb-3">Authorization lifecycle</div>
                 <div className="relative">
-                  <div className="absolute left-[5px] top-1 bottom-1 w-px bg-(--ss-hairline-strong)" />
+                  <div className="absolute left-1.25 top-1 bottom-1 w-px bg-(--ss-hairline-strong)" />
                   <ul className="space-y-3">
                     {auth.approvalTimeline.map((t, i) => {
                       const isLast = i === auth.approvalTimeline.length - 1;
                       return (
                         <li key={i} className="relative pl-6">
                           <span className={cn(
-                            "absolute left-0 top-1 w-[11px] h-[11px] rounded-full border-2 border-[#0A111E]",
+                            "absolute left-0 top-1 w-2.75 h-2.75 rounded-full border-2 border-[#0A111E]",
                             isLast && auth.state === "active" ? "bg-emerald-400" : "bg-cyan-400"
                           )} />
                           <div className="flex items-baseline justify-between gap-2">

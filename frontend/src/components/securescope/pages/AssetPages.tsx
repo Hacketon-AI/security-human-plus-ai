@@ -69,7 +69,7 @@ export function AssetsListPage() {
   return (
     <>
       <TopNavCommandBar />
-      <div className="pt-[76px] min-h-screen">
+      <div className="pt-19 min-h-screen">
         <PageHeader
           breadcrumbs={[{ label: "Assets" }]}
           title="Assets"
@@ -181,7 +181,7 @@ export function AssetDetailPage() {
   return (
     <>
       <TopNavCommandBar />
-      <div className="pt-[76px] min-h-screen">
+      <div className="pt-19 min-h-screen">
         {/* Identity header */}
         <div className="px-4 lg:px-6 pt-4 pb-4 border-b border-(--ss-hairline-strong) bg-linear-to-b from-(--ss-surface-2)/30 to-transparent">
           <div className="flex items-center gap-1.5 text-[10px] text-slate-500 mb-2">
@@ -256,7 +256,7 @@ export function AssetDetailPage() {
         </div>
 
         {/* Tabs */}
-        <div className="px-4 lg:px-6 border-b border-(--ss-hairline-strong) sticky top-[76px] bg-[#070B14]/80 backdrop-blur-sm z-20">
+        <div className="px-4 lg:px-6 border-b border-(--ss-hairline-strong) sticky top-19 bg-[#070B14]/80 backdrop-blur-sm z-20">
           <div className="flex items-center gap-0.5 overflow-x-auto ss-scroll">
             {ASSET_TABS.map((t) => (
               <button
@@ -447,7 +447,7 @@ function AssetVerification({ asset, attempts }: { asset: Asset; attempts: { id: 
         <div className="ss-panel p-4">
           <div className="ss-eyebrow mb-3">Verification status timeline</div>
           <div className="relative">
-            <div className="absolute left-[5px] top-1 bottom-1 w-px bg-(--ss-hairline-strong)" />
+            <div className="absolute left-1.25 top-1 bottom-1 w-px bg-(--ss-hairline-strong)" />
             <ul className="space-y-3">
               {([
                 { state: "pending", label: "Pending", desc: "Challenge issued, awaiting DNS propagation.", reached: true },
@@ -461,7 +461,7 @@ function AssetVerification({ asset, attempts }: { asset: Asset; attempts: { id: 
                   : "bg-slate-700 border border-slate-600";
                 return (
                   <li key={s.state} className="relative pl-6">
-                    <span className={cn("absolute left-0 top-1 w-[11px] h-[11px] rounded-full border-2 border-[#0A111E]", tone)} />
+                    <span className={cn("absolute left-0 top-1 w-2.75 h-2.75 rounded-full border-2 border-[#0A111E]", tone)} />
                     <div className={cn("text-xs font-medium", s.reached ? "text-slate-200" : "text-slate-600")}>{s.label}</div>
                     <div className={cn("text-[10px]", s.reached ? "text-slate-500" : "text-slate-700")}>{s.desc}</div>
                   </li>

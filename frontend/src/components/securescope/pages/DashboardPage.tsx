@@ -712,7 +712,7 @@ function OverviewDashboard() {
             </ul>
           )}
         </section>
-        <div className="min-h-[320px]"><ActivityRail /></div>
+        <div className="min-h-80"><ActivityRail /></div>
       </div>
     </div>
   );
@@ -724,7 +724,7 @@ function OperationsDashboard() {
       <div className="flex items-center gap-2"><ShieldCheck className="w-5 h-5 text-emerald-400" /><div><div className="ss-eyebrow">Operations</div><h1 className="text-xl font-semibold text-slate-100">Authorized validation operations</h1></div></div>
       <div className="grid lg:grid-cols-3 gap-4"><div className="lg:col-span-1 flex flex-col gap-4"><AuthorizedDomainScanPanel /></div><div className="lg:col-span-2"><ValidationOperationsMap /></div></div>
       <DispatchStatusStrip />
-      <div className="grid lg:grid-cols-[1.85fr_1fr] gap-4"><ActiveExecutionFocus /><div className="min-h-[320px]"><ActivityRail /></div></div>
+      <div className="grid lg:grid-cols-[1.85fr_1fr] gap-4"><ActiveExecutionFocus /><div className="min-h-80"><ActivityRail /></div></div>
       <div className="grid lg:grid-cols-12 gap-4"><div className="lg:col-span-5"><RiskDistributionMatrix /></div><div className="lg:col-span-3"><AuthorizationExpiryRadar /></div><div className="lg:col-span-4"><AssetVerificationQueue /></div></div>
       <RecentAuditTrail />
     </div>
@@ -749,5 +749,5 @@ export function DashboardPage({ view = "overview" }: { view?: DashboardView }) {
   const warningMessage = workspaceWarning || "Optional workspace context failed to load. Workspace seed data unavailable. Real authorized scan mode is still available.";
   const content = view === "operations" ? <OperationsDashboard /> : view === "ai" ? <AiIntelligenceDashboard /> : <OverviewDashboard />;
 
-  return <><TopNavCommandBar /><main className="pt-[76px] min-h-screen pb-12">{(workspaceWarning || demoWorkspaceMode === "real_scan_standalone") && <div className="px-4 lg:px-6 pt-4"><AlertBanner tone="amber" title="Optional workspace context failed to load">{warningMessage}</AlertBanner></div>}{content}</main></>;
+  return <><TopNavCommandBar /><main className="pt-19 min-h-screen pb-12">{(workspaceWarning || demoWorkspaceMode === "real_scan_standalone") && <div className="px-4 lg:px-6 pt-4"><AlertBanner tone="amber" title="Optional workspace context failed to load">{warningMessage}</AlertBanner></div>}{content}</main></>;
 }

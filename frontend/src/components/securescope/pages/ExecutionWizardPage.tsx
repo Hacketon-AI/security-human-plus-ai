@@ -112,7 +112,7 @@ export function ExecutionWizardPage() {
   return (
     <>
       <TopNavCommandBar />
-      <div className="pt-[76px] min-h-screen">
+      <div className="pt-19 min-h-screen">
         <PageHeader
           breadcrumbs={[
             { label: "Executions", onClick: () => go("execution_wizard") },

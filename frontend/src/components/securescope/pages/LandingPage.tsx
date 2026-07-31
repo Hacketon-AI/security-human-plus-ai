@@ -725,7 +725,7 @@ export function LandingPage() {
           </div>
 
           {/* Cyber Attack Simulation Graphic Banner (Live Animated 60FPS Canvas) */}
-          <div className="relative rounded-2xl overflow-hidden border border-cyan-500/50 shadow-[0_0_60px_rgba(6,182,212,0.3)] group bg-[#01040a] min-h-[320px] sm:min-h-[380px] flex items-center justify-center">
+          <div className="relative rounded-2xl overflow-hidden border border-cyan-500/50 shadow-[0_0_60px_rgba(6,182,212,0.3)] group bg-[#01040a] min-h-80 sm:min-h-[380px] flex items-center justify-center">
             {/* Background World Map Graphic Blend */}
             <img
               src="/securescope-world-map.png"

@@ -28,7 +28,7 @@ export function EngagementsListPage() {
   return (
     <>
       <TopNavCommandBar />
-      <div className="pt-[76px] min-h-screen">
+      <div className="pt-19 min-h-screen">
         <PageHeader
           breadcrumbs={[{ label: "Engagements" }]}
           title="Engagements"
@@ -98,7 +98,7 @@ export function EngagementDetailPage() {
   return (
     <>
       <TopNavCommandBar />
-      <div className="pt-[76px] min-h-screen">
+      <div className="pt-19 min-h-screen">
         <PageHeader
           breadcrumbs={[
             { label: "Engagements", onClick: () => go("engagements") },

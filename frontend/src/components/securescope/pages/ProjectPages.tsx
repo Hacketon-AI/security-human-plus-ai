@@ -40,7 +40,7 @@ export function ProjectsListPage() {
   return (
     <>
       <TopNavCommandBar />
-      <div className="pt-[76px] min-h-screen">
+      <div className="pt-19 min-h-screen">
         <PageHeader
           breadcrumbs={[{ label: "Projects" }]}
           title="Projects"
@@ -172,7 +172,7 @@ export function ProjectDetailPage() {
   return (
     <>
       <TopNavCommandBar />
-      <div className="pt-[76px] min-h-screen">
+      <div className="pt-19 min-h-screen">
         <PageHeader
           breadcrumbs={[
             { label: "Projects", onClick: () => go("projects") },
