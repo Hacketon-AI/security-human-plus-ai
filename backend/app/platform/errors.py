@@ -48,6 +48,12 @@ class AuthenticationRequiredError(SecureScopeError):
     code: ClassVar[str] = "authentication_required"
 
 
+class PermissionDeniedError(SecureScopeError):
+    """The caller is authenticated but its role may not perform this action."""
+
+    code: ClassVar[str] = "permission_denied"
+
+
 class ServiceNotConfiguredError(SecureScopeError):
     """A required capability is not configured for the current environment.
 

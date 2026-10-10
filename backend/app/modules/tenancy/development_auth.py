@@ -8,12 +8,12 @@ compatibility adapter when the caller supplies no bearer token.
 from typing import Any
 from uuid import UUID
 
-from fastapi import Depends, Header
+from fastapi import Depends, Header, Request
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import Settings
-from app.modules.auth.models import User
+from app.modules.auth.models import User, UserRole
 from app.modules.auth.security import decode_access_token
 from app.modules.tenancy.context import TenantContext
 from app.platform.dependencies import (
@@ -21,7 +21,11 @@ from app.platform.dependencies import (
     get_db_session,
     get_jwt_secret,
 )
-from app.platform.errors import AuthenticationRequiredError, ServiceNotConfiguredError
+from app.platform.errors import (
+    AuthenticationRequiredError,
+    PermissionDeniedError,
+    ServiceNotConfiguredError,
+)
 
 _TENANT_HEADER = "X-Organization-Id"
 
@@ -30,6 +34,17 @@ class TenantContextMissing(AuthenticationRequiredError):
     """The request carried no usable tenant identity."""
 
     code = "tenant_context_missing"
+
+
+class ReadOnlyRole(PermissionDeniedError):
+    """A viewer attempted a state-changing request."""
+
+    code = "read_only_role"
+
+
+# Viewers are read-only on every tenant route. Enforced here, where every
+# tenant request is authenticated, so no route can forget the check.
+_READ_ONLY_METHODS = frozenset({"GET", "HEAD", "OPTIONS"})
 
 
 class TenantAuthenticationNotConfigured(ServiceNotConfiguredError):
@@ -72,10 +87,11 @@ async def _tenant_context_from_bearer_token(
         or token_version != user.token_version
     ):
         raise TenantContextMissing("invalid tenant authentication")
-    return TenantContext(organization_id=organization_id)
+    return TenantContext(organization_id=organization_id, role=user.role)
 
 
 async def require_tenant_context(
+    request: Request,
     authorization: str | None = Header(default=None),
     x_organization_id: str | None = Header(default=None, alias=_TENANT_HEADER),
     settings: Settings = Depends(get_app_settings),
@@ -84,11 +100,14 @@ async def require_tenant_context(
 ) -> TenantContext:
     """Resolve a verified JWT tenant, or a development-only header fallback."""
     if authorization:
-        return await _tenant_context_from_bearer_token(
+        context = await _tenant_context_from_bearer_token(
             authorization,
             jwt_secret=jwt_secret,
             session=session,
         )
+        if context.role == UserRole.viewer and request.method not in _READ_ONLY_METHODS:
+            raise ReadOnlyRole("viewers have read-only access")
+        return context
 
     if not settings.development_auth_active:
         raise TenantAuthenticationNotConfigured(

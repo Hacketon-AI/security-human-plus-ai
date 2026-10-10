@@ -14,6 +14,7 @@ from app.platform.errors import (
     ConflictError,
     DomainValidationError,
     NotFoundError,
+    PermissionDeniedError,
     SecureScopeError,
     ServiceNotConfiguredError,
 )
@@ -22,6 +23,7 @@ from app.platform.errors import (
 # that is a SecureScopeError but matches no category falls back to 400.
 _STATUS_BY_CATEGORY: tuple[tuple[type[SecureScopeError], int], ...] = (
     (AuthenticationRequiredError, 401),
+    (PermissionDeniedError, 403),
     (NotFoundError, 404),
     (ConflictError, 409),
     (DomainValidationError, 422),

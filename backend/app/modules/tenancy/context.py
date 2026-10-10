@@ -14,3 +14,5 @@ class TenantContext:
     """Immutable tenant identity resolved by the authentication adapter."""
 
     organization_id: UUID
+    # Role of the authenticated user; None for the development header adapter.
+    role: str | None = None
