@@ -20,11 +20,11 @@ def test_generated_tokens_are_high_entropy_and_unique() -> None:
 
 def test_record_name_and_value_construction() -> None:
     assert build_record_name("www.example.com") == (
-        "_securescope-verification.www.example.com"
+        "_doubleaa-verification.www.example.com"
     )
-    assert build_record_value("abc123") == "securescope-verification=abc123"
+    assert build_record_value("abc123") == "doubleaa-verification=abc123"
     control = build_control_record_name("www.example.com", "deadbeef")
-    assert control == "_securescope-verification-deadbeef.www.example.com"
+    assert control == "_doubleaa-verification-deadbeef.www.example.com"
 
 
 def test_digest_matches_only_exact_value() -> None:
@@ -32,7 +32,7 @@ def test_digest_matches_only_exact_value() -> None:
     digest = digest_value(value)
     assert matches_digest(value, digest)
     assert not matches_digest(value + "x", digest)
-    assert not matches_digest("securescope-verification=other", digest)
+    assert not matches_digest("doubleaa-verification=other", digest)
 
 
 def test_digest_is_not_the_raw_value() -> None:

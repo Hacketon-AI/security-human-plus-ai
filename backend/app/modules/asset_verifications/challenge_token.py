@@ -13,8 +13,8 @@ import secrets
 
 # 32 bytes => 256 bits of entropy, per the security requirement.
 _TOKEN_BYTES = 32
-_RECORD_NAME_PREFIX = "_securescope-verification"
-_RECORD_VALUE_PREFIX = "securescope-verification="
+_RECORD_NAME_PREFIX = "_doubleaa-verification"
+_RECORD_VALUE_PREFIX = "doubleaa-verification="
 
 # The DNS record type callers must publish.
 RECORD_TYPE = "TXT"

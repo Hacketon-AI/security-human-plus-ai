@@ -67,8 +67,8 @@ async def test_create_returns_record_and_persists_only_digest(
     assert response.status_code == 201
     body = response.json()
     assert body["record_type"] == "TXT"
-    assert body["record_name"] == "_securescope-verification.www.example.com"
-    assert body["record_value"].startswith("securescope-verification=")
+    assert body["record_name"] == "_doubleaa-verification.www.example.com"
+    assert body["record_value"].startswith("doubleaa-verification=")
     assert body["method"] == "dns_txt"
     assert body["maximum_attempts"] == 5
 
@@ -107,7 +107,7 @@ async def test_mismatch_increments_attempts_without_verifying(
     client, resolver, _app = verification_app
     _org, headers, asset = await _pending_asset(client, create_organization)
     created = (await client.post(_base(asset["id"]), headers=headers)).json()
-    resolver.records[created["record_name"]] = ["securescope-verification=wrong"]
+    resolver.records[created["record_name"]] = ["doubleaa-verification=wrong"]
 
     response = await client.post(
         f"{_base(asset['id'])}/{created['challenge_id']}/verify", headers=headers
@@ -164,7 +164,7 @@ async def test_maximum_attempts_marks_challenge_failed(
     client, resolver, _app = verification_app
     _org, headers, asset = await _pending_asset(client, create_organization)
     created = (await client.post(_base(asset["id"]), headers=headers)).json()
-    resolver.records[created["record_name"]] = ["securescope-verification=wrong"]
+    resolver.records[created["record_name"]] = ["doubleaa-verification=wrong"]
     verify_url = f"{_base(asset['id'])}/{created['challenge_id']}/verify"
 
     last_body = {}

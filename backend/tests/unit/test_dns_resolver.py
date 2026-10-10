@@ -39,12 +39,12 @@ def _patch_resolve(monkeypatch: pytest.MonkeyPatch, behaviour: object) -> None:
 
 
 async def test_joins_segmented_txt_strings(monkeypatch: pytest.MonkeyPatch) -> None:
-    answer = _FakeAnswer([_FakeRdata(b"securescope-", b"verification=abc")])
+    answer = _FakeAnswer([_FakeRdata(b"doubleaa-", b"verification=abc")])
     _patch_resolve(monkeypatch, answer)
 
     values = await DnspythonTxtResolver().resolve_txt("_x.example.com", 5.0)
 
-    assert list(values) == ["securescope-verification=abc"]
+    assert list(values) == ["doubleaa-verification=abc"]
 
 
 async def test_nxdomain_returns_empty(monkeypatch: pytest.MonkeyPatch) -> None:

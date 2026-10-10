@@ -64,7 +64,7 @@ async def test_token_appears_only_in_create_response(
     assert created["record_value"] not in current.text
     assert current.json()["token_last_four"] == token[-4:]
 
-    resolver.records[created["record_name"]] = ["securescope-verification=wrong"]
+    resolver.records[created["record_name"]] = ["doubleaa-verification=wrong"]
     verify = await client.post(
         f"{_base(asset['id'])}/{created['challenge_id']}/verify", headers=headers
     )
@@ -82,7 +82,7 @@ async def test_logs_and_responses_do_not_leak_raw_token(
     with caplog.at_level(logging.DEBUG):
         created = (await client.post(_base(asset["id"]), headers=headers)).json()
         token = _token_of(created["record_value"])
-        resolver.records[created["record_name"]] = ["securescope-verification=wrong"]
+        resolver.records[created["record_name"]] = ["doubleaa-verification=wrong"]
         response = await client.post(
             f"{_base(asset['id'])}/{created['challenge_id']}/verify", headers=headers
         )
