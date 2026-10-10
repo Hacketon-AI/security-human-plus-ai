@@ -49,17 +49,17 @@ After running `python -m app.seed` from the `backend/` directory, the following 
 
 | Organization | Slug | Organization ID (login) | Status |
 |---|---|---|---|
-| **BRI Ventures Digital** | `bri-ventures` | `a3f7c2d1-8b4e-4f9a-b6c3-2e1d5f8a9b0c` | active |
-| **Telkom Sigma Cloud** | `telkom-sigma` | `b8e4d6f2-1c7a-4e2b-9d5f-3a0c8e7b4d1f` | active |
-| **Mandiri Sekuritas** | `mandiri-sek` | `c1d9e5a3-4f2b-4c8d-a7e1-6b3d0f9c2e5a` | active |
+| **Nusantara Digital Ventures** | `nusantara-ventures` | `a3f7c2d1-8b4e-4f9a-b6c3-2e1d5f8a9b0c` | active |
+| **Archipelago Cloud** | `archipelago-cloud` | `b8e4d6f2-1c7a-4e2b-9d5f-3a0c8e7b4d1f` | active |
+| **Merapi Sekuritas** | `merapi-sekuritas` | `c1d9e5a3-4f2b-4c8d-a7e1-6b3d0f9c2e5a` | active |
 
 ### Recommended dev login
 
-The default dev bypass button uses **BRI Ventures Digital**:
+The default dev bypass button uses **Nusantara Digital Ventures**:
 
 ```
 Organization ID : a3f7c2d1-8b4e-4f9a-b6c3-2e1d5f8a9b0c
-Email           : operator@briventures.co.id
+Email           : operator@nusantara-ventures.test
 Password        : Dev@SecureScope2026!
 MFA Code        : 000000
 ```
@@ -68,7 +68,7 @@ All fields are **pre-filled automatically** when `NEXT_PUBLIC_DEFAULT_ORG_ID` is
 
 This org has the most complete seed data:
 - 4 assets across 2 projects (3 verified, 1 pending)
-- 2 active authorizations (Q3 pentest + OJK compliance scan)
+- 2 active authorizations (Q3 pentest + regulatory compliance scan)
 - 2 active engagements running right now
 - 4 validation executions (2 completed with full evidence, 1 executing, 1 queued)
 
@@ -87,45 +87,45 @@ Or click **⚡ Dev Login (bypass)** to skip the form entirely (uses `a3f7c2d1-8b
 ### Organizations → Projects → Assets
 
 ```
-BRI Ventures Digital (a3f7c2d1-8b4e-4f9a-b6c3-2e1d5f8a9b0c)
-├── Pinjamanku Lending API (project)
-│   ├── Pinjamanku Partner API (Production)  — api / production  / verified  (2c9f5a8e-…)
-│   ├── Pinjamanku Staging Gateway           — api / staging     / verified  (3d0e6b9f-…)
+Nusantara Digital Ventures (a3f7c2d1-8b4e-4f9a-b6c3-2e1d5f8a9b0c)
+├── Consumer Lending API (project)
+│   ├── Lending Partner API (Production)  — api / production  / verified  (2c9f5a8e-…)
+│   ├── Lending Staging Gateway           — api / staging     / verified  (3d0e6b9f-…)
 │   └── OAuth 2.0 Token Service              — api / production  / pending   (4e1f7c0a-…)
-└── OJK Compliance Portal (project)
-    └── OJK Reporting Portal (Web)           — web / production  / verified  (5f2a8d1b-…)
+└── Regulatory Reporting Portal (project)
+    └── Regulatory Reporting Portal (Web)           — web / production  / verified  (5f2a8d1b-…)
 
-Telkom Sigma Cloud (b8e4d6f2-1c7a-4e2b-9d5f-3a0c8e7b4d1f)
-├── SigmaCloud Management Console (project)
-│   ├── SigmaCloud Control Plane API         — api / production  / verified  (6a3b9e2c-…)
-│   └── SigmaCloud Web Console               — web / production  / verified  (7b4c0f3d-…)
+Archipelago Cloud (b8e4d6f2-1c7a-4e2b-9d5f-3a0c8e7b4d1f)
+├── Cloud Management Console (project)
+│   ├── Cloud Control Plane API         — api / production  / verified  (6a3b9e2c-…)
+│   └── Cloud Web Console               — web / production  / verified  (7b4c0f3d-…)
 └── SIEM Event Ingest API (project)
     ├── SIEM Collector Ingest Endpoint       — api / production  / verified  (8c5d1a4e-…)
     └── SIEM Ingest (Preproduction)          — api / preprod     / draft     (9d6e2b5f-…)
 
-Mandiri Sekuritas (c1d9e5a3-4f2b-4c8d-a7e1-6b3d0f9c2e5a)
-└── MOST Trading Platform (project)
-    ├── MOST Order Routing API               — api / production  / verified  (0e7f3c6a-…)
-    └── MOST Web Trading App                 — web / production  / verified  (1f8a4d7b-…)
+Merapi Sekuritas (c1d9e5a3-4f2b-4c8d-a7e1-6b3d0f9c2e5a)
+└── Retail Trading Platform (project)
+    ├── Order Routing API               — api / production  / verified  (0e7f3c6a-…)
+    └── Web Trading App                 — web / production  / verified  (1f8a4d7b-…)
 ```
 
 ### Active Engagements
 
 | Engagement | Organization | Status | Window | Contact |
 |---|---|---|---|---|
-| Pinjamanku API — TLS & Auth Header Sweep | BRI Ventures Digital | `active` | −90 min … +6.5 hr | Reza Firmansyah |
-| OJK Portal — Mandatory Compliance Scan | BRI Ventures Digital | `active` | −2 hr … +14 hr | Dewi Anggraini |
-| SigmaCloud API — Auth & Rate-Limit Validation | Telkom Sigma Cloud | `active` | −30 min … +5 hr | Hendra Kusuma |
-| MOST v4.2.0 — Pre-Release Security Gate | Mandiri Sekuritas | `scheduled` | tomorrow | Agus Priyanto |
+| Lending API — TLS & Auth Header Sweep | Nusantara Digital Ventures | `active` | −90 min … +6.5 hr | Reza Firmansyah |
+| Reporting Portal — Mandatory Compliance Scan | Nusantara Digital Ventures | `active` | −2 hr … +14 hr | Dewi Anggraini |
+| Cloud API — Auth & Rate-Limit Validation | Archipelago Cloud | `active` | −30 min … +5 hr | Hendra Kusuma |
+| Trading Platform v4.2.0 — Pre-Release Security Gate | Merapi Sekuritas | `scheduled` | tomorrow | Agus Priyanto |
 
 ### Validation Executions
 
 | # | Asset | Template | Status | Outcome |
 |---|---|---|---|---|
-| 1 | Pinjamanku Partner API (prod) | HTTP_SECURITY_HEADER_VALIDATION | `succeeded` | validated |
-| 2 | Pinjamanku Staging Gateway | TLS_VERSION_VALIDATION | `succeeded` | validated |
-| 3 | SigmaCloud Control Plane API | HTTP_SECURITY_HEADER_VALIDATION | `executing` | — |
-| 4 | OJK Reporting Portal | TLS_VERSION_VALIDATION | `queued` | — |
+| 1 | Lending Partner API (prod) | HTTP_SECURITY_HEADER_VALIDATION | `succeeded` | validated |
+| 2 | Lending Staging Gateway | TLS_VERSION_VALIDATION | `succeeded` | validated |
+| 3 | Cloud Control Plane API | HTTP_SECURITY_HEADER_VALIDATION | `executing` | — |
+| 4 | Regulatory Reporting Portal | TLS_VERSION_VALIDATION | `queued` | — |
 
 ---
 

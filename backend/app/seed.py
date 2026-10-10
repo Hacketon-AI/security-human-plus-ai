@@ -65,28 +65,28 @@ async def run_seed() -> None:
         # ------------------------------------------------------------------ #
         # ORGANIZATIONS
         # Three real-sounding Indonesian enterprise clients.
-        # org1  → BRI Ventures Digital (fintech / OJK-regulated)
-        # org2  → Telkom Sigma Cloud (infrastructure / MSP)
-        # org3  → Mandiri Sekuritas (capital markets / broker-dealer)
+        # org1  → Nusantara Digital Ventures (fintech / regulated fintech)
+        # org2  → Archipelago Cloud (infrastructure / MSP)
+        # org3  → Merapi Sekuritas (capital markets / broker-dealer)
         # ------------------------------------------------------------------ #
         print("Seeding organizations...")
 
         org1 = Organization(
             id=UUID("a3f7c2d1-8b4e-4f9a-b6c3-2e1d5f8a9b0c"),
-            name="BRI Ventures Digital",
-            slug="bri-ventures",
+            name="Nusantara Digital Ventures",
+            slug="nusantara-ventures",
             status=OrganizationStatus.active,
         )
         org2 = Organization(
             id=UUID("b8e4d6f2-1c7a-4e2b-9d5f-3a0c8e7b4d1f"),
-            name="Telkom Sigma Cloud",
-            slug="telkom-sigma",
+            name="Archipelago Cloud",
+            slug="archipelago-cloud",
             status=OrganizationStatus.active,
         )
         org3 = Organization(
             id=UUID("c1d9e5a3-4f2b-4c8d-a7e1-6b3d0f9c2e5a"),
-            name="Mandiri Sekuritas",
-            slug="mandiri-sek",
+            name="Merapi Sekuritas",
+            slug="merapi-sekuritas",
             status=OrganizationStatus.active,
         )
         session.add_all([org1, org2, org3])
@@ -97,36 +97,36 @@ async def run_seed() -> None:
         # ------------------------------------------------------------------ #
         print("Seeding projects...")
 
-        # BRI Ventures — two projects: consumer lending API and OJK compliance
+        # Nusantara Ventures — consumer lending API and regulatory reporting
         p1 = Project(
             id=UUID("d4b7f1e8-2a5c-4d9b-8f3e-1c6a0d5e7b2f"),
             organization_id=org1.id,
-            name="Pinjamanku Lending API",
-            slug="pinjamanku-api",
+            name="Consumer Lending API",
+            slug="lending-api",
             description=(
                 "Security validation for the consumer micro-lending REST API "
-                "exposed to 3rd-party fintech partners under OJK POJK 77 scope."
+                "exposed to fintech partners under P2P lending regulation scope."
             ),
             status=ProjectStatus.active,
         )
         p2 = Project(
             id=UUID("e6c3a9d5-7f1b-4e8c-b2d4-9a0e3f6c1b8d"),
             organization_id=org1.id,
-            name="OJK Compliance Portal",
-            slug="ojk-portal",
+            name="Regulatory Reporting Portal",
+            slug="reporting-portal",
             description=(
-                "Internal reporting portal submitted to OJK sandbox. "
+                "Internal portal used for regulatory reporting submissions. "
                 "Annual penetration test mandatory under regulatory schedule."
             ),
             status=ProjectStatus.active,
         )
 
-        # Telkom Sigma — cloud management & SIEM dashboard
+        # Archipelago Cloud — cloud management & SIEM dashboard
         p3 = Project(
             id=UUID("f2e8b4c1-9d6a-4f3e-c5b7-0d2a8f1e4c9b"),
             organization_id=org2.id,
-            name="SigmaCloud Management Console",
-            slug="sigma-console",
+            name="Cloud Management Console",
+            slug="cloud-console",
             description=(
                 "Multi-tenant cloud management console. Customer-facing control "
                 "plane used by ~2 000 enterprise tenants across AWS, GCP, and "
@@ -146,15 +146,15 @@ async def run_seed() -> None:
             status=ProjectStatus.active,
         )
 
-        # Mandiri Sekuritas — trading platform and KYC service
+        # Merapi Sekuritas — trading platform and KYC service
         p5 = Project(
             id=UUID("1b3e7c4d-6a0f-4d2e-f8b5-4c1d9a7e2f0b"),
             organization_id=org3.id,
-            name="MOST Trading Platform",
-            slug="most-trading",
+            name="Retail Trading Platform",
+            slug="retail-trading",
             description=(
-                "Retail online trading platform (Mandiri Online Saham & "
-                "Investasi). IDX-connected order routing with OJK broker-dealer "
+                "Retail online trading platform "
+                "with exchange-connected order routing under broker-dealer "
                 "licensing constraints."
             ),
             status=ProjectStatus.active,
@@ -169,15 +169,15 @@ async def run_seed() -> None:
         # ------------------------------------------------------------------ #
         print("Seeding assets...")
 
-        # BRI Ventures — Pinjamanku API (p1)
+        # Nusantara Ventures — Lending API (p1)
         a1 = Asset(
             id=UUID("2c9f5a8e-1d4b-4e7c-a3f0-8b6e2c5d9a1f"),
             organization_id=org1.id,
             project_id=p1.id,
-            name="Pinjamanku Partner API (Production)",
+            name="Lending Partner API (Production)",
             asset_type=AssetType.api,
             environment=AssetEnvironment.production,
-            target="api.pinjamanku.co.id",
+            target="api.lending.nusantara-ventures.test",
             criticality=AssetCriticality.critical,
             status=AssetStatus.verified,
             ownership_verified_at=now - timedelta(days=14),
@@ -187,10 +187,10 @@ async def run_seed() -> None:
             id=UUID("3d0e6b9f-2c5a-4f8d-b4e1-9c7f3d6e0b2a"),
             organization_id=org1.id,
             project_id=p1.id,
-            name="Pinjamanku Staging Gateway",
+            name="Lending Staging Gateway",
             asset_type=AssetType.api,
             environment=AssetEnvironment.staging,
-            target="staging-api.pinjamanku.co.id",
+            target="staging-api.lending.nusantara-ventures.test",
             criticality=AssetCriticality.high,
             status=AssetStatus.verified,
             ownership_verified_at=now - timedelta(days=14),
@@ -203,37 +203,37 @@ async def run_seed() -> None:
             name="OAuth 2.0 Token Service",
             asset_type=AssetType.api,
             environment=AssetEnvironment.production,
-            target="auth.pinjamanku.co.id",
+            target="auth.lending.nusantara-ventures.test",
             criticality=AssetCriticality.critical,
             status=AssetStatus.pending_verification,
             verification_method=VerificationMethod.dns_txt_record,
             verification_requested_at=now - timedelta(hours=6),
         )
 
-        # BRI Ventures — OJK Portal (p2)
+        # Nusantara Ventures — Reporting Portal (p2)
         a4 = Asset(
             id=UUID("5f2a8d1b-4e7c-4b0f-d6a3-1e9b5f8a2d4c"),
             organization_id=org1.id,
             project_id=p2.id,
-            name="OJK Reporting Portal (Web)",
+            name="Regulatory Reporting Portal (Web)",
             asset_type=AssetType.web_application,
             environment=AssetEnvironment.production,
-            target="ojk-portal.briventures.co.id",
+            target="reporting.nusantara-ventures.test",
             criticality=AssetCriticality.high,
             status=AssetStatus.verified,
             ownership_verified_at=now - timedelta(days=30),
             verification_method=VerificationMethod.dns_txt_record,
         )
 
-        # Telkom Sigma — Cloud Console (p3)
+        # Archipelago Cloud — Cloud Console (p3)
         a5 = Asset(
             id=UUID("6a3b9e2c-5f8d-4c1a-e7b4-2f0c6a9b3e5d"),
             organization_id=org2.id,
             project_id=p3.id,
-            name="SigmaCloud Control Plane API",
+            name="Cloud Control Plane API",
             asset_type=AssetType.api,
             environment=AssetEnvironment.production,
-            target="api.sigmacloud.telkom.co.id",
+            target="api.archipelago-cloud.test",
             criticality=AssetCriticality.critical,
             status=AssetStatus.verified,
             ownership_verified_at=now - timedelta(days=21),
@@ -243,17 +243,17 @@ async def run_seed() -> None:
             id=UUID("7b4c0f3d-6a9e-4d2b-f8c5-3a1d7b0c4f6e"),
             organization_id=org2.id,
             project_id=p3.id,
-            name="SigmaCloud Web Console",
+            name="Cloud Web Console",
             asset_type=AssetType.web_application,
             environment=AssetEnvironment.production,
-            target="console.sigmacloud.telkom.co.id",
+            target="console.archipelago-cloud.test",
             criticality=AssetCriticality.high,
             status=AssetStatus.verified,
             ownership_verified_at=now - timedelta(days=21),
             verification_method=VerificationMethod.dns_txt_record,
         )
 
-        # Telkom Sigma — SIEM Ingest (p4)
+        # Archipelago Cloud — SIEM Ingest (p4)
         a7 = Asset(
             id=UUID("8c5d1a4e-7b0f-4e3c-a9d6-4b2e8c1d5a7f"),
             organization_id=org2.id,
@@ -261,7 +261,7 @@ async def run_seed() -> None:
             name="SIEM Collector Ingest Endpoint",
             asset_type=AssetType.api,
             environment=AssetEnvironment.production,
-            target="ingest.siem.sigmacloud.telkom.co.id",
+            target="ingest.siem.archipelago-cloud.test",
             criticality=AssetCriticality.high,
             status=AssetStatus.verified,
             ownership_verified_at=now - timedelta(days=7),
@@ -274,20 +274,20 @@ async def run_seed() -> None:
             name="SIEM Ingest (Preproduction)",
             asset_type=AssetType.api,
             environment=AssetEnvironment.preproduction,
-            target="ingest-preprod.siem.sigmacloud.telkom.co.id",
+            target="ingest-preprod.siem.archipelago-cloud.test",
             criticality=AssetCriticality.medium,
             status=AssetStatus.draft,
         )
 
-        # Mandiri Sekuritas — MOST Trading (p5)
+        # Merapi Sekuritas — retail trading (p5)
         a9 = Asset(
             id=UUID("0e7f3c6a-9d2b-4a5e-c1f8-6d4a0e3f7c9b"),
             organization_id=org3.id,
             project_id=p5.id,
-            name="MOST Order Routing API",
+            name="Order Routing API",
             asset_type=AssetType.api,
             environment=AssetEnvironment.production,
-            target="order-api.most.mandiri-sekuritas.co.id",
+            target="order-api.trade.merapi-sekuritas.test",
             criticality=AssetCriticality.critical,
             status=AssetStatus.verified,
             ownership_verified_at=now - timedelta(days=45),
@@ -297,10 +297,10 @@ async def run_seed() -> None:
             id=UUID("1f8a4d7b-0e3c-4b6f-d2a9-7e5b1f4a8d0c"),
             organization_id=org3.id,
             project_id=p5.id,
-            name="MOST Web Trading App",
+            name="Web Trading App",
             asset_type=AssetType.web_application,
             environment=AssetEnvironment.production,
-            target="most.mandiri-sekuritas.co.id",
+            target="trade.merapi-sekuritas.test",
             criticality=AssetCriticality.critical,
             status=AssetStatus.verified,
             ownership_verified_at=now - timedelta(days=45),
@@ -316,13 +316,13 @@ async def run_seed() -> None:
         # ------------------------------------------------------------------ #
         print("Seeding authorizations...")
 
-        # BRI Ventures — Pinjamanku API annual pentest authorization
+        # Nusantara Ventures — Lending API annual pentest authorization
         auth1 = Authorization(
             id=UUID("2a9b5e8c-1f4d-4c7a-e3b0-8f6c2a5d9e1b"),
             organization_id=org1.id,
             project_id=p1.id,
-            reference_number="BRIV-PENTEST-2026-003",
-            title="Annual Penetration Test — Pinjamanku Partner API Q3 2026",
+            reference_number="NDV-PENTEST-2026-003",
+            title="Annual Penetration Test — Lending Partner API Q3 2026",
             status=AuthorizationStatus.active,
             valid_from=now - timedelta(days=3),
             valid_until=now + timedelta(days=11),
@@ -330,17 +330,17 @@ async def run_seed() -> None:
             maximum_risk_tier=RiskTier.tier_2_controlled,
             emergency_contact_name="Reza Firmansyah",
             emergency_contact_phone="+62-812-9100-4477",
-            authorization_document_name="BRIV-PENTEST-2026-003-Authorization-Letter.pdf",
+            authorization_document_name="NDV-PENTEST-2026-003-Authorization-Letter.pdf",
             authorization_document_sha256="a3f8d2e1c7b94056f1208d3e7a9c0b5e2d4f6a8c1e3b5d7f9a0c2e4b6d8f0a2",
         )
 
-        # BRI Ventures — OJK Portal compliance scan (tight window)
+        # Nusantara Ventures — Reporting Portal compliance scan (tight window)
         auth2 = Authorization(
             id=UUID("3b0c6f9d-2a5e-4d8b-f4c1-9a7d3b6e0f2c"),
             organization_id=org1.id,
             project_id=p2.id,
-            reference_number="BRIV-OJK-2026-011",
-            title="OJK Sandbox Compliance Scan — Reporting Portal",
+            reference_number="NDV-REG-2026-011",
+            title="Regulatory Compliance Scan — Reporting Portal",
             status=AuthorizationStatus.active,
             valid_from=now - timedelta(hours=8),
             valid_until=now + timedelta(hours=16),
@@ -348,17 +348,17 @@ async def run_seed() -> None:
             maximum_risk_tier=RiskTier.tier_1_safe,
             emergency_contact_name="Dewi Anggraini",
             emergency_contact_phone="+62-811-2233-5566",
-            authorization_document_name="BRIV-OJK-2026-011-Signed-Scope.pdf",
+            authorization_document_name="NDV-REG-2026-011-Signed-Scope.pdf",
             authorization_document_sha256="b5c7e9f1a3d50278e3410f5c8b2d4a6e8c0a2e4c6a8e0b2d4f6a8c0e2d4f6b8",
         )
 
-        # Telkom Sigma — SigmaCloud control plane quarterly assessment
+        # Archipelago Cloud — cloud control plane quarterly assessment
         auth3 = Authorization(
             id=UUID("4c1d7a0e-3b6f-4e9c-a5d2-0b8e4c7f1a3d"),
             organization_id=org2.id,
             project_id=p3.id,
             reference_number="TSIG-INFRASEC-2026-007",
-            title="SigmaCloud Control Plane — Q3 2026 Security Assessment",
+            title="Cloud Control Plane — Q3 2026 Security Assessment",
             status=AuthorizationStatus.active,
             valid_from=now - timedelta(days=1),
             valid_until=now + timedelta(days=6),
@@ -370,7 +370,7 @@ async def run_seed() -> None:
             authorization_document_sha256="c9d1e3f5a7b90234d5670b9c1e3f5a7b9c1e3d5f7a9b1c3e5d7f9a1c3e5d7f9",
         )
 
-        # Telkom Sigma — SIEM ingest TLS hardening (upcoming, draft)
+        # Archipelago Cloud — SIEM ingest TLS hardening (upcoming, draft)
         auth4 = Authorization(
             id=UUID("5d2e8b1f-4c7a-4f0d-b6e3-1c9f5d8a2b4e"),
             organization_id=org2.id,
@@ -388,13 +388,13 @@ async def run_seed() -> None:
             authorization_document_sha256="d1e3f5a7b9c1e3f5a7b9c1e3f5a7b9c1e3f5a7b9c1e3f5a7b9c1e3f5a7b9c1",
         )
 
-        # Mandiri Sekuritas — MOST trading platform pre-go-live security gate
+        # Merapi Sekuritas — retail trading platform pre-go-live security gate
         auth5 = Authorization(
             id=UUID("6e3f9c2a-5d8b-4a1e-c7f4-2d0a6e9b3c5f"),
             organization_id=org3.id,
             project_id=p5.id,
-            reference_number="MANSEK-MOST-2026-019",
-            title="MOST Platform Pre-Release Security Gate — v4.2.0",
+            reference_number="MRP-TRADE-2026-019",
+            title="Trading Platform Pre-Release Security Gate — v4.2.0",
             status=AuthorizationStatus.active,
             valid_from=now - timedelta(days=2),
             valid_until=now + timedelta(days=2),
@@ -402,7 +402,7 @@ async def run_seed() -> None:
             maximum_risk_tier=RiskTier.tier_2_controlled,
             emergency_contact_name="Agus Priyanto",
             emergency_contact_phone="+62-816-7788-9900",
-            authorization_document_name="MANSEK-MOST-2026-019-Security-Gate-Authorization.pdf",
+            authorization_document_name="MRP-TRADE-2026-019-Security-Gate-Authorization.pdf",
             authorization_document_sha256="e3f5a7b9c1e3f5a7b9c1e3f5a7b9c1e3f5a7b9c1e3f5a7b9c1e3f5a7b9c1e3",
         )
 
@@ -501,13 +501,13 @@ async def run_seed() -> None:
         # ------------------------------------------------------------------ #
         print("Seeding engagements...")
 
-        # BRI Ventures — running now (started 90 min ago, ends in 6.5 hrs)
+        # Nusantara Ventures — running now (started 90 min ago, ends in 6.5 hrs)
         eng1 = Engagement(
             id=UUID("4a1b7e0c-3f6d-4c9a-e5b2-0f8c4a7d1e3b"),
             organization_id=org1.id,
             project_id=p1.id,
             authorization_id=auth1.id,
-            name="Pinjamanku API — TLS & Auth Header Sweep",
+            name="Lending API — TLS & Auth Header Sweep",
             description=(
                 "Validate TLS 1.3 enforcement, HSTS preload, CSP, and OAuth 2.0 "
                 "token header hygiene on both production and staging endpoints."
@@ -520,20 +520,20 @@ async def run_seed() -> None:
             default_rate_limit_per_minute=40,
             default_concurrency_limit=4,
             emergency_contact_name="Reza Firmansyah",
-            emergency_contact_email="reza.firmansyah@briventures.co.id",
+            emergency_contact_email="reza.firmansyah@nusantara-ventures.test",
             emergency_contact_phone="+62-812-9100-4477",
             kill_switch_active=False,
         )
 
-        # BRI Ventures — OJK compliance scan (started 2 hrs ago, narrow window)
+        # Nusantara Ventures — compliance scan (started 2 hrs ago, narrow window)
         eng2 = Engagement(
             id=UUID("5b2c8f1d-4a7e-4d0b-f6c3-1a9d5b8e2f4c"),
             organization_id=org1.id,
             project_id=p2.id,
             authorization_id=auth2.id,
-            name="OJK Portal — Mandatory Compliance Scan",
+            name="Reporting Portal — Mandatory Compliance Scan",
             description=(
-                "OJK POJK 38 annual mandatory security scan. Read-only "
+                "Annual mandatory security scan under banking IT-risk rules. Read-only "
                 "reconnaissance and header/TLS inspection only. Kill switch armed."
             ),
             status=EngagementStatus.active,
@@ -544,18 +544,18 @@ async def run_seed() -> None:
             default_rate_limit_per_minute=20,
             default_concurrency_limit=2,
             emergency_contact_name="Dewi Anggraini",
-            emergency_contact_email="dewi.anggraini@briventures.co.id",
+            emergency_contact_email="dewi.anggraini@nusantara-ventures.test",
             emergency_contact_phone="+62-811-2233-5566",
             kill_switch_active=False,
         )
 
-        # Telkom Sigma — infrastructure assessment (started 30 min ago)
+        # Archipelago Cloud — infrastructure assessment (started 30 min ago)
         eng3 = Engagement(
             id=UUID("6c3d9a2e-5b8f-4e1c-a7d4-2b0e6c9f3a5d"),
             organization_id=org2.id,
             project_id=p3.id,
             authorization_id=auth3.id,
-            name="SigmaCloud API — Authentication & Rate-Limit Validation",
+            name="Cloud API — Authentication & Rate-Limit Validation",
             description=(
                 "Validate authentication enforcement, rate-limit headers, and "
                 "mTLS configuration on the multi-tenant control plane API."
@@ -568,20 +568,20 @@ async def run_seed() -> None:
             default_rate_limit_per_minute=50,
             default_concurrency_limit=5,
             emergency_contact_name="Hendra Kusuma",
-            emergency_contact_email="hendra.kusuma@telkomsigma.co.id",
+            emergency_contact_email="hendra.kusuma@archipelago-cloud.test",
             emergency_contact_phone="+62-813-5544-3322",
             kill_switch_active=False,
         )
 
-        # Mandiri Sekuritas — pre-release security gate (scheduled for tomorrow)
+        # Merapi Sekuritas — pre-release security gate (scheduled for tomorrow)
         eng4 = Engagement(
             id=UUID("7d4e0b3f-6c9a-4f2d-b8e5-3c1f7d0a4b6e"),
             organization_id=org3.id,
             project_id=p5.id,
             authorization_id=auth5.id,
-            name="MOST v4.2.0 — Pre-Release Security Gate",
+            name="Trading Platform v4.2.0 — Pre-Release Security Gate",
             description=(
-                "Security gate before v4.2.0 goes live to IDX. Covers order "
+                "Security gate before v4.2.0 goes live. Covers order "
                 "routing API and web app: TLS, CSP, CORS, and session management."
             ),
             status=EngagementStatus.scheduled,
@@ -592,7 +592,7 @@ async def run_seed() -> None:
             default_rate_limit_per_minute=25,
             default_concurrency_limit=3,
             emergency_contact_name="Agus Priyanto",
-            emergency_contact_email="agus.priyanto@mandiri-sekuritas.co.id",
+            emergency_contact_email="agus.priyanto@merapi-sekuritas.test",
             emergency_contact_phone="+62-816-7788-9900",
             kill_switch_active=False,
         )
@@ -675,7 +675,7 @@ async def run_seed() -> None:
         # ------------------------------------------------------------------ #
         print("Seeding validation executions...")
 
-        # ── Execution 1: completed, validated (BRI Ventures prod API) ──
+        # ── Execution 1: completed, validated (Nusantara Ventures prod API) ──
         exec1 = ValidationExecution(
             id=UUID("3d0e6b9f-2c5a-4f8d-b4e1-9c7f3d6e0b2c"),
             organization_id=org1.id,
@@ -690,7 +690,7 @@ async def run_seed() -> None:
             outcome=ExecutionOutcome.validated,
             risk_tier=RiskTier.tier_1_safe,
             execution_specification={
-                "target": "api.pinjamanku.co.id",
+                "target": "api.lending.nusantara-ventures.test",
                 "port": 443,
                 "path": "/health",
                 "method": "GET",
@@ -719,7 +719,7 @@ async def run_seed() -> None:
             finished_at=now - timedelta(minutes=69),
         )
 
-        # ── Execution 2: completed, validated (BRI Ventures staging) ──
+        # ── Execution 2: completed, validated (Nusantara Ventures staging) ──
         exec2 = ValidationExecution(
             id=UUID("4e1f7c0a-3d6b-4a9e-c5f2-0d8a4e7f1c3d"),
             organization_id=org1.id,
@@ -734,7 +734,7 @@ async def run_seed() -> None:
             outcome=ExecutionOutcome.validated,
             risk_tier=RiskTier.tier_1_safe,
             execution_specification={
-                "target": "staging-api.pinjamanku.co.id",
+                "target": "staging-api.lending.nusantara-ventures.test",
                 "port": 443,
                 "path": "/health",
                 "method": "GET",
@@ -763,7 +763,7 @@ async def run_seed() -> None:
             finished_at=now - timedelta(minutes=62),
         )
 
-        # ── Execution 3: currently executing (Telkom Sigma control plane) ──
+        # ── Execution 3: currently executing (Archipelago Cloud control plane) ──
         exec3 = ValidationExecution(
             id=UUID("5f2a8d1b-4e7c-4b0f-d6a3-1e9b5f8a2d4e"),
             organization_id=org2.id,
@@ -778,7 +778,7 @@ async def run_seed() -> None:
             outcome=None,
             risk_tier=RiskTier.tier_1_safe,
             execution_specification={
-                "target": "api.sigmacloud.telkom.co.id",
+                "target": "api.archipelago-cloud.test",
                 "port": 443,
                 "path": "/api/v3/health",
                 "method": "GET",
@@ -806,7 +806,7 @@ async def run_seed() -> None:
             started_at=now - timedelta(minutes=7),
         )
 
-        # ── Execution 4: queued (OJK portal compliance scan) ──
+        # ── Execution 4: queued (reporting portal compliance scan) ──
         exec4 = ValidationExecution(
             id=UUID("6a3b9e2c-5f8d-4c1a-e7b4-2f0c6a9b3e5f"),
             organization_id=org1.id,
@@ -821,7 +821,7 @@ async def run_seed() -> None:
             outcome=None,
             risk_tier=RiskTier.tier_1_safe,
             execution_specification={
-                "target": "ojk-portal.briventures.co.id",
+                "target": "reporting.nusantara-ventures.test",
                 "port": 443,
                 "path": "/portal/health",
                 "method": "GET",
@@ -857,7 +857,7 @@ async def run_seed() -> None:
         # ------------------------------------------------------------------ #
         print("Seeding validation step results...")
 
-        # Steps for exec1 — BRI Ventures prod API (all passed)
+        # Steps for exec1 — Nusantara Ventures prod API (all passed)
         step1 = ValidationStepResult(
             id=UUID("7b4c0f3d-6a9e-4d2b-f8c5-3a1d7b0c4f6f"),
             organization_id=org1.id,
@@ -868,7 +868,7 @@ async def run_seed() -> None:
                 "protocol": "TLSv1.3",
                 "cipher": "TLS_AES_256_GCM_SHA384",
                 "cert_issuer": "DigiCert TLS RSA SHA256 2020 CA1",
-                "cert_subject": "api.pinjamanku.co.id",
+                "cert_subject": "api.lending.nusantara-ventures.test",
                 "cert_expiry": (now + timedelta(days=187)).strftime(
                     "%Y-%m-%dT%H:%M:%SZ"
                 ),
@@ -918,14 +918,16 @@ async def run_seed() -> None:
             evidence={
                 "unauthenticated_returns_401": True,
                 "www_authenticate_present": True,
-                "www_authenticate": 'Bearer realm="api.pinjamanku.co.id"',
+                "www_authenticate": (
+                    'Bearer realm="api.lending.nusantara-ventures.test"'
+                ),
                 "bearer_without_scope_returns_403": True,
             },
             started_at=now - timedelta(minutes=70, seconds=20),
             finished_at=now - timedelta(minutes=69, seconds=55),
         )
 
-        # Steps for exec2 — BRI Ventures staging (all passed)
+        # Steps for exec2 — Nusantara Ventures staging (all passed)
         step5 = ValidationStepResult(
             id=UUID("1f8a4d7b-0e3c-4b6f-d2a9-7e5b1f4a8d13"),
             organization_id=org1.id,
@@ -982,10 +984,10 @@ async def run_seed() -> None:
         print()
         print("  Login with Organization ID:")
         print(
-            "  BRI Ventures Digital   ->  a3f7c2d1-8b4e-4f9a-b6c3-2e1d5f8a9b0c  (dev default)"  # noqa: E501
+            "  Nusantara Digital Ventures   ->  a3f7c2d1-8b4e-4f9a-b6c3-2e1d5f8a9b0c  (dev default)"  # noqa: E501
         )
-        print("  Telkom Sigma Cloud     ->  b8e4d6f2-1c7a-4e2b-9d5f-3a0c8e7b4d1f")
-        print("  Mandiri Sekuritas      ->  c1d9e5a3-4f2b-4c8d-a7e1-6b3d0f9c2e5a")
+        print("  Archipelago Cloud     ->  b8e4d6f2-1c7a-4e2b-9d5f-3a0c8e7b4d1f")
+        print("  Merapi Sekuritas      ->  c1d9e5a3-4f2b-4c8d-a7e1-6b3d0f9c2e5a")
 
 
 if __name__ == "__main__":
