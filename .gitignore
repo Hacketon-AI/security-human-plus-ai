@@ -51,3 +51,7 @@ yarn-error.log*
 .kiro
 # Ignore accidental literal Cursor folder
 /~/.cursor/
+
+# Local databases and build caches
+frontend/db/*.db
+*.tsbuildinfo

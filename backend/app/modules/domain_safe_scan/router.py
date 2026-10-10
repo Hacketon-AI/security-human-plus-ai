@@ -21,9 +21,7 @@ async def analyze_domain(
 ) -> DomainSafeScanResponse:
     """Analyze an authorized domain as an authenticated tenant operation."""
     try:
-        return await service.analyze(
-            request, organization_id=tenant.organization_id
-        )
+        return await service.analyze(request, organization_id=tenant.organization_id)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except Exception:
