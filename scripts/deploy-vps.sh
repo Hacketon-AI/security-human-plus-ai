@@ -27,6 +27,13 @@ if [ ! -f "frontend/.env" ]; then
     [ -f "frontend/.env.example" ] && cp frontend/.env.example frontend/.env || touch frontend/.env
 fi
 
+# Never sign tokens with the development JWT secret published in the repository.
+# Generate a per-server secret on first deploy; it persists in the untracked .env.
+if ! grep -q '^SECURESCOPE_JWT_SECRET=' .env; then
+    echo "🔐 Generating SECURESCOPE_JWT_SECRET in .env (existing sessions must sign in again)..."
+    printf '\nSECURESCOPE_JWT_SECRET=%s\n' "$(openssl rand -hex 32)" >> .env
+fi
+
 # 2. Build Docker Containers
 echo "📦 Building Docker Images..."
 docker compose -f "$COMPOSE_FILE" build --parallel
@@ -47,13 +54,16 @@ done
 
 # 4. Run Alembic Database Migrations
 echo "🗄️  Running Alembic Database Migrations..."
-docker compose -f "$COMPOSE_FILE" run --rm securescope-api alembic upgrade head || {
-    echo "⚠️  Alembic migration failed or pending, continuing startup..."
-}
+# Fail the deploy on migration errors: starting the API against a stale schema
+# breaks at request time instead of here.
+docker compose -f "$COMPOSE_FILE" run --rm securescope-api alembic upgrade head
 
-# 5. Seed Demo Data (Optional, idempotent)
-echo "🌱 Checking Seed Data..."
-docker compose -f "$COMPOSE_FILE" run --rm securescope-api python -m app.seed || true
+# 5. Seed Demo Data — opt-in only. app.seed DELETES all orgs, projects, assets,
+# authorizations, and executions before inserting demo rows.
+if [ "${SEED_DEMO_DATA:-0}" = "1" ]; then
+    echo "🌱 SEED_DEMO_DATA=1: resetting database to demo data..."
+    docker compose -f "$COMPOSE_FILE" run --rm securescope-api python -m app.seed
+fi
 
 # 6. Recreate & Start All Services (Zero Downtime Recreate)
 echo "⚡ Starting API & Frontend Containers..."

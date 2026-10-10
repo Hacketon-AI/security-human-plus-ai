@@ -22,7 +22,13 @@ services:
     env_file:
       - .env
     environment:
-      APP_ENV: development
+      # Still "development" because execution dispatch runs in-memory (no
+      # RabbitMQ/Celery in this stack). The development adapters are forced off
+      # so a public deployment never trusts X-Organization-Id headers or allows
+      # unauthenticated organization provisioning.
+      SECURESCOPE_DEVELOPMENT_AUTH_ENABLED: "false"
+      SECURESCOPE_DEVELOPMENT_PROVISIONING_ENABLED: "false"
+      SECURESCOPE_CORS_ORIGINS: https://agungzippo.tech
       # Overrides backend/.env's 127.0.0.1 default — inside Docker the API
       # must reach Postgres via the "postgres" service DNS name, not localhost.
       SECURESCOPE_DATABASE_DSN: postgresql+asyncpg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-securescope}
@@ -44,8 +50,6 @@ services:
       NEXT_PUBLIC_USE_MOCK_API: "false"
       # API Base URL used by server-side proxy
       API_INTERNAL_BASE_URL: "http://securescope-api:8000"
-      # Seed org UUIDs for local multi-tenant dev — matches app.seed
-      NEXT_PUBLIC_SEED_ORG_IDS: "00000000-0000-0000-0000-000000000001,00000000-0000-0000-0000-000000000002,00000000-0000-0000-0000-000000000003"
     depends_on:
       - securescope-api
 
@@ -58,8 +62,6 @@ services:
       '
     volumes:
       - ./docker/local-amd-model-mock/app.py:/app.py
-    ports:
-      - "8001:8000"
     expose:
       - "8000"
 
