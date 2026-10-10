@@ -70,7 +70,7 @@ export function AiProofOfRiskCommandStrip() {
   ];
 
   return (
-    <div className="border-b border-(--ss-hairline-strong) bg-[#050810]/80 sticky top-(--ss-topnav-height) z-10 backdrop-blur-md">
+    <div className="border-b border-(--ss-hairline-strong) bg-[#0B0D10]/80 sticky top-(--ss-topnav-height) z-10 backdrop-blur-md">
       <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 divide-x divide-(--ss-hairline)">
         {items.map((it) => (
           <div key={it.label} className="p-3 px-4 relative group overflow-hidden">

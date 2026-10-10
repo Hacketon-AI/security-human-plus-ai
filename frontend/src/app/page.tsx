@@ -90,5 +90,6 @@ export default function Page() {
     case "settings": content = <SettingsPage />; break;
     default: content = <DashboardPage view="overview" />;
   }
-  return <>{content}{modal}</>;
+  // The console shell (TopNavCommandBar) is a fixed sidebar on lg+; offset the page.
+  return <><div className="lg:pl-56">{content}</div>{modal}</>;
 }

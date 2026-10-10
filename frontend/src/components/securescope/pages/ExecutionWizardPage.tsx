@@ -130,7 +130,7 @@ export function ExecutionWizardPage() {
         />
 
         {/* Horizontal stepper */}
-        <div className="px-4 lg:px-6 py-3 border-b border-(--ss-hairline-strong) bg-[#050810]/60 overflow-x-auto ss-scroll">
+        <div className="px-4 lg:px-6 py-3 border-b border-(--ss-hairline-strong) bg-[#0B0D10]/60 overflow-x-auto ss-scroll">
           <ol className="flex items-center gap-1 min-w-max">
             {STEPS.map((s, i) => {
               const isActive = s.key === step;
@@ -150,8 +150,8 @@ export function ExecutionWizardPage() {
                     >
                       <span className={cn(
                         "w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-semibold tnum",
-                        tone === "cyan" && "bg-cyan-400 text-[#060912]",
-                        tone === "green" && "bg-emerald-400 text-[#060912]",
+                        tone === "cyan" && "bg-cyan-400 text-[#0B0D10]",
+                        tone === "green" && "bg-emerald-400 text-[#0B0D10]",
                         tone === "slate" && "bg-(--ss-surface-3) text-slate-500 border border-(--ss-hairline-strong)"
                       )}>
                         {isDone ? "✓" : i + 1}

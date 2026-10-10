@@ -230,7 +230,7 @@ export function AuthorizationDetailPage() {
                       return (
                         <li key={i} className="relative pl-6">
                           <span className={cn(
-                            "absolute left-0 top-1 w-2.75 h-2.75 rounded-full border-2 border-[#0A111E]",
+                            "absolute left-0 top-1 w-2.75 h-2.75 rounded-full border-2 border-[#0F1216]",
                             isLast && auth.state === "active" ? "bg-emerald-400" : "bg-cyan-400"
                           )} />
                           <div className="flex items-baseline justify-between gap-2">

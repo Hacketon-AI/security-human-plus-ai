@@ -63,7 +63,7 @@ export function SettingsPage() {
 
         <div className="px-4 lg:px-6 py-5 grid lg:grid-cols-[200px_1fr] gap-5">
           {/* Section nav (contextual, not a global sidebar) */}
-          <nav className="ss-panel-flat p-2 h-max lg:sticky lg:top-[88px]">
+          <nav className="ss-panel-flat p-2 h-max lg:sticky lg:top-[68px]">
             <ul className="space-y-0.5">
               {sections.map((s) => (
                 <li key={s.key}>

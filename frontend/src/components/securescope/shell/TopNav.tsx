@@ -2,134 +2,85 @@
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import {
-  Search,
-  Bell,
-  ChevronDown,
-  Activity,
-  Server,
-  Radio,
-  Settings,
-  LogOut,
-  User,
-  Globe,
-  Command,
-} from "lucide-react";
+import { ChevronDown, LogOut, Menu, Settings, X } from "lucide-react";
 import { useApp, NAV_ITEMS } from "@/lib/securescope/store";
 import { BrandLogo } from "../shared/ui";
 import type { RouteKey } from "@/lib/securescope/types";
 
 // ============================================================
-// TopNavCommandBar — global fixed header
-// Left: SecureScope mark · Center: horizontal nav · Right: search,
-// environment badge, dispatch status, notifications, user menu.
+// Console shell — grouped sidebar (drawer below lg) + slim top bar.
+// The top bar only shows real state: where you are and who you are.
 // ============================================================
 
-function activeModule(route: RouteKey): string {
-  if (route.startsWith("organization")) return "Organizations";
-  if (route.startsWith("project")) return "Projects";
-  if (route.startsWith("asset")) return "Assets";
-  if (route.startsWith("authorization")) return "Authorizations";
-  if (route.startsWith("engagement")) return "Engagements";
-  if (route.startsWith("execution")) return "Executions";
-  if (route === "workers") return "Workers";
-  if (route === "audit") return "Audit";
-  if (route === "settings") return "Settings";
-  return "Dashboard";
+const NAV_GROUPS: { label: string; keys: RouteKey[] }[] = [
+  { label: "monitor", keys: ["dashboard", "operations", "ai_intelligence"] },
+  { label: "inventory", keys: ["organizations", "projects", "assets"] },
+  { label: "governance", keys: ["authorizations", "engagements", "execution_wizard"] },
+  { label: "runtime", keys: ["workers", "pentest_audit"] },
+  { label: "system", keys: ["audit", "settings"] },
+];
+
+// Looked up at render time, not module load, so modules importing this file
+// don't require the store's NAV_ITEMS to exist (e.g. under test mocks).
+function navLabel(key: RouteKey): string {
+  return NAV_ITEMS.find((item) => item.key === key)?.label ?? key;
 }
 
-function EnvironmentBadge() {
-  return (
-    <div className="hidden lg:flex items-center gap-1.5 px-2 py-1 rounded-sm border border-amber-500/30 bg-amber-500/5">
-      <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-      <span className="text-[10px] uppercase tracking-wider text-amber-300 font-medium">Staging</span>
-    </div>
-  );
+function isNavActive(key: RouteKey, route: RouteKey): boolean {
+  if (key === route) return true;
+  if (key === "organizations") return route.startsWith("organization");
+  if (key === "projects") return route.startsWith("project");
+  if (key === "assets") return route.startsWith("asset");
+  if (key === "authorizations") return route.startsWith("authorization");
+  if (key === "engagements") return route.startsWith("engagement");
+  if (key === "execution_wizard") return route.startsWith("execution");
+  return false;
 }
 
-function DispatchStatusPill() {
-  return (
-    <div className="hidden xl:flex items-center gap-2 px-2 py-1 rounded-sm border border-emerald-500/25 bg-emerald-500/5">
-      <div className="relative">
-        <Server className="w-3 h-3 text-emerald-400" />
-      </div>
-      <div className="leading-none">
-        <div className="text-[9px] uppercase tracking-wider text-slate-500">Dispatch</div>
-        <div className="text-[10px] text-emerald-300 font-medium">Celery · online</div>
-      </div>
-    </div>
-  );
+function consolePath(route: RouteKey): string {
+  const key = NAV_ITEMS.find((item) => isNavActive(item.key, route))?.key ?? "dashboard";
+  return `~/console/${navLabel(key).toLowerCase().replace(/\s+/g, "-")}`;
 }
 
-function GlobalSearch() {
-  return (
-    <div className="hidden md:flex items-center gap-2 px-2.5 py-1.5 rounded-sm border border-(--ss-hairline-strong) bg-(--ss-surface-2) min-w-[220px] lg:min-w-[280px]">
-      <Search className="w-3.5 h-3.5 text-slate-500" />
-      <input
-        type="text"
-        placeholder="Search executions, assets, authorizations…"
-        className="bg-transparent text-xs text-slate-200 placeholder:text-slate-600 outline-none flex-1 min-w-0"
-      />
-      <kbd className="ss-mono-xs text-[10px] text-slate-500 border border-(--ss-hairline-strong) rounded-sm px-1.5 py-0.5 hidden lg:inline-flex items-center gap-0.5">
-        <Command className="w-2.5 h-2.5" />K
-      </kbd>
-    </div>
-  );
-}
+const FOCUS_RING = "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-300";
 
-function NotificationBell() {
-  const [open, setOpen] = React.useState(false);
+function SidebarNav({ onNavigate }: { onNavigate: () => void }) {
+  const route = useApp((s) => s.route);
+  const go = useApp((s) => s.go);
   return (
-    <div className="relative">
-      <button
-        onClick={() => setOpen((v) => !v)}
-        className="relative w-8 h-8 flex items-center justify-center rounded-sm border border-(--ss-hairline-strong) bg-(--ss-surface-2) hover:bg-(--ss-surface-3) text-slate-400 hover:text-slate-200 transition-colors"
-        aria-label="Notifications"
-      >
-        <Bell className="w-3.5 h-3.5" />
-        <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-amber-400 ss-pulse-amber" />
-      </button>
-      {open && (
-        <>
-          <div className="fixed inset-0 z-30" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 top-10 z-40 w-80 ss-panel-raised shadow-2xl">
-            <div className="px-3 py-2 border-b border-(--ss-hairline-strong) flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-200">Operational Alerts</span>
-              <span className="text-[10px] text-slate-500">3 unread</span>
-            </div>
-            <ul className="max-h-72 overflow-y-auto ss-scroll">
-              {[
-                { t: "Kill switch armed on ENG-CBV-001", at: "2m ago", tone: "amber" },
-                { t: "Authorization AUTH-NSL-001 expires in 13d", at: "1h ago", tone: "yellow" },
-                { t: "EXEC-2026-0702-003 validated · 6/6 steps", at: "20m ago", tone: "green" },
-              ].map((n, i) => (
-                <li key={i} className="px-3 py-2 border-b border-(--ss-hairline) hover:bg-(--ss-surface-3)/50 cursor-pointer">
-                  <div className="flex items-start gap-2">
-                    <span
-                      className={cn(
-                        "mt-1 w-1.5 h-1.5 rounded-full",
-                        n.tone === "amber" && "bg-amber-400",
-                        n.tone === "yellow" && "bg-yellow-400",
-                        n.tone === "green" && "bg-emerald-400"
-                      )}
-                    />
-                    <div className="flex-1">
-                      <div className="text-[11px] text-slate-200">{n.t}</div>
-                      <div className="text-[10px] text-slate-500 mt-0.5">{n.at}</div>
-                    </div>
-                  </div>
+    <nav aria-label="Console" className="flex-1 overflow-y-auto px-2 py-3 ss-scroll">
+      {NAV_GROUPS.map((group) => (
+        <div key={group.label} className="mb-4">
+          <p className="px-2.5 pb-1 font-mono text-[11px] text-slate-500"># {group.label}</p>
+          <ul>
+            {group.keys.map((key) => {
+              const active = isNavActive(key, route);
+              return (
+                <li key={key}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      go(key);
+                      onNavigate();
+                    }}
+                    aria-current={active ? "page" : undefined}
+                    className={cn(
+                      "flex w-full items-center rounded-md border-l-2 px-2.5 py-1.5 text-left font-mono text-[13px] transition-colors",
+                      FOCUS_RING,
+                      active
+                        ? "border-cyan-300 bg-white/5 text-white"
+                        : "border-transparent text-slate-400 hover:bg-white/[0.03] hover:text-slate-100"
+                    )}
+                  >
+                    {navLabel(key).toLowerCase()}
+                  </button>
                 </li>
-              ))}
-            </ul>
-            <div className="px-3 py-2 border-t border-(--ss-hairline-strong)">
-              <button className="text-[10px] text-cyan-300 hover:text-cyan-200 uppercase tracking-wider">
-                View audit trail →
-              </button>
-            </div>
-          </div>
-        </>
-      )}
-    </div>
+              );
+            })}
+          </ul>
+        </div>
+      ))}
+    </nav>
   );
 }
 
@@ -147,17 +98,54 @@ function UserMenu() {
       return null;
     }
   }, []);
-  const displayName = user?.full_name || user?.username || "Operator";
-  const initials = displayName.slice(0, 2).toUpperCase();
+  const displayName = user?.full_name || user?.username || "operator";
 
   return (
     <div className="relative">
-      <button onClick={() => setOpen((value) => !value)} className="flex items-center gap-2 pl-1.5 pr-2 py-1 rounded-sm border border-(--ss-hairline-strong) bg-(--ss-surface-2) hover:bg-(--ss-surface-3) transition-colors">
-        <div className="w-6 h-6 rounded-sm bg-linear-to-br from-cyan-500/30 to-blue-600/20 border border-cyan-400/30 flex items-center justify-center"><span className="text-[10px] font-semibold text-cyan-200">{initials}</span></div>
-        <div className="hidden sm:block leading-none text-left"><div className="text-[11px] font-medium text-slate-200">{user?.username || "operator"}</div><div className="text-[9px] text-slate-500 uppercase tracking-wider">{user?.role || "operator"}</div></div>
-        <ChevronDown className="w-3 h-3 text-slate-500" />
+      <button
+        type="button"
+        onClick={() => setOpen((value) => !value)}
+        aria-expanded={open}
+        aria-haspopup="menu"
+        className={cn("flex h-9 items-center gap-2 rounded-md border border-(--ss-hairline-strong) px-2.5 font-mono text-[13px] text-slate-200 transition-colors hover:bg-white/5", FOCUS_RING)}
+      >
+        <span className="text-cyan-300">@</span>
+        <span className="max-w-[12rem] truncate">{user?.username || "operator"}</span>
+        <span className="hidden text-slate-500 sm:inline">({user?.role || "operator"})</span>
+        <ChevronDown className="size-3.5 text-slate-500" aria-hidden />
       </button>
-      {open && <><div className="fixed inset-0 z-30" onClick={() => setOpen(false)} /><div className="absolute right-0 top-10 z-40 w-56 ss-panel-raised shadow-2xl"><div className="px-3 py-2.5 border-b border-(--ss-hairline-strong)"><div className="text-xs font-medium text-slate-200">{displayName}</div><div className="text-[10px] text-slate-500">{user?.email || ""}</div><div className="mt-1"><span className="text-[9px] uppercase tracking-wider text-cyan-300 border border-cyan-500/30 bg-cyan-500/5 px-1.5 py-0.5 rounded-sm">{user?.role || "operator"}</span></div></div><ul className="py-1">{[{ icon: User, label: "Operator profile" }, { icon: Globe, label: "Region · eu-1" }, { icon: Settings, label: "Settings", onClick: () => { setOpen(false); go("settings"); } }].map((item) => <li key={item.label}><button onClick={item.onClick} className="w-full flex items-center gap-2.5 px-3 py-1.5 text-[11px] text-slate-300 hover:bg-(--ss-surface-3)/50 hover:text-slate-100"><item.icon className="w-3 h-3 text-slate-500" />{item.label}</button></li>)}</ul><div className="py-1 border-t border-(--ss-hairline-strong)"><button onClick={logout} className="w-full flex items-center gap-2.5 px-3 py-1.5 text-[11px] text-red-300 hover:bg-red-500/5"><LogOut className="w-3 h-3" />Sign out</button></div></div></>}
+      {open && (
+        <>
+          <div className="fixed inset-0 z-30" onClick={() => setOpen(false)} />
+          <div role="menu" className="absolute right-0 top-11 z-40 w-64 rounded-md border border-(--ss-hairline-strong) bg-(--ss-surface-2) shadow-2xl">
+            <div className="border-b border-(--ss-hairline-strong) px-3 py-2.5">
+              <p className="text-sm font-medium text-slate-100">{displayName}</p>
+              <p className="truncate font-mono text-xs text-slate-500">{user?.email || ""}</p>
+            </div>
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                setOpen(false);
+                go("settings");
+              }}
+              className="flex w-full items-center gap-2.5 px-3 py-2 text-sm text-slate-300 hover:bg-white/5 hover:text-white"
+            >
+              <Settings className="size-4 text-slate-500" aria-hidden />
+              Settings
+            </button>
+            <button
+              type="button"
+              role="menuitem"
+              onClick={logout}
+              className="flex w-full items-center gap-2.5 border-t border-(--ss-hairline-strong) px-3 py-2 text-sm text-red-300 hover:bg-red-500/5"
+            >
+              <LogOut className="size-4" aria-hidden />
+              Sign out
+            </button>
+          </div>
+        </>
+      )}
     </div>
   );
 }
@@ -165,86 +153,42 @@ function UserMenu() {
 export function TopNavCommandBar() {
   const route = useApp((s) => s.route);
   const go = useApp((s) => s.go);
-  const moduleLabel = activeModule(route);
+  const [drawerOpen, setDrawerOpen] = React.useState(false);
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-40 h-14 border-b border-(--ss-hairline-strong) bg-[#070B14]/95 backdrop-blur-md">
-      <div className="h-full flex items-center gap-4 px-4">
-        {/* Left: mark */}
-        <button onClick={() => go("dashboard")} className="shrink-0 pr-4 border-r border-(--ss-hairline) h-full flex items-center">
-          <BrandLogo className="select-none" />
-        </button>
+    <>
+      {drawerOpen && <div className="fixed inset-0 z-40 bg-black/60 lg:hidden" onClick={() => setDrawerOpen(false)} />}
+      <aside
+        className={cn(
+          "fixed inset-y-0 left-0 z-50 flex w-56 flex-col border-r border-(--ss-hairline-strong) bg-(--ss-surface-1) transition-transform lg:translate-x-0",
+          drawerOpen ? "translate-x-0" : "-translate-x-full"
+        )}
+      >
+        <div className="flex h-14 shrink-0 items-center justify-between border-b border-(--ss-hairline-strong) px-4">
+          <button type="button" onClick={() => go("dashboard")} className={cn("rounded-md", FOCUS_RING)} aria-label="Double AA overview">
+            <BrandLogo className="select-none" />
+          </button>
+          <button type="button" onClick={() => setDrawerOpen(false)} className={cn("rounded-md p-1 text-slate-400 lg:hidden", FOCUS_RING)} aria-label="Close menu">
+            <X className="size-5" aria-hidden />
+          </button>
+        </div>
+        <SidebarNav onNavigate={() => setDrawerOpen(false)} />
+      </aside>
 
-        {/* Center: nav */}
-        <nav className="flex-1 min-w-0 flex items-center justify-start overflow-x-auto ss-scroll">
-          <ul className="flex items-center gap-0.5">
-            {NAV_ITEMS.map((item) => {
-              const isActive =
-                item.key === route ||
-                (item.key === "organizations" && route.startsWith("organization")) ||
-                (item.key === "projects" && route.startsWith("project")) ||
-                (item.key === "assets" && route.startsWith("asset")) ||
-                (item.key === "authorizations" && route.startsWith("authorization")) ||
-                (item.key === "engagements" && route.startsWith("engagement")) ||
-                (item.key === "execution_wizard" && route.startsWith("execution"));
-              return (
-                <li key={item.key}>
-                  <button
-                    onClick={() => go(item.key)}
-                    className={cn(
-                      "relative px-2.5 py-1.5 text-[11px] font-medium uppercase tracking-wider rounded-sm transition-colors whitespace-nowrap",
-                      isActive
-                        ? "text-cyan-200 bg-cyan-500/10"
-                        : "text-slate-400 hover:text-slate-200 hover:bg-(--ss-surface-3)/50"
-                    )}
-                  >
-                    {item.label}
-                    {isActive && (
-                      <span className="absolute left-2 right-2 -bottom-px h-px bg-cyan-400 ss-glow-cyan" />
-                    )}
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-        </nav>
-
-        {/* Right cluster */}
-        <div className="shrink-0 flex items-center gap-2">
-          <GlobalSearch />
-          <EnvironmentBadge />
-          <DispatchStatusPill />
-          <NotificationBell />
-          <div className="w-px h-6 bg-(--ss-hairline) mx-1" />
+      <header className="fixed left-0 right-0 top-0 z-30 h-14 border-b border-(--ss-hairline-strong) bg-(--ss-surface-1)/95 backdrop-blur lg:left-56">
+        <div className="flex h-full items-center justify-between gap-3 px-4 lg:px-6">
+          <div className="flex min-w-0 items-center gap-3">
+            <button type="button" onClick={() => setDrawerOpen(true)} className={cn("rounded-md p-1 text-slate-300 lg:hidden", FOCUS_RING)} aria-label="Open menu">
+              <Menu className="size-5" aria-hidden />
+            </button>
+            <p className="truncate font-mono text-[13px] text-slate-400">
+              <span className="text-cyan-300">$</span> {consolePath(route)}
+            </p>
+          </div>
           <UserMenu />
         </div>
-      </div>
-
-      {/* Module subline (very thin) */}
-      <div className="h-5 px-4 flex items-center justify-between border-t border-(--ss-hairline) bg-[#050810]/80 text-[10px]">
-        <div className="flex items-center gap-3 text-slate-500">
-          <span className="flex items-center gap-1">
-            <Activity className="w-2.5 h-2.5" />
-            <span className="uppercase tracking-wider">Module</span>
-            <span className="text-slate-300">{moduleLabel}</span>
-          </span>
-          <span className="text-slate-700">/</span>
-          <span className="flex items-center gap-1">
-            <Radio className="w-2.5 h-2.5" />
-            <span className="uppercase tracking-wider">Region</span>
-            <span className="text-slate-300 ss-mono-xs">eu-1</span>
-          </span>
-        </div>
-        <div className="hidden md:flex items-center gap-3 text-slate-500">
-          <span className="ss-mono-xs">Session · 04:18:22</span>
-          <span className="text-slate-700">/</span>
-          <span className="flex items-center gap-1">
-            <span className="w-1 h-1 rounded-full bg-emerald-400" />
-            <span className="uppercase tracking-wider text-emerald-400">Channel Secure</span>
-          </span>
-        </div>
-      </div>
-    </header>
+      </header>
+    </>
   );
 }
 
@@ -264,7 +208,7 @@ export function SecondaryContextNav({
   right?: React.ReactNode;
 }) {
   return (
-    <div className="sticky top-[76px] z-20 h-10 flex items-center justify-between px-4 border-b border-(--ss-hairline-strong) bg-[#070B14]/80 backdrop-blur-sm">
+    <div className="sticky top-14 z-20 h-10 flex items-center justify-between px-4 border-b border-(--ss-hairline-strong) bg-[#0B0D10]/80 backdrop-blur-sm">
       <div className="flex items-center gap-0.5 overflow-x-auto ss-scroll">
         {items.map((it) => {
           const isActive = it.key === active;
@@ -273,7 +217,7 @@ export function SecondaryContextNav({
               key={it.key}
               onClick={() => onSelect(it.key)}
               className={cn(
-                "px-2.5 py-1 text-[11px] uppercase tracking-wider rounded-sm transition-colors whitespace-nowrap flex items-center gap-1.5",
+                "px-2.5 py-1 font-mono text-[13px] rounded-md transition-colors whitespace-nowrap flex items-center gap-1.5",
                 isActive ? "text-cyan-200 bg-cyan-500/10" : "text-slate-500 hover:text-slate-300"
               )}
             >
@@ -316,24 +260,24 @@ export function PageHeader({
 }) {
   return (
     <div className="px-4 lg:px-6 pt-4 pb-3 border-b border-(--ss-hairline)">
-      <div className="flex items-center gap-1.5 text-[10px] text-slate-500 mb-2">
+      <div className="flex items-center gap-1.5 font-mono text-xs text-slate-500 mb-2">
         {breadcrumbs.map((b, i) => (
           <React.Fragment key={i}>
             {i > 0 && <span className="text-slate-700">/</span>}
             {b.onClick ? (
-              <button onClick={b.onClick} className="hover:text-slate-300 uppercase tracking-wider">
+              <button onClick={b.onClick} className="hover:text-slate-300 lowercase">
                 {b.label}
               </button>
             ) : (
-              <span className="uppercase tracking-wider">{b.label}</span>
+              <span className="lowercase">{b.label}</span>
             )}
           </React.Fragment>
         ))}
       </div>
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div className="min-w-0 flex-1">
-          <h1 className="text-xl lg:text-2xl font-semibold tracking-tight text-slate-100">{title}</h1>
-          {description && <p className="text-xs text-slate-400 mt-1 max-w-3xl leading-relaxed">{description}</p>}
+          <h1 className="font-mono text-xl lg:text-2xl font-bold tracking-tight text-white">{title}</h1>
+          {description && <p className="text-sm text-slate-400 mt-1.5 max-w-3xl leading-relaxed">{description}</p>}
           {meta && <div className="mt-2.5 flex flex-wrap items-center gap-2">{meta}</div>}
         </div>
         {right && <div className="shrink-0 flex items-center gap-2">{right}</div>}

@@ -256,7 +256,7 @@ export function AssetDetailPage() {
         </div>
 
         {/* Tabs */}
-        <div className="px-4 lg:px-6 border-b border-(--ss-hairline-strong) sticky top-19 bg-[#070B14]/80 backdrop-blur-sm z-20">
+        <div className="px-4 lg:px-6 border-b border-(--ss-hairline-strong) sticky top-19 bg-[#0B0D10]/80 backdrop-blur-sm z-20">
           <div className="flex items-center gap-0.5 overflow-x-auto ss-scroll">
             {ASSET_TABS.map((t) => (
               <button
@@ -461,7 +461,7 @@ function AssetVerification({ asset, attempts }: { asset: Asset; attempts: { id: 
                   : "bg-slate-700 border border-slate-600";
                 return (
                   <li key={s.state} className="relative pl-6">
-                    <span className={cn("absolute left-0 top-1 w-2.75 h-2.75 rounded-full border-2 border-[#0A111E]", tone)} />
+                    <span className={cn("absolute left-0 top-1 w-2.75 h-2.75 rounded-full border-2 border-[#0F1216]", tone)} />
                     <div className={cn("text-xs font-medium", s.reached ? "text-slate-200" : "text-slate-600")}>{s.label}</div>
                     <div className={cn("text-[10px]", s.reached ? "text-slate-500" : "text-slate-700")}>{s.desc}</div>
                   </li>

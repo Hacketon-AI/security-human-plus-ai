@@ -155,7 +155,7 @@ export function EventTimeline({
           const time = new Date(e.at).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
           return (
             <li key={e.id} className="relative pl-6">
-              <span className={cn("absolute left-0 top-1 w-[11px] h-[11px] rounded-full border-2 border-[#0A111E]", tone.dot)} />
+              <span className={cn("absolute left-0 top-1 w-[11px] h-[11px] rounded-full border-2 border-[#0F1216]", tone.dot)} />
               <div className="flex items-baseline justify-between gap-3">
                 <div className={cn("text-xs font-medium", tone.text)}>{e.label}</div>
                 <div className="ss-mono-xs text-slate-500 tnum">{time}</div>

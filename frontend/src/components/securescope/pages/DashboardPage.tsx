@@ -70,8 +70,6 @@ export function DispatchStatusStrip() {
   const lastEventValue = lastEvent ? relativeTime(lastEvent.at) : "—";
 
   const items = [
-    { label: "Environment", value: "Staging", tone: "amber" as const, hint: "Pre-prod mirror" },
-    { label: "Dispatch Backend", value: "Celery", tone: "green" as const, hint: "online · eu-1" },
     { label: "Worker Auth Mode", value: "Per-execution", tone: "cyan" as const, hint: "credential" },
     { label: "Shared-token Fallback", value: "Disabled", tone: "default" as const, hint: "policy" },
     {
@@ -100,7 +98,7 @@ export function DispatchStatusStrip() {
     },
   ];
   return (
-    <div className="border-b border-(--ss-hairline-strong) bg-[#050810]/60">
+    <div className="border-b border-(--ss-hairline-strong) bg-[#0B0D10]/60">
       <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-8 divide-x divide-(--ss-hairline)">
         {items.map((it) => (
           <KpiCell
@@ -184,7 +182,7 @@ export function ValidationOperationsMap() {
     { key: "auths", label: "Active Authorizations", count: activeAuths, tone: "cyan", icon: <Shield className="w-3.5 h-3.5 text-cyan-400" />, sub: "scope-locked" },
     { key: "engagements", label: "Active Engagements", count: activeEngagements, tone: "cyan", icon: <Zap className="w-3.5 h-3.5 text-cyan-400" />, sub: "in window" },
     { key: "queued", label: "Queued Executions", count: queued, tone: "blue", icon: <Layers className="w-3.5 h-3.5 text-blue-400" />, sub: "awaiting worker" },
-    { key: "executing", label: "Executing", count: executing, tone: "cyan", pulse: true, icon: <Activity className="w-3.5 h-3.5 text-cyan-300" />, sub: "live · eu-1" },
+    { key: "executing", label: "Executing", count: executing, tone: "cyan", pulse: true, icon: <Activity className="w-3.5 h-3.5 text-cyan-300" />, sub: "live" },
     { key: "finished", label: "Finished", count: finished, tone: "slate", icon: <Gauge className="w-3.5 h-3.5 text-slate-400" />, sub: "24h window" },
   ];
 
@@ -279,12 +277,8 @@ export function ActivityRail() {
       <div className="px-4 py-2.5 border-b border-(--ss-hairline-strong) flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Radio className="w-3.5 h-3.5 text-cyan-400" />
-          <span className="text-xs font-semibold text-slate-100">Live Activity Rail</span>
+          <span className="text-xs font-semibold text-slate-100">Recent activity</span>
         </div>
-        <Pill tone="cyan">
-          <span className="w-1 h-1 rounded-full bg-cyan-400 ss-pulse-cyan" />
-          streaming
-        </Pill>
       </div>
       <div className="flex-1 overflow-y-auto ss-scroll p-2">
         {auditEvents.length === 0 ? (
@@ -419,8 +413,8 @@ function ActiveExecutionFocus() {
             </div>
           </div>
 
-          <AlertBanner tone="warning" title="Kill switch armed on this engagement">
-            Operator r.varga staged a manual hold. Activating will halt EXEC-2026-0702-002 and revoke its credential.
+          <AlertBanner tone="warning" title="Kill switch available">
+            Activating the kill switch halts {exec.id} and revokes its worker credential.
           </AlertBanner>
 
           <div className="flex items-center gap-2">
@@ -491,7 +485,7 @@ function RiskDistributionMatrix() {
                       <div
                         className={cn(
                           "inline-flex items-center justify-center w-6 h-6 rounded-sm ss-mono-xs tnum",
-                          v > 0 ? `${intensity} text-[#060912] font-semibold` : "text-slate-600 border border-(--ss-hairline)"
+                          v > 0 ? `${intensity} text-[#0B0D10] font-semibold` : "text-slate-600 border border-(--ss-hairline)"
                         )}
                       >
                         {v > 0 ? v : "·"}

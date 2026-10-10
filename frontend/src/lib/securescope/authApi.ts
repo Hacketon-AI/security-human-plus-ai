@@ -62,13 +62,16 @@ async function authFetch<T>(path: string, options: RequestInit = {}): Promise<T>
     const errorText = await response.text().catch(() => "Unknown error");
     try {
       const parsed: unknown = JSON.parse(errorText);
-      if (
-        typeof parsed === "object" &&
-        parsed !== null &&
-        "detail" in parsed &&
-        typeof parsed.detail === "string"
-      ) {
-        throw new Error(parsed.detail);
+      if (typeof parsed === "object" && parsed !== null && "detail" in parsed) {
+        if (typeof parsed.detail === "string") throw new Error(parsed.detail);
+        // FastAPI validation errors (422) arrive as a list; show their messages,
+        // never the raw JSON payload.
+        if (Array.isArray(parsed.detail)) {
+          const messages = parsed.detail
+            .map((item: unknown) => (typeof item === "object" && item !== null && "msg" in item ? String(item.msg) : ""))
+            .filter(Boolean);
+          if (messages.length) throw new Error(messages.join("; "));
+        }
       }
     } catch (error) {
       if (error instanceof Error && error.message !== errorText) throw error;
