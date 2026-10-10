@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
+import { useLocale, type Locale } from "@/lib/securescope/locale";
 import { AlertTriangle, Info, ShieldAlert, ShieldCheck, X } from "lucide-react";
 
 // ============================================================
@@ -265,6 +266,38 @@ export function MaskedField({
         </span>
       </div>
       {note && <div className="px-3 pb-2.5 text-[10px] text-slate-500">{note}</div>}
+    </div>
+  );
+}
+
+// ============================================================
+// LocaleToggle — EN / ID switch for public pages
+// ============================================================
+
+const LOCALES: { value: Locale; label: string; name: string }[] = [
+  { value: "en", label: "EN", name: "English" },
+  { value: "id", label: "ID", name: "Bahasa Indonesia" },
+];
+
+export function LocaleToggle({ className }: { className?: string }) {
+  const [locale, setLocale] = useLocale();
+  return (
+    <div role="group" aria-label="Language" className={cn("inline-flex rounded-lg border border-white/10 p-0.5", className)}>
+      {LOCALES.map((option) => (
+        <button
+          key={option.value}
+          type="button"
+          aria-pressed={locale === option.value}
+          aria-label={option.name}
+          onClick={() => setLocale(option.value)}
+          className={cn(
+            "min-w-9 rounded-md px-2 py-1.5 text-xs font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-400",
+            locale === option.value ? "bg-white/10 text-white" : "text-slate-400 hover:text-white"
+          )}
+        >
+          {option.label}
+        </button>
+      ))}
     </div>
   );
 }

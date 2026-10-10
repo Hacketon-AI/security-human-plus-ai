@@ -1,231 +1,196 @@
 "use client";
 
 import * as React from "react";
-import * as THREE from "three";
+import { AlertCircle, ArrowLeft, Eye, EyeOff, Loader2, OctagonX, ShieldCheck, Target } from "lucide-react";
 import { loginUser, saveToken, saveUser } from "@/lib/securescope/authApi";
+import { useLocale, type Locale } from "@/lib/securescope/locale";
 import { useApp } from "@/lib/securescope/store";
+import { LocaleToggle } from "../shared/ui";
+
+const COPY = {
+  en: {
+    back: "Back to home",
+    title: "Sign in to SecureScope",
+    subtitle: "Use the account your administrator created for you.",
+    email: "Email",
+    password: "Password",
+    showPassword: "Show password",
+    hidePassword: "Hide password",
+    submit: "Sign in",
+    submitting: "Signing in...",
+    required: "Email and password are required.",
+    noOrganization: "This account is not assigned to an organization. Contact an administrator.",
+    failed: "Sign-in failed",
+    notice: "Access is restricted to authorized personnel and every action is audited.",
+    asideTitle: "Authorized security validation, under control.",
+    aside: ["Every target is checked against an authorized scope", "Kill switch available on every engagement", "Full audit trail of every decision"],
+  },
+  id: {
+    back: "Kembali ke beranda",
+    title: "Masuk ke SecureScope",
+    subtitle: "Gunakan akun yang dibuatkan oleh administrator Anda.",
+    email: "Email",
+    password: "Kata sandi",
+    showPassword: "Tampilkan kata sandi",
+    hidePassword: "Sembunyikan kata sandi",
+    submit: "Masuk",
+    submitting: "Sedang masuk...",
+    required: "Email dan kata sandi wajib diisi.",
+    noOrganization: "Akun ini belum terhubung ke organisasi. Hubungi administrator.",
+    failed: "Gagal masuk",
+    notice: "Akses terbatas untuk personel berwenang dan setiap tindakan diaudit.",
+    asideTitle: "Validasi keamanan terotorisasi, tetap terkendali.",
+    aside: ["Setiap target dicek terhadap cakupan yang diizinkan", "Kill switch tersedia di setiap engagement", "Jejak audit lengkap untuk setiap keputusan"],
+  },
+} satisfies Record<Locale, unknown>;
+
+const ASIDE_ICONS = [Target, OctagonX, ShieldCheck];
+const FOCUS_RING = "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-400";
+const INPUT =
+  "h-11 w-full rounded-lg border border-white/10 bg-white/[0.03] px-3.5 text-[15px] text-white placeholder:text-slate-600 transition-colors hover:border-white/20 focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400/25";
 
 export function LoginPage() {
   const login = useApp((state) => state.login);
   const go = useApp((state) => state.go);
+  const [locale] = useLocale();
+  const t = COPY[locale];
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
+  const [showPassword, setShowPassword] = React.useState(false);
   const [submitting, setSubmitting] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
-  const canvasRef = React.useRef<HTMLCanvasElement>(null);
-  const cardRef = React.useRef<HTMLDivElement>(null);
-  const rightPanelRef = React.useRef<HTMLDivElement>(null);
-
-  React.useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    let animationId = 0;
-    let disposed = false;
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(
-      75,
-      window.innerWidth / window.innerHeight,
-      1,
-      1000
-    );
-    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(window.devicePixelRatio);
-    camera.position.z = 30;
-
-    const particleCount = 1500;
-    const positions = new Float32Array(particleCount * 3);
-    const colors = new Float32Array(particleCount * 3);
-    const color1 = new THREE.Color(0x00f2ff);
-    const color2 = new THREE.Color(0x7d2ae8);
-    for (let index = 0; index < particleCount; index += 1) {
-      positions[index * 3] = (Math.random() - 0.5) * 100;
-      positions[index * 3 + 1] = (Math.random() - 0.5) * 100;
-      positions[index * 3 + 2] = (Math.random() - 0.5) * 100;
-      const mixedColor = color1.clone().lerp(color2, Math.random());
-      colors[index * 3] = mixedColor.r;
-      colors[index * 3 + 1] = mixedColor.g;
-      colors[index * 3 + 2] = mixedColor.b;
-    }
-
-    const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
-    geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
-    const material = new THREE.PointsMaterial({
-      size: 0.15,
-      vertexColors: true,
-      transparent: true,
-      opacity: 0.8,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false,
-    });
-    const particles = new THREE.Points(geometry, material);
-    scene.add(particles);
-
-    const coreGeometry = new THREE.IcosahedronGeometry(6, 1);
-    const coreMaterial = new THREE.MeshBasicMaterial({
-      color: 0x00f2ff,
-      wireframe: true,
-      transparent: true,
-      opacity: 0.15,
-    });
-    const core = new THREE.Mesh(coreGeometry, coreMaterial);
-    scene.add(core);
-
-    let mouseX = 0;
-    let mouseY = 0;
-    const onMouseMove = (event: MouseEvent) => {
-      mouseX = (event.clientX / window.innerWidth) * 2 - 1;
-      mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
-    };
-    const onResize = () => {
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-    };
-    const animate = () => {
-      if (disposed) return;
-      animationId = requestAnimationFrame(animate);
-      particles.rotation.x += 0.0005;
-      particles.rotation.y += 0.001;
-      core.rotation.x += 0.003;
-      core.rotation.y += 0.005;
-      core.scale.setScalar(1 + Math.sin(Date.now() * 0.001) * 0.1);
-      camera.position.x += (mouseX * 5 - camera.position.x) * 0.05;
-      camera.position.y += (mouseY * 5 - camera.position.y) * 0.05;
-      camera.lookAt(scene.position);
-      renderer.render(scene, camera);
-    };
-
-    document.addEventListener("mousemove", onMouseMove);
-    window.addEventListener("resize", onResize);
-    animate();
-    return () => {
-      disposed = true;
-      cancelAnimationFrame(animationId);
-      window.removeEventListener("resize", onResize);
-      document.removeEventListener("mousemove", onMouseMove);
-      renderer.dispose();
-      geometry.dispose();
-      material.dispose();
-      coreGeometry.dispose();
-      coreMaterial.dispose();
-    };
-  }, []);
-
-  React.useEffect(() => {
-    const panel = rightPanelRef.current;
-    const card = cardRef.current;
-    if (!panel || !card) return;
-    const onMove = (event: MouseEvent) => {
-      const rect = panel.getBoundingClientRect();
-      const rotateX = ((event.clientY - rect.top - rect.height / 2) / (rect.height / 2)) * -10;
-      const rotateY = ((event.clientX - rect.left - rect.width / 2) / (rect.width / 2)) * 10;
-      card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-    };
-    const onLeave = () => {
-      card.style.transform = "rotateX(0deg) rotateY(0deg)";
-    };
-    panel.addEventListener("mousemove", onMove);
-    panel.addEventListener("mouseleave", onLeave);
-    return () => {
-      panel.removeEventListener("mousemove", onMove);
-      panel.removeEventListener("mouseleave", onLeave);
-    };
-  }, []);
 
   const submit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError(null);
     if (!email.trim() || !password) {
-      setError("Email and password are required.");
+      setError(t.required);
       return;
     }
     setSubmitting(true);
     try {
       const response = await loginUser({ email: email.trim(), password });
       if (!response.user.organization_id) {
-        setError("This account is not assigned to an organization. Contact an administrator.");
+        setError(t.noOrganization);
         return;
       }
       saveToken(response.access_token);
       saveUser(response.user);
       login(response.user.organization_id);
     } catch (reason: unknown) {
-      setError(reason instanceof Error ? reason.message : "Authentication failed");
+      setError(reason instanceof Error ? reason.message : t.failed);
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <>
-      <canvas ref={canvasRef} className="fixed inset-0 z-0 h-screen w-screen pointer-events-none" />
-      <div className="ss-login-container">
-        <div className="ss-login-left">
-          <h1 className="ss-login-logo">SecureScope</h1>
-          <p className="ss-login-tagline">
-            Orchestrate authorized security validation across your entire infrastructure.
-          </p>
-          <div className="ss-login-features">
-            <div className="ss-login-feature-item">
-              <div className="ss-login-feature-icon"><i className="fas fa-shield-halved" /></div>
-              <div>
-                <h4>Zero Trust Validation</h4>
-                <p>Continuously verify access requests.</p>
-              </div>
-            </div>
-            <div className="ss-login-feature-item">
-              <div className="ss-login-feature-icon"><i className="fas fa-satellite-dish" /></div>
-              <div>
-                <h4>Real-time Threat Emulation</h4>
-                <p>Simulate authorized security scenarios safely.</p>
-              </div>
-            </div>
-          </div>
+    <div className="grid min-h-screen bg-[#070A12] text-slate-300 antialiased lg:grid-cols-2">
+      <aside className="relative hidden overflow-hidden border-r border-white/5 lg:flex lg:flex-col lg:justify-between lg:p-12">
+        <div aria-hidden className="pointer-events-none absolute inset-0 bg-[radial-gradient(70%_50%_at_20%_0%,rgba(34,211,238,0.12),transparent)]" />
+        <div className="relative flex items-center gap-2.5">
+          <span className="grid size-8 place-items-center rounded-lg bg-cyan-400/10 ring-1 ring-cyan-400/30">
+            <ShieldCheck className="size-4.5 text-cyan-300" aria-hidden />
+          </span>
+          <span className="text-base font-semibold tracking-tight text-white">SecureScope</span>
         </div>
-        <div className="ss-login-right" ref={rightPanelRef}>
-          <div className="ss-login-card-container" ref={cardRef}>
-            <div className="ss-login-card">
-              <div className="ss-login-header">
+        <div className="relative max-w-md">
+          <h2 className="text-3xl font-semibold tracking-tight text-balance text-white">{t.asideTitle}</h2>
+          <ul className="mt-8 space-y-4">
+            {t.aside.map((item, index) => {
+              const Icon = ASIDE_ICONS[index];
+              return (
+                <li key={item} className="flex items-center gap-3 text-sm text-slate-300">
+                  <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-emerald-400/10 ring-1 ring-emerald-400/25">
+                    <Icon className="size-4 text-emerald-300" aria-hidden />
+                  </span>
+                  {item}
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+        <p className="relative text-sm text-slate-500">© 2026 SecureScope</p>
+      </aside>
+
+      <main className="flex flex-col px-4 py-6 sm:px-8">
+        <div className="flex items-center justify-between">
+          <button
+            type="button"
+            onClick={() => go("landing")}
+            className={`inline-flex h-9 items-center gap-1.5 rounded-lg px-2 text-sm text-slate-400 transition-colors hover:text-white ${FOCUS_RING}`}
+          >
+            <ArrowLeft className="size-4" aria-hidden />
+            {t.back}
+          </button>
+          <LocaleToggle />
+        </div>
+
+        <div className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center py-12">
+          <h1 className="text-2xl font-semibold tracking-tight text-white">{t.title}</h1>
+          <p className="mt-2 text-sm text-slate-400">{t.subtitle}</p>
+
+          <form onSubmit={submit} className="mt-8 space-y-5" noValidate>
+            <div>
+              <label htmlFor="login-email" className="mb-1.5 block text-sm font-medium text-slate-200">{t.email}</label>
+              <input
+                id="login-email"
+                type="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                autoComplete="email"
+                inputMode="email"
+                placeholder="name@company.com"
+                required
+                aria-invalid={error !== null && !email.trim()}
+                className={INPUT}
+              />
+            </div>
+            <div>
+              <label htmlFor="login-password" className="mb-1.5 block text-sm font-medium text-slate-200">{t.password}</label>
+              <div className="relative">
+                <input
+                  id="login-password"
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  autoComplete="current-password"
+                  required
+                  aria-invalid={error !== null && !password}
+                  className={`${INPUT} pr-11`}
+                />
                 <button
                   type="button"
-                  onClick={() => go("landing")}
-                  className="mb-3 inline-flex items-center gap-1.5 text-xs font-mono text-cyan-400 hover:text-cyan-300 transition-colors cursor-pointer"
+                  onClick={() => setShowPassword((shown) => !shown)}
+                  aria-label={showPassword ? t.hidePassword : t.showPassword}
+                  aria-pressed={showPassword}
+                  className={`absolute inset-y-0 right-0 grid w-11 place-items-center rounded-r-lg text-slate-400 transition-colors hover:text-white ${FOCUS_RING}`}
                 >
-                  <i className="fas fa-arrow-left text-[11px]" />
-                  <span>Lihat Live System Overview</span>
+                  {showPassword ? <EyeOff className="size-4" aria-hidden /> : <Eye className="size-4" aria-hidden />}
                 </button>
-                <h2>Operator Authentication</h2>
-                <p>Secure Access Gateway</p>
               </div>
-              <form onSubmit={submit}>
-                <div className="ss-login-input-group">
-                  <label htmlFor="operator-email">Operator Email</label>
-                  <div className="ss-login-input-wrapper">
-                    <i className="fas fa-envelope" />
-                    <input id="operator-email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="email" required />
-                  </div>
-                </div>
-                <div className="ss-login-input-group">
-                  <label htmlFor="operator-password">Password</label>
-                  <div className="ss-login-input-wrapper">
-                    <i className="fas fa-key" />
-                    <input id="operator-password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="current-password" required />
-                  </div>
-                </div>
-                {error && <div className="ss-login-error"><i className="fas fa-circle-exclamation" /><span>{error}</span></div>}
-                <button type="submit" className="ss-login-btn-authenticate" disabled={submitting}>
-                  <i className={`fas ${submitting ? "fa-spinner fa-spin" : "fa-lock-open"}`} style={{ marginRight: 10 }} />
-                  {submitting ? "Authenticating..." : "Authenticate"}
-                </button>
-                <div className="ss-login-footer-warning"><i className="fas fa-triangle-exclamation" />Authorized personnel only. All actions are monitored.</div>
-              </form>
             </div>
-          </div>
+
+            {error && (
+              <p role="alert" className="flex items-start gap-2 rounded-lg border border-red-400/25 bg-red-400/[0.06] p-3 text-sm text-red-200">
+                <AlertCircle className="mt-0.5 size-4 shrink-0" aria-hidden />
+                {error}
+              </p>
+            )}
+
+            <button
+              type="submit"
+              disabled={submitting}
+              className={`inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-cyan-400 text-sm font-semibold text-slate-950 transition-colors hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-60 ${FOCUS_RING}`}
+            >
+              {submitting && <Loader2 className="size-4 animate-spin motion-reduce:animate-none" aria-hidden />}
+              {submitting ? t.submitting : t.submit}
+            </button>
+          </form>
+
+          <p className="mt-8 text-xs leading-relaxed text-slate-500">{t.notice}</p>
         </div>
-      </div>
-    </>
+      </main>
+    </div>
   );
 }

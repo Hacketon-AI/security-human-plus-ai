@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Orbitron, Rajdhani, JetBrains_Mono } from "next/font/google";
+import { Geist, Geist_Mono, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as SonnerToaster } from "@/components/ui/sonner";
@@ -14,18 +14,6 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const orbitron = Orbitron({
-  subsets: ["latin"],
-  weight: ["400", "700", "900"],
-  variable: "--font-orbitron",
-});
-
-const rajdhani = Rajdhani({
-  subsets: ["latin"],
-  weight: ["300", "500", "700"],
-  variable: "--font-rajdhani",
-});
-
 const jetbrains = JetBrains_Mono({
   subsets: ["latin"],
   weight: ["400", "700"],
@@ -35,13 +23,13 @@ const jetbrains = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "SecureScope — Authorized Security Validation Control",
   description:
-    "SecureScope is a security validation execution and penetration validation orchestration platform for security operators, pentest coordinators, auditors, and administrators.",
+    "SecureScope verifies asset ownership, enforces written authorization, and runs safe, scope-locked security validation with human-reviewed, AI-assisted proof-of-risk.",
   keywords: [
     "SecureScope",
-    "penetration testing",
+    "authorized security testing",
     "security validation",
-    "SOC",
-    "offensive security orchestration",
+    "proof-of-risk",
+    "penetration testing",
   ],
   authors: [{ name: "SecureScope" }],
   icons: { icon: "/securescope-favicon.png" },
@@ -52,14 +40,8 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
-      <head>
-        <link
-          rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-        />
-      </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${orbitron.variable} ${rajdhani.variable} ${jetbrains.variable} antialiased bg-background text-foreground min-h-screen`}
+        className={`${geistSans.variable} ${geistMono.variable} ${jetbrains.variable} antialiased bg-background text-foreground min-h-screen`}
       >
         {children}
         <Toaster />
