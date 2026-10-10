@@ -612,6 +612,7 @@ function SafetyStep({ draft }: { draft: DraftState }) {
   const assets = useApp((s) => s.assets);
   const authorizations = useApp((s) => s.authorizations);
   const engagements = useApp((s) => s.engagements);
+  const dispatcherBackend = useApp((s) => s.systemStatus?.dispatcher_backend);
 
   const asset = assets.find((a) => a.id === draft.assetId);
   const auth = authorizations.find((a) => a.id === draft.authorizationId);
@@ -677,18 +678,11 @@ function SafetyStep({ draft }: { draft: DraftState }) {
       meta: "source=per_execution, fallback=disabled",
     },
     {
-      label: "Dispatch backend available",
-      explanation: "Celery dispatch backend is online and accepting messages.",
-      passed: true,
+      label: "Dispatch backend configured",
+      explanation: "A dispatch backend is configured on the control plane. Without one, executions cannot leave the API.",
+      passed: dispatcherBackend !== undefined && dispatcherBackend !== "unconfigured",
       blocking: true,
-      meta: "broker=online, region=eu-1",
-    },
-    {
-      label: "Worker auth mode ready",
-      explanation: "Worker authentication mode is per-execution credential (shared fallback disabled).",
-      passed: true,
-      blocking: true,
-      meta: "mode=per_execution, fallback=disabled",
+      meta: `backend=${dispatcherBackend ?? "unknown"}`,
     },
   ];
 

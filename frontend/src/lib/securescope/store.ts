@@ -40,6 +40,7 @@ interface AppState {
   auditEvents: AuditEvent[];
   workers: any[];
   dispatchQueues: any[];
+  systemStatus: api.SystemStatus | null;
 
   isLoading: boolean;
   error: string | null;
@@ -175,6 +176,7 @@ export const useApp = create<AppState>((set, get) => ({
   auditEvents: [],
   workers: [],
   dispatchQueues: [],
+  systemStatus: null,
 
   latestAiProofOfRiskAnalysis: null,
   latestAiProofOfRiskExecutionId: null,
@@ -238,6 +240,7 @@ export const useApp = create<AppState>((set, get) => ({
       executions: [],
       workers: [],
       dispatchQueues: [],
+      systemStatus: null,
       latestAiProofOfRiskAnalysis: null,
       latestAiProofOfRiskExecutionId: null,
       aiProofOfRiskLastRunAt: null,
@@ -494,12 +497,14 @@ export const useApp = create<AppState>((set, get) => ({
                 fallbackEnabled: false,
               },
               dispatchMessage: {
-                messageId: "msg_" + ex.id.slice(0, 4),
+                // The API does not expose broker message IDs or payload hashes;
+                // show that honestly instead of inventing values.
+                messageId: "—",
                 queueName: "validation_executions",
                 routingKey: "validation.execute",
                 envelopeSchemaVersion: "1",
-                payloadHash: "sha256:...",
-                publishStatus: "published",
+                payloadHash: "—",
+                publishStatus: ex.status === "queued" ? "pending" : "published",
                 workerState: ex.status === "executing" ? "running" : ex.status === "succeeded" ? "finished" : "idle",
                 lastHeartbeat: ex.updated_at,
               },
@@ -545,10 +550,11 @@ export const useApp = create<AppState>((set, get) => ({
       });
 
       // Fetch audit events, workers, and dispatch queues
-      const [rawAuditEvents, rawWorkers, rawQueues] = await Promise.all([
+      const [rawAuditEvents, rawWorkers, rawQueues, systemStatus] = await Promise.all([
         api.fetchAuditEvents(orgId, 100).catch(() => []),
         api.fetchWorkers(orgId).catch(() => []),
         api.fetchDispatchQueues(orgId).catch(() => []),
+        api.fetchSystemStatus(orgId).catch(() => null),
       ]);
 
       const auditEvents: AuditEvent[] = rawAuditEvents.map((e: any) => ({
@@ -573,6 +579,7 @@ export const useApp = create<AppState>((set, get) => ({
         auditEvents,
         workers: rawWorkers,
         dispatchQueues: rawQueues,
+        systemStatus,
         demoWorkspaceMode: "full"
       });
     } catch (e: any) {

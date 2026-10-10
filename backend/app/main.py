@@ -36,7 +36,7 @@ from app.modules.validation_executions.router import (
     router as validation_executions_router,
 )
 from app.modules.workers.router import router as workers_router
-from app.platform import health
+from app.platform import health, system_status
 from app.platform.database import create_engine, create_session_factory
 from app.platform.error_handlers import install_error_handlers
 from app.platform.observability import instrument_app
@@ -160,6 +160,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     install_error_handlers(app)
 
     app.include_router(health.router)
+    app.include_router(system_status.router)
     app.include_router(auth_router)
     app.include_router(organizations_router)
     app.include_router(projects_router)

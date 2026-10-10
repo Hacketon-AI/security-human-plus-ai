@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { useApp } from "@/lib/securescope/store";
 import { Pill, StatusBadge } from "../shared/badges";
-import { EmptyState, KeyValue, MaskedField } from "../shared/ui";
+import { DispatchBackendPill, EmptyState, KeyValue, MaskedField } from "../shared/ui";
 import { EventTimeline, SecureCodeBlock } from "../shared/lifecycle";
 import { TopNavCommandBar, PageHeader } from "../shell/TopNav";
 
@@ -26,6 +26,9 @@ export function WorkersPage() {
   const executions = useApp((s) => s.executions);
   const workers = useApp((s) => s.workers);
   const dispatchQueues = useApp((s) => s.dispatchQueues);
+  const systemStatus = useApp((s) => s.systemStatus);
+  const queue = dispatchQueues[0];
+  const runningWorker = workers.find((w) => w.state === "running");
 
   return (
     <>
@@ -37,9 +40,7 @@ export function WorkersPage() {
           description="Real-time view of the dispatch pipeline, broker state, queue depths, message lifecycle, and worker heartbeats. Sensitive internals (broker URL, raw credentials, envelope secrets) are never exposed."
           meta={
             <>
-              <Pill tone="green"><span className="w-1 h-1 rounded-full bg-emerald-400 ss-pulse-green" /> Broker online</Pill>
-              <Pill tone="cyan">eu-1 region</Pill>
-              <Pill tone="slate">schema v1.4.0</Pill>
+              <DispatchBackendPill backend={systemStatus?.dispatcher_backend} />
             </>
           }
         />
@@ -52,14 +53,13 @@ export function WorkersPage() {
                 <Workflow className="w-4 h-4 text-cyan-400" />
                 <span className="text-sm font-semibold text-slate-100">Dispatch Pipeline</span>
               </div>
-              <Pill tone="cyan">live</Pill>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
               {[
-                { label: "Execution queued", icon: <Layers className="w-3.5 h-3.5" />, tone: "blue", value: "1 pending" },
-                { label: "Dispatch message published", icon: <GitBranch className="w-3.5 h-3.5" />, tone: "cyan", value: "envelope v1.4.0" },
-                { label: "Broker routed", icon: <Server className="w-3.5 h-3.5" />, tone: "green", value: "queue: securescope.exec.v1" },
-                { label: "Worker consumed", icon: <Cpu className="w-3.5 h-3.5" />, tone: "cyan", value: "wkr-eu-1-a07" },
+                { label: "Execution queued", icon: <Layers className="w-3.5 h-3.5" />, tone: "blue", value: `${queue?.pending ?? 0} pending` },
+                { label: "Dispatch message published", icon: <GitBranch className="w-3.5 h-3.5" />, tone: "cyan", value: "dispatch envelope" },
+                { label: "Broker routed", icon: <Server className="w-3.5 h-3.5" />, tone: "green", value: `queue: ${queue?.queue_name ?? "—"}` },
+                { label: "Worker consumed", icon: <Cpu className="w-3.5 h-3.5" />, tone: "cyan", value: runningWorker?.worker_id ?? "none running" },
                 { label: "Result emitted", icon: <Activity className="w-3.5 h-3.5" />, tone: "slate", value: "awaiting finish" },
               ].map((n, i) => {
                 const toneMap: Record<string, string> = {
@@ -106,7 +106,7 @@ export function WorkersPage() {
                     <ServerCog className="w-3.5 h-3.5 text-cyan-400" />
                     <span className="text-xs font-semibold text-slate-100">Broker & queue status</span>
                   </div>
-                  <Pill tone="green">online</Pill>
+                  <DispatchBackendPill backend={systemStatus?.dispatcher_backend} />
                 </div>
                 <div className="space-y-2">
                   {dispatchQueues.length === 0 ? (
@@ -119,7 +119,7 @@ export function WorkersPage() {
                           <code className="ss-mono-xs text-cyan-200">{q.queue_name}</code>
                           <Pill tone="slate">{q.routing_key}</Pill>
                         </div>
-                        <Pill tone={q.broker_status === "online" ? "green" : "red"}>{q.broker_status}</Pill>
+                        <DispatchBackendPill backend={q.broker_status} />
                       </div>
                       <div className="grid grid-cols-3 gap-2">
                         <div>
@@ -161,7 +161,6 @@ export function WorkersPage() {
                     <thead>
                       <tr className="bg-(--ss-surface-2)">
                         <th className="text-left px-3 py-2 ss-eyebrow">Worker ID</th>
-                        <th className="text-left px-3 py-2 ss-eyebrow">Region</th>
                         <th className="text-left px-3 py-2 ss-eyebrow">State</th>
                         <th className="text-left px-3 py-2 ss-eyebrow">Current execution</th>
                         <th className="text-left px-3 py-2 ss-eyebrow">Last heartbeat</th>
@@ -174,7 +173,6 @@ export function WorkersPage() {
                         workers.map((w) => (
                         <tr key={w.worker_id} className={cn("border-t border-(--ss-hairline)", w.state === "running" && "bg-cyan-500/5")}>
                           <td className="px-3 py-2.5"><code className="ss-mono-xs text-cyan-200">{w.worker_id}</code></td>
-                          <td className="px-3 py-2.5 ss-mono-xs text-slate-400">{w.region}</td>
                           <td className="px-3 py-2.5">
                             <Pill tone={w.state === "running" ? "cyan" : w.state === "idle" ? "slate" : w.state === "finished" ? "green" : "red"}>
                               <span className={cn("w-1 h-1 rounded-full", w.state === "running" && "bg-cyan-400 ss-pulse-cyan")} />
@@ -245,8 +243,6 @@ export function WorkersPage() {
                     <li key={e.id} onClick={() => openExecution(e.id)} className="flex items-center justify-between p-2 rounded-sm border border-(--ss-hairline) hover:border-cyan-500/40 hover:bg-(--ss-surface-3)/40 cursor-pointer">
                       <div className="flex items-center gap-2 min-w-0">
                         <code className="ss-mono-xs text-cyan-200">{e.code}</code>
-                        <span className="text-[10px] text-slate-500">→</span>
-                        <code className="ss-mono-xs text-slate-500">msg_{e.id.slice(-6)}</code>
                       </div>
                       <StatusBadge status={e.status} />
                     </li>
@@ -281,23 +277,19 @@ export function WorkersPage() {
                 <EmptyState title="No dispatch data" icon={<Shield className="w-5 h-5" />} />
               ) : (
                 <div className="mt-3 ss-panel-flat p-3">
-                  <div className="ss-eyebrow mb-1.5">Dispatch outcomes (24h)</div>
-                  <div className="grid grid-cols-4 gap-2 text-center">
+                  <div className="ss-eyebrow mb-1.5">Execution outcomes</div>
+                  <div className="grid grid-cols-3 gap-2 text-center">
                     <div>
-                      <div className="text-lg font-semibold tnum text-emerald-300">{(dispatchQueues[0].active ?? 0) + (dispatchQueues[0].pending ?? 0)}</div>
-                      <div className="ss-eyebrow">published</div>
+                      <div className="text-lg font-semibold tnum text-blue-300">{dispatchQueues[0].pending ?? 0}</div>
+                      <div className="ss-eyebrow">pending</div>
                     </div>
                     <div>
                       <div className="text-lg font-semibold tnum text-cyan-300">{dispatchQueues[0].active ?? 0}</div>
-                      <div className="ss-eyebrow">consumed</div>
+                      <div className="ss-eyebrow">executing</div>
                     </div>
                     <div>
                       <div className="text-lg font-semibold tnum text-amber-300">{dispatchQueues[0].failed ?? 0}</div>
-                      <div className="ss-eyebrow">dead-lettered</div>
-                    </div>
-                    <div>
-                      <div className="text-lg font-semibold tnum text-slate-400">0</div>
-                      <div className="ss-eyebrow">lost</div>
+                      <div className="ss-eyebrow">failed · 24h</div>
                     </div>
                   </div>
                 </div>

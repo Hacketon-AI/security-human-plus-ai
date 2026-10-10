@@ -12,30 +12,21 @@ import {
 } from "@/lib/securescope/authApi";
 import { useApp } from "@/lib/securescope/store";
 import {
-  Cog,
   Database,
   KeyRound,
   Lock,
   Server,
-  Settings as SettingsIcon,
-  Shield,
-  ShieldAlert,
   ShieldCheck,
-  ToggleLeft,
-  ToggleRight,
   Users,
 } from "lucide-react";
 import { Pill } from "../shared/badges";
-import { AlertBanner, CyberButton, KeyValue, MaskedField } from "../shared/ui";
+import { AlertBanner, CyberButton, DispatchBackendPill, KeyValue } from "../shared/ui";
 import { TopNavCommandBar, PageHeader } from "../shell/TopNav";
 
 const SECTIONS = [
   { key: "account", label: "Account" },
   { key: "users", label: "Users" },
-  { key: "environment", label: "Environment" },
-  { key: "dispatch", label: "Dispatch backend" },
-  { key: "worker_auth", label: "Worker authentication" },
-  { key: "safety", label: "Safety controls" },
+  { key: "system", label: "System" },
   { key: "secrets", label: "Secrets policy" },
 ] as const;
 
@@ -55,7 +46,6 @@ export function SettingsPage() {
           description="Non-sensitive operational configuration. Secrets, raw worker tokens, broker credentials, and database URLs are never exposed."
           meta={
             <>
-              <Pill tone="amber">Staging</Pill>
               <Pill tone="green"><ShieldCheck className="w-2.5 h-2.5" /> Policy enforced</Pill>
             </>
           }
@@ -87,111 +77,7 @@ export function SettingsPage() {
             {section === "account" && <ChangePasswordPanel />}
             {section === "users" && isAdmin && <UsersPanel currentUserId={currentUser?.id} />}
 
-            {section === "environment" && (
-              <div className="ss-panel p-5">
-                <div className="flex items-center gap-2 mb-1">
-                  <Cog className="w-4 h-4 text-cyan-400" />
-                  <div className="ss-eyebrow text-cyan-300">Environment</div>
-                </div>
-                <h2 className="text-base font-semibold text-slate-100 mb-3">Environment configuration</h2>
-                <div className="grid md:grid-cols-2 gap-x-6 gap-y-0">
-                  <KeyValue k="Environment" v="Staging" />
-                  <KeyValue k="Region" v="eu-1" mono />
-                  <KeyValue k="Build" v="2026.07.02" mono />
-                  <KeyValue k="Schema version" v="v1.4.0" mono />
-                  <KeyValue k="Timezone" v="UTC" mono />
-                  <KeyValue k="Session timeout" v="04:00:00" mono />
-                </div>
-                <AlertBanner tone="warning" title="Staging environment" className="mt-3">
-                  This environment mirrors production but uses sanitized data. Do not assume live asset state.
-                </AlertBanner>
-              </div>
-            )}
-
-            {section === "dispatch" && (
-              <div className="ss-panel p-5">
-                <div className="flex items-center gap-2 mb-1">
-                  <Server className="w-4 h-4 text-cyan-400" />
-                  <div className="ss-eyebrow text-cyan-300">Dispatch backend</div>
-                </div>
-                <h2 className="text-base font-semibold text-slate-100 mb-3">Dispatch backend configuration</h2>
-                <div className="grid md:grid-cols-2 gap-x-6 gap-y-0">
-                  <KeyValue k="Backend" v="Celery" />
-                  <KeyValue k="Broker status" v={<Pill tone="green">online</Pill>} />
-                  <KeyValue k="Default queue" v={<code className="ss-mono-xs text-cyan-200">securescope.exec.v1</code>} />
-                  <KeyValue k="Dead-letter queue" v={<code className="ss-mono-xs text-cyan-200">securescope.deadletter.v1</code>} />
-                  <KeyValue k="Heartbeat interval" v="5s" mono />
-                  <KeyValue k="Visibility timeout" v="300s" mono />
-                </div>
-                <MaskedField
-                  label="Broker URL"
-                  placeholder="amqp://••••••••@••••••••"
-                  note="Broker connection details are managed via the secrets manager and never exposed in the UI."
-                  className="mt-3"
-                />
-              </div>
-            )}
-
-            {section === "worker_auth" && (
-              <div className="ss-panel p-5">
-                <div className="flex items-center gap-2 mb-1">
-                  <Shield className="w-4 h-4 text-cyan-400" />
-                  <div className="ss-eyebrow text-cyan-300">Worker authentication</div>
-                </div>
-                <h2 className="text-base font-semibold text-slate-100 mb-3">Worker authentication mode</h2>
-                <div className="grid md:grid-cols-2 gap-x-6 gap-y-0 mb-4">
-                  <KeyValue k="Auth mode" v={<Pill tone="cyan">Per-execution credential</Pill>} />
-                  <KeyValue k="Credential source" v="per_execution" mono />
-                  <KeyValue k="Shared-token fallback" v={<Pill tone="slate"><ToggleRight className="w-3 h-3" /> Disabled</Pill>} />
-                  <KeyValue k="Token rotation" v="automatic on finish" />
-                  <KeyValue k="Algorithm" v="ed25519" mono />
-                  <KeyValue k="Token TTL" v="engagement window" />
-                </div>
-                <AlertBanner tone="success" title="Per-execution credentials enforced">
-                  Each worker receives a single-use credential scoped to one execution. Fallback to shared tokens is disabled by policy.
-                </AlertBanner>
-                <div className="mt-3 grid md:grid-cols-2 gap-3">
-                  <div className="ss-panel-flat p-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[11px] text-slate-300">Allow shared-token fallback</span>
-                      <ToggleRight className="w-5 h-5 text-slate-600" />
-                    </div>
-                    <div className="text-[10px] text-slate-500 mt-1">Disabled by policy — cannot be overridden per organization.</div>
-                  </div>
-                  <div className="ss-panel-flat p-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[11px] text-slate-300">Revoke credential on finish</span>
-                      <ToggleRight className="w-5 h-5 text-emerald-400" />
-                    </div>
-                    <div className="text-[10px] text-slate-500 mt-1">Automatic revocation is always on.</div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {section === "safety" && (
-              <div className="ss-panel p-5">
-                <div className="flex items-center gap-2 mb-1">
-                  <ShieldAlert className="w-4 h-4 text-cyan-400" />
-                  <div className="ss-eyebrow text-cyan-300">Safety controls</div>
-                </div>
-                <h2 className="text-base font-semibold text-slate-100 mb-3">Safety control configuration</h2>
-                <div className="grid md:grid-cols-2 gap-x-6 gap-y-0 mb-4">
-                  <KeyValue k="Global kill switch" v={<Pill tone="green">Inactive</Pill>} />
-                  <KeyValue k="Kill switch armed engagements" v="1" mono />
-                  <KeyValue k="Pre-flight safety check" v={<Pill tone="green">Enforced</Pill>} />
-                  <KeyValue k="Scope snapshot" v="immutable at queue" />
-                  <KeyValue k="Safety snapshot" v="immutable at queue" />
-                  <KeyValue k="Max risk tier cap" v={<Pill tone="amber">Critical</Pill>} />
-                </div>
-                <AlertBanner tone="info" title="Kill switch is always available">
-                  The global kill switch halts all in-flight executions across all engagements and revokes every active credential. Activation requires confirmation and is audited.
-                </AlertBanner>
-                <div className="mt-3">
-                  <CyberButton variant="amber">Arm global kill switch</CyberButton>
-                </div>
-              </div>
-            )}
+            {section === "system" && <SystemPanel />}
 
             {section === "secrets" && (
               <div className="ss-panel p-5">
@@ -459,6 +345,41 @@ export function UsersPanel({ currentUserId }: { currentUserId: string | undefine
           {saving ? "Adding..." : "Add user"}
         </CyberButton>
       </form>
+    </div>
+  );
+}
+
+const ROUTER_MODES: Record<string, string> = {
+  deterministic: "deterministic rules only (no AI model calls)",
+  hybrid: "hybrid: Claude preferred, then Fireworks, then rules",
+  local_only: "local model, then rules",
+  fireworks_only: "Fireworks, then rules",
+};
+
+export function SystemPanel() {
+  const status = useApp((state) => state.systemStatus);
+
+  return (
+    <div className="ss-panel p-5">
+      <div className="flex items-center gap-2 mb-1">
+        <Server className="w-4 h-4 text-cyan-400" />
+        <div className="ss-eyebrow text-cyan-300">System</div>
+      </div>
+      <h2 className="text-base font-semibold text-slate-100 mb-1">Runtime configuration</h2>
+      <p className="text-sm text-slate-400 mb-4">Reported by the running control plane. Names and on/off states only; URLs and credentials are never exposed.</p>
+      {status === null ? (
+        <AlertBanner tone="warning" title="Status unavailable">
+          The control plane did not report its configuration. Reload the page or check the API.
+        </AlertBanner>
+      ) : (
+        <div className="grid md:grid-cols-2 gap-x-6 gap-y-0">
+          <KeyValue k="Environment" v={status.environment} mono />
+          <KeyValue k="Dispatch backend" v={<DispatchBackendPill backend={status.dispatcher_backend} />} />
+          <KeyValue k="AI router mode" v={ROUTER_MODES[status.ai_router_mode] ?? status.ai_router_mode} />
+          <KeyValue k="Claude (Anthropic API)" v={status.claude_configured ? "configured" : "not configured"} />
+          <KeyValue k="Fireworks" v={status.fireworks_configured ? "configured" : "not configured"} />
+        </div>
+      )}
     </div>
   );
 }

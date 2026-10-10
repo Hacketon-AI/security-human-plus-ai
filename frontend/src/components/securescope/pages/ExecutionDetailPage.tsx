@@ -324,15 +324,12 @@ function ExecutionInspector({ exec }: { exec: ValidationExecution }) {
             <Cpu className="w-3.5 h-3.5 text-cyan-400" />
             <span className="text-xs font-semibold text-slate-100">Execution Inspector</span>
           </div>
-          <Pill tone="cyan">live</Pill>
         </div>
         <div className="p-4 space-y-3">
           <div>
             <div className="ss-eyebrow mb-1.5">Worker state</div>
             <div className="grid grid-cols-2 gap-x-4 gap-y-0">
-              <KeyValue k="Worker ID" v={exec.dispatchMessage.workerState === "running" ? "wkr-eu-1-a07" : "—"} mono />
               <KeyValue k="State" v={exec.dispatchMessage.workerState} />
-              <KeyValue k="Region" v="eu-1" mono />
               <KeyValue k="Last heartbeat" v={exec.dispatchMessage.lastHeartbeat} mono />
             </div>
           </div>

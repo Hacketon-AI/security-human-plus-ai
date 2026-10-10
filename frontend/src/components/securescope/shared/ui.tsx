@@ -326,3 +326,24 @@ export function BrandLogo({ className }: { className?: string }) {
     </span>
   );
 }
+
+// ============================================================
+// DispatchBackendPill — the configured dispatch backend, as reported by
+// /api/v1/system/status. Never hardcode "online": this is configuration,
+// not a liveness probe.
+// ============================================================
+
+const DISPATCH_BACKENDS: Record<string, { label: string; className: string }> = {
+  celery: { label: "celery", className: "border-emerald-500/30 bg-emerald-500/5 text-emerald-300" },
+  in_memory: { label: "in-process (dev)", className: "border-amber-500/30 bg-amber-500/5 text-amber-300" },
+  unconfigured: { label: "not configured", className: "border-red-500/30 bg-red-500/5 text-red-300" },
+};
+
+export function DispatchBackendPill({ backend }: { backend: string | null | undefined }) {
+  const known = backend ? DISPATCH_BACKENDS[backend] : undefined;
+  return (
+    <span className={cn("inline-flex items-center gap-1.5 rounded-sm border px-1.5 py-0.5 font-mono text-[11px]", known?.className ?? "border-slate-600/40 text-slate-400")}>
+      dispatch: {known?.label ?? backend ?? "unknown"}
+    </span>
+  );
+}

@@ -3,17 +3,21 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.config import Settings
 from app.modules.tenancy.context import TenantContext
 from app.modules.tenancy.development_auth import require_tenant_context
 from app.modules.workers.schemas import DispatchQueueResponse, WorkerStateResponse
 from app.modules.workers.service import WorkersService
-from app.platform.dependencies import get_session
+from app.platform.dependencies import get_app_settings, get_session
 
 router = APIRouter(tags=["workers"])
 
 
-def _service(session: AsyncSession = Depends(get_session)) -> WorkersService:
-    return WorkersService(session)
+def _service(
+    session: AsyncSession = Depends(get_session),
+    settings: Settings = Depends(get_app_settings),
+) -> WorkersService:
+    return WorkersService(session, settings.validation_dispatcher_backend)
 
 
 @router.get("/api/v1/workers")

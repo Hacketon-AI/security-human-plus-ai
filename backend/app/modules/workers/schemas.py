@@ -9,7 +9,6 @@ class WorkerStateResponse(BaseModel):
     model_config = ConfigDict(from_attributes=False)
 
     worker_id: str
-    region: str
     state: str  # "running" | "idle" | "finished"
     current_execution_id: str | None
     last_heartbeat: str | None

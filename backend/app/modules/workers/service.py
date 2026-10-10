@@ -6,18 +6,21 @@ from uuid import UUID
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.config import ValidationDispatcherBackend
 from app.modules.validation_executions.enums import ExecutionStatus
 from app.modules.validation_executions.models import ValidationExecution
 from app.modules.workers.schemas import DispatchQueueResponse, WorkerStateResponse
 
 _QUEUE_NAME = "validation_executions"
 _ROUTING_KEY = "validation.execute"
-_REGION = "eu-1"
 
 
 class WorkersService:
-    def __init__(self, session: AsyncSession) -> None:
+    def __init__(
+        self, session: AsyncSession, dispatcher_backend: ValidationDispatcherBackend
+    ) -> None:
         self._session = session
+        self._dispatcher_backend = dispatcher_backend
 
     async def list_workers(self, org_id: UUID) -> list[WorkerStateResponse]:
         """Derive one WorkerStateResponse per active or recently-finished execution."""
@@ -55,7 +58,8 @@ class WorkersService:
                 state = "idle"
 
             short_id = str(ex.id)[:4]
-            worker_id = f"wkr-{_REGION}-{short_id}"
+            # Workers are derived from executions; there is no worker registry.
+            worker_id = f"exec-{short_id}"
             heartbeat = ex.updated_at.isoformat() if ex.updated_at else None
             exec_code = (
                 f"EXEC-{ex.created_at.strftime('%Y%m%d')}-{short_id.upper()}"
@@ -66,7 +70,6 @@ class WorkersService:
             workers.append(
                 WorkerStateResponse(
                     worker_id=worker_id,
-                    region=_REGION,
                     state=state,
                     current_execution_id=exec_code if state == "running" else None,
                     last_heartbeat=heartbeat,
@@ -112,7 +115,8 @@ class WorkersService:
         return DispatchQueueResponse(
             queue_name=_QUEUE_NAME,
             routing_key=_ROUTING_KEY,
-            broker_status="online",
+            # The configured dispatch backend, not a liveness probe.
+            broker_status=self._dispatcher_backend.value,
             pending=pending,
             active=active,
             failed=failed_24h,

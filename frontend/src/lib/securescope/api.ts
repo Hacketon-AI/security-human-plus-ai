@@ -366,3 +366,18 @@ export async function fetchDispatchQueues(orgId: string): Promise<any[]> {
     headers: { "X-Organization-Id": orgId },
   });
 }
+
+// 9. Runtime configuration reported by the control plane (never hardcoded in the UI)
+export interface SystemStatus {
+  environment: string;
+  dispatcher_backend: string; // "unconfigured" | "in_memory" | "celery"
+  ai_router_mode: string;
+  claude_configured: boolean;
+  fireworks_configured: boolean;
+}
+
+export async function fetchSystemStatus(orgId: string): Promise<SystemStatus> {
+  return request("/api/v1/system/status", {
+    headers: { "X-Organization-Id": orgId },
+  });
+}
