@@ -55,3 +55,6 @@ yarn-error.log*
 # Local databases and build caches
 frontend/db/*.db
 *.tsbuildinfo
+
+# Generated knowledge graph (rebuild with /graphify)
+graphify-out/
