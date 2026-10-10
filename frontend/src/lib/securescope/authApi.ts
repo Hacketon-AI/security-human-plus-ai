@@ -111,6 +111,41 @@ export async function getMe(token: string): Promise<UserResponse> {
   });
 }
 
+// The backend revokes the current token on success; callers must sign in again.
+export async function changePassword(currentPassword: string, newPassword: string): Promise<void> {
+  const token = getStoredToken();
+  if (!token) throw new Error("Your session has expired. Sign in again.");
+  await authFetch<null>("/change-password", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ current_password: currentPassword, new_password: newPassword }),
+  });
+}
+
+function adminHeaders(): HeadersInit {
+  const token = getStoredToken();
+  if (!token) throw new Error("An administrator session is required.");
+  return { Authorization: `Bearer ${token}` };
+}
+
+export async function listUsers(): Promise<UserResponse[]> {
+  const page = await authFetch<{ users: UserResponse[]; total: number }>("/users?limit=200", {
+    headers: adminHeaders(),
+  });
+  return page.users;
+}
+
+export async function updateUser(
+  userId: string,
+  changes: { role?: string; is_active?: boolean },
+): Promise<UserResponse> {
+  return authFetch<UserResponse>(`/users/${userId}`, {
+    method: "PUT",
+    headers: adminHeaders(),
+    body: JSON.stringify(changes),
+  });
+}
+
 const TOKEN_KEY = "securescope_token";
 const USER_KEY = "securescope_user";
 

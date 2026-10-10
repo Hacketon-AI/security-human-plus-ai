@@ -3,7 +3,7 @@
 from typing import Any
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Header, HTTPException
+from fastapi import APIRouter, Depends, Header, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.auth.schemas import (
@@ -19,6 +19,7 @@ from app.modules.auth.security import decode_access_token
 from app.modules.auth.service import (
     AuthenticationError,
     AuthService,
+    SelfLockoutError,
     UserExistsError,
     UserNotFoundError,
 )
@@ -172,8 +173,8 @@ async def change_password(
 
 @router.get("/users", response_model=UserListResponse)
 async def list_users(
-    offset: int = 0,
-    limit: int = 50,
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=50, ge=1, le=200),
     admin: dict[str, Any] = Depends(_require_admin),
     service: AuthService = Depends(_get_auth_service),
 ) -> UserListResponse:
@@ -214,10 +215,13 @@ async def update_user(
             user_id,
             request,
             organization_id=_admin_organization_id(admin),
+            actor_id=UUID(str(admin["sub"])),
         )
         return UserResponse.model_validate(user)
     except UserNotFoundError as exc:
         raise HTTPException(status_code=404, detail=exc.detail) from exc
+    except SelfLockoutError as exc:
+        raise HTTPException(status_code=409, detail=exc.detail) from exc
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
@@ -231,7 +235,11 @@ async def delete_user(
     """Delete a user from the current administrator's organization."""
     try:
         await service.delete_user(
-            user_id, organization_id=_admin_organization_id(admin)
+            user_id,
+            organization_id=_admin_organization_id(admin),
+            actor_id=UUID(str(admin["sub"])),
         )
     except UserNotFoundError as exc:
         raise HTTPException(status_code=404, detail=exc.detail) from exc
+    except SelfLockoutError as exc:
+        raise HTTPException(status_code=409, detail=exc.detail) from exc

@@ -45,6 +45,14 @@ class UserNotFoundError(Exception):
         super().__init__(detail)
 
 
+class SelfLockoutError(Exception):
+    """Raised when an administrator would remove their own admin access."""
+
+    def __init__(self) -> None:
+        self.detail = "You cannot deactivate, demote, or delete your own account"
+        super().__init__(self.detail)
+
+
 class BootstrapOrganizationNotFoundError(Exception):
     """Raised when a configured bootstrap organization does not exist."""
 
@@ -164,11 +172,17 @@ class AuthService:
         request: UserUpdateRequest,
         *,
         organization_id: UUID,
+        actor_id: UUID,
     ) -> User:
         """Update an organization user and revoke tokens on privilege changes."""
         user = await self.get_user_for_organization(user_id, organization_id)
         if user is None:
             raise UserNotFoundError()
+        if user_id == actor_id and (
+            request.is_active is False
+            or (request.role is not None and request.role != UserRole.admin)
+        ):
+            raise SelfLockoutError()
 
         update_data = request.model_dump(exclude_unset=True)
         if update_data.get("organization_id") is not None:
@@ -205,8 +219,12 @@ class AuthService:
         user.token_version += 1
         await self.session.flush()
 
-    async def delete_user(self, user_id: UUID, *, organization_id: UUID) -> None:
+    async def delete_user(
+        self, user_id: UUID, *, organization_id: UUID, actor_id: UUID
+    ) -> None:
         """Delete a user only if it belongs to the administrator's organization."""
+        if user_id == actor_id:
+            raise SelfLockoutError()
         user = await self.get_user_for_organization(user_id, organization_id)
         if user is None:
             raise UserNotFoundError()
