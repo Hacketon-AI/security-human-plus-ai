@@ -74,3 +74,13 @@ async def test_requires_slug_when_organization_is_ambiguous(
                 email=f"x-{uuid4().hex[:8]}@example.com",
                 organization_slug=None,
             )
+
+
+async def test_rejects_email_the_login_endpoint_would_refuse(
+    session_factory: async_sessionmaker[AsyncSession],
+) -> None:
+    async with session_factory() as session:
+        with pytest.raises(AdminRecoveryError, match="invalid email"):
+            await reset_admin(
+                session, email="demo@company.test", organization_slug=None
+            )

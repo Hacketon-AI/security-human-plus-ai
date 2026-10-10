@@ -13,6 +13,7 @@ import asyncio
 import secrets
 from dataclasses import dataclass
 
+from pydantic import EmailStr, TypeAdapter, ValidationError
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -57,6 +58,11 @@ async def reset_admin(
     session: AsyncSession, *, email: str, organization_slug: str | None
 ) -> AdminRecoveryResult:
     """Grant admin with a fresh password to ``email``, creating it if needed."""
+    try:
+        # Same validation as the login endpoint, so the account can sign in.
+        TypeAdapter(EmailStr).validate_python(email)
+    except ValidationError as exc:
+        raise AdminRecoveryError(f"invalid email address: {email!r}") from exc
     password = secrets.token_urlsafe(12)
     user = (
         await session.execute(select(User).where(User.email == email))
