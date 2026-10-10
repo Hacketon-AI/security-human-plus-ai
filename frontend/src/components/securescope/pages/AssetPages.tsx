@@ -405,7 +405,7 @@ function AssetVerification({ asset, attempts }: { asset: Asset; attempts: { id: 
           </div>
           <div className="p-4 space-y-3">
             <AlertBanner tone="info" title="Ownership verification via DNS TXT">
-              SecureScope issues a one-time challenge token. Publish it as a TXT record at the challenge host below. Once DNS propagates, we verify ownership and lock the asset to your organization.
+              Double AA issues a one-time challenge token. Publish it as a TXT record at the challenge host below. Once DNS propagates, we verify ownership and lock the asset to your organization.
             </AlertBanner>
 
             <SecureCodeBlock label="Challenge host" value={challengeHost} copyable hint="publish TXT record here" />
@@ -413,7 +413,7 @@ function AssetVerification({ asset, attempts }: { asset: Asset; attempts: { id: 
             <MaskedField
               label="Operator signature key"
               placeholder="ed25519:••••••••••••••••"
-              note="Used to sign the challenge token. The private key never leaves SecureScope."
+              note="Used to sign the challenge token. The private key never leaves Double AA."
             />
 
             <div className="grid grid-cols-3 gap-2">

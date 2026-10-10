@@ -1,47 +1,43 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, JetBrains_Mono } from "next/font/google";
+import { IBM_Plex_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as SonnerToaster } from "@/components/ui/sonner";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const plexSans = IBM_Plex_Sans({
+  variable: "--font-plex-sans",
   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
 });
 
 const jetbrains = JetBrains_Mono({
   subsets: ["latin"],
-  weight: ["400", "700"],
+  weight: ["400", "500", "700"],
   variable: "--font-jetbrains",
 });
 
 export const metadata: Metadata = {
-  title: "SecureScope — Authorized Security Validation Control",
+  title: "Double AA · Authorized security validation",
   description:
-    "SecureScope verifies asset ownership, enforces written authorization, and runs safe, scope-locked security validation with human-reviewed, AI-assisted proof-of-risk.",
+    "Double AA verifies asset ownership, enforces written authorization, and runs safe, scope-locked security validation with human-reviewed, AI-assisted proof-of-risk.",
   keywords: [
-    "SecureScope",
+    "Double AA",
     "authorized security testing",
     "security validation",
     "proof-of-risk",
     "penetration testing",
   ],
-  authors: [{ name: "SecureScope" }],
-  icons: { icon: "/securescope-favicon.png" },
+  authors: [{ name: "Double AA" }],
+  icons: { icon: "/doubleaa-mark.svg" },
 };
 
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className="dark" suppressHydrationWarning>
+    <html lang="en" className={`dark ${plexSans.variable} ${jetbrains.variable}`} suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${jetbrains.variable} antialiased bg-background text-foreground min-h-screen`}
+        className={`antialiased bg-background text-foreground min-h-screen`}
       >
         {children}
         <Toaster />

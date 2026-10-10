@@ -62,7 +62,7 @@ export function AuditPage() {
         <PageHeader
           breadcrumbs={[{ label: "Audit Trail" }]}
           title="Audit Trail"
-          description="Immutable stream of every operator, system, scheduler, and worker action across SecureScope. Filterable by organization, project, asset, execution, and event type."
+          description="Immutable stream of every operator, system, scheduler, and worker action across Double AA. Filterable by organization, project, asset, execution, and event type."
           meta={
             <>
               <Pill tone="green"><Shield className="w-2.5 h-2.5" /> Append-only</Pill>

@@ -232,7 +232,7 @@ export async function analyzeProofOfRisk(
             retest_checklist: ["Port scan"],
           },
           safety_notes: [
-            "Real exploit validation was performed only inside a controlled SecureScope digital twin sandbox. The production/authorized domain received safe, non-destructive validation only."
+            "Real exploit validation was performed only inside a controlled Double AA digital twin sandbox. The production/authorized domain received safe, non-destructive validation only."
           ]
         });
       }, 1500);

@@ -1,172 +1,135 @@
 "use client";
 
 import * as React from "react";
-import {
-  ArrowRight,
-  Ban,
-  BadgeCheck,
-  BrainCircuit,
-  CheckCircle2,
-  ClipboardList,
-  FileCheck2,
-  Fingerprint,
-  KeyRound,
-  ListChecks,
-  OctagonX,
-  ScanSearch,
-  ShieldCheck,
-  Target,
-  Waves,
-} from "lucide-react";
 import { useApp } from "@/lib/securescope/store";
 import { useLocale, type Locale } from "@/lib/securescope/locale";
-import { LocaleToggle } from "../shared/ui";
+import { BrandLogo, LocaleToggle } from "../shared/ui";
 
+// Terminal and code artifacts stay in English in both locales: they mirror
+// what the product actually prints. Only the prose around them is translated.
 const COPY = {
   en: {
-    nav: { how: "How it works", safety: "Guardrails", ai: "Human + AI", signIn: "Sign in" },
-    hero: {
-      eyebrow: "Authorized security validation",
-      title: "Security testing that never leaves its scope.",
-      body: "SecureScope verifies asset ownership, enforces written authorization, and runs safe, scope-locked checks — then turns redacted evidence into proof-of-risk your team can act on.",
-      primary: "Open console",
-      secondary: "See how it works",
-      audience: "Built for regulated teams: banking, fintech, and critical infrastructure.",
-    },
-    preview: {
-      title: "Validation run",
-      example: "Example",
-      checks: [
-        "Asset ownership verified (DNS TXT)",
-        "Written authorization active · 29 days left",
-        "Target inside approved scope",
-        "Rate limit 60 req/min enforced",
-        "Kill switch armed",
-      ],
-      phases: ["Passive recon", "Header checks", "TLS review", "Report"],
-      findings: "2 findings · 0 critical",
-      redacted: "Evidence redacted before AI review",
-    },
-    how: {
-      title: "From asset to proof in four controlled steps",
-      steps: [
-        { title: "Verify ownership", body: "Prove you control the asset with a DNS TXT challenge before anything can run." },
-        { title: "Authorize in writing", body: "Attach the signed authorization: scope, testing window, risk tier, and rate limits." },
-        { title: "Validate within scope", body: "Isolated workers run passive and low-impact checks. Every target is checked against scope." },
-        { title: "Prove and remediate", body: "AI turns redacted evidence into proof-of-risk, fixes, and a retest plan your team reviews." },
-      ],
-    },
-    safety: {
-      title: "Guardrails, not promises",
-      body: "Safety is enforced by the platform, not left to operator discipline.",
-      items: [
-        { title: "Scope-locked", body: "Targets outside a verified, authorized scope are refused before a single request is sent." },
-        { title: "Instant kill switch", body: "Stop any engagement at once. Workers abort between phases and lose their credentials." },
-        { title: "Single-scan credentials", body: "Each worker gets a short-lived, least-privilege credential for exactly one execution." },
-        { title: "Passive by default", body: "Intrusive checks stay off unless a recorded policy explicitly enables them." },
-        { title: "Redacted evidence", body: "Secrets and personal data are masked before evidence reaches AI models or reports." },
-        { title: "Complete audit trail", body: "Every decision is recorded: who acted, on what, when, and why." },
-      ],
-      neverLabel: "SecureScope never performs",
-      never: ["Autonomous exploitation", "Denial of service", "Credential harvesting", "Bulk data extraction"],
-    },
-    ai: {
-      eyebrow: "Human + AI",
-      title: "AI proposes. Your team decides.",
-      body: "AI accelerates the analysis, but every conclusion stays reviewable and every action stays human-approved.",
-      points: [
-        "Risk tribunal weighs evidence before a finding is confirmed",
-        "Remediation guidance tailored to the affected asset",
-        "Retest plan to verify each fix",
-        "Audit-ready report with full evidence lineage",
-      ],
-      card: {
-        label: "Finding",
-        title: "Strict-Transport-Security header missing",
-        severity: "Moderate",
-        status: "Confirmed by reviewer",
-        fix: "Add HSTS with max-age ≥ 31536000 at the gateway, then run the retest plan.",
-      },
-    },
-    cta: { title: "Validate your security posture — safely.", body: "Sign in to manage assets, authorizations, and validation runs.", button: "Open console" },
-    footer: { rights: "© 2026 SecureScope", note: "Only for assets you own or are authorized in writing to test." },
+    nav: [
+      { href: "#procedure", label: "procedure" },
+      { href: "#guarantees", label: "guarantees" },
+      { href: "#author", label: "author" },
+    ],
+    signIn: "sign in",
+    docTitle: "Authorized Security Validation",
+    name: "NAME",
+    tagline: "authorized security testing that refuses to leave its scope",
+    title: "Security testing that refuses to leave its scope.",
+    description:
+      "Double AA verifies that you own an asset, holds you to a written authorization, and runs only safe checks inside the approved scope. Findings arrive as redacted, reviewable proof-of-risk with a fix and a retest plan.",
+    openConsole: "open console",
+    readProcedure: "read the procedure",
+    terminalHint: "Try it. Only api.example-bank.test is authorized in this simulation.",
+    terminalLabel: "scope gate simulation · no network requests",
+    examples: "examples",
+    run: "run",
+    targetLabel: "Scan target",
+    procedureTitle: "PROCEDURE",
+    procedureLead: "Every run follows the same four steps. Nothing is skipped and nothing runs early.",
+    steps: [
+      { title: "Verify ownership", body: "Publish a one-time DNS TXT record. Until it resolves, the asset cannot be tested." },
+      { title: "Authorize in writing", body: "Record the signed authorization: scope, validity window, risk tier, and rate limits." },
+      { title: "Validate within scope", body: "An isolated worker runs passive, low-impact checks with a credential valid for this execution only. The kill switch is polled between phases." },
+      { title: "Prove and remediate", body: "Evidence is redacted, analysed with AI assistance, and confirmed by a human reviewer before it becomes a finding." },
+    ],
+    guaranteesTitle: "GUARANTEES",
+    guaranteesLead: "Enforced by the platform. None of these depend on operator discipline.",
+    guarantees: [
+      { title: "Scope-locked", body: "A target outside a verified, authorized scope is refused before any request is sent." },
+      { title: "Kill switch", body: "Any engagement can be stopped at once. Workers abort between phases and their credentials are revoked." },
+      { title: "Single-execution credentials", body: "Workers receive short-lived, least-privilege credentials scoped to one execution." },
+      { title: "Passive by default", body: "Intrusive checks stay disabled unless a recorded policy enables them." },
+      { title: "Redacted evidence", body: "Secrets and personal data are masked before evidence reaches an AI model or a report." },
+      { title: "Audit trail", body: "Every decision is recorded with who acted, on what, and when." },
+    ],
+    nonGoalsTitle: "NON-GOALS",
+    nonGoalsLead: "Double AA does not, and will not:",
+    nonGoals: ["exploit targets autonomously", "perform denial of service", "harvest credentials", "extract data in bulk"],
+    authorTitle: "AUTHOR",
+    author: "Designed, built, and operated by a solo founder.",
+    authorCta: "Access is by invitation. Sign in with the account your administrator created.",
   },
   id: {
-    nav: { how: "Cara kerja", safety: "Pengaman", ai: "Manusia + AI", signIn: "Masuk" },
-    hero: {
-      eyebrow: "Validasi keamanan terotorisasi",
-      title: "Pengujian keamanan yang tidak pernah keluar dari cakupannya.",
-      body: "SecureScope memverifikasi kepemilikan aset, menegakkan otorisasi tertulis, dan menjalankan pengujian aman yang terkunci pada cakupan — lalu mengubah bukti yang telah disamarkan menjadi proof-of-risk yang siap ditindaklanjuti tim Anda.",
-      primary: "Buka konsol",
-      secondary: "Lihat cara kerja",
-      audience: "Dirancang untuk tim di industri teregulasi: perbankan, fintech, dan infrastruktur kritis.",
-    },
-    preview: {
-      title: "Validation run",
-      example: "Contoh",
-      checks: [
-        "Kepemilikan aset terverifikasi (DNS TXT)",
-        "Otorisasi tertulis aktif · sisa 29 hari",
-        "Target berada dalam cakupan",
-        "Batas 60 permintaan/menit diterapkan",
-        "Kill switch siaga",
-      ],
-      phases: ["Recon pasif", "Cek header", "Tinjau TLS", "Laporan"],
-      findings: "2 temuan · 0 kritis",
-      redacted: "Bukti disamarkan sebelum ditinjau AI",
-    },
-    how: {
-      title: "Dari aset hingga bukti dalam empat langkah terkendali",
-      steps: [
-        { title: "Verifikasi kepemilikan", body: "Buktikan Anda menguasai aset melalui tantangan DNS TXT sebelum pengujian apa pun berjalan." },
-        { title: "Otorisasi tertulis", body: "Lampirkan otorisasi yang ditandatangani: cakupan, jendela waktu, tingkat risiko, dan batas laju." },
-        { title: "Validasi dalam cakupan", body: "Worker terisolasi menjalankan pengecekan pasif berdampak rendah. Setiap target dicek terhadap cakupan." },
-        { title: "Buktikan dan perbaiki", body: "AI mengubah bukti tersamarkan menjadi proof-of-risk, langkah perbaikan, dan rencana uji ulang untuk ditinjau tim Anda." },
-      ],
-    },
-    safety: {
-      title: "Pengaman nyata, bukan sekadar janji",
-      body: "Keamanan ditegakkan oleh platform, tidak bergantung pada kedisiplinan operator.",
-      items: [
-        { title: "Terkunci pada cakupan", body: "Target di luar cakupan yang terverifikasi dan terotorisasi ditolak sebelum satu permintaan pun dikirim." },
-        { title: "Kill switch instan", body: "Hentikan engagement kapan saja. Worker berhenti di antara fase dan kehilangan kredensialnya." },
-        { title: "Kredensial sekali pakai", body: "Setiap worker mendapat kredensial berumur pendek dengan hak minimum untuk tepat satu eksekusi." },
-        { title: "Pasif secara default", body: "Pengujian intrusif tetap nonaktif kecuali diizinkan secara eksplisit oleh kebijakan yang tercatat." },
-        { title: "Bukti tersamarkan", body: "Rahasia dan data pribadi disamarkan sebelum bukti mencapai model AI atau laporan." },
-        { title: "Jejak audit lengkap", body: "Setiap keputusan tercatat: siapa, terhadap apa, kapan, dan mengapa." },
-      ],
-      neverLabel: "SecureScope tidak pernah melakukan",
-      never: ["Eksploitasi otomatis", "Serangan denial of service", "Pengambilan kredensial", "Ekstraksi data massal"],
-    },
-    ai: {
-      eyebrow: "Manusia + AI",
-      title: "AI mengusulkan. Tim Anda yang memutuskan.",
-      body: "AI mempercepat analisis, tetapi setiap kesimpulan tetap dapat ditinjau dan setiap tindakan tetap disetujui manusia.",
-      points: [
-        "Risk tribunal menimbang bukti sebelum temuan dikonfirmasi",
-        "Panduan perbaikan yang disesuaikan dengan aset terdampak",
-        "Rencana uji ulang untuk memverifikasi setiap perbaikan",
-        "Laporan siap audit dengan riwayat bukti lengkap",
-      ],
-      card: {
-        label: "Temuan",
-        title: "Header Strict-Transport-Security tidak ada",
-        severity: "Sedang",
-        status: "Dikonfirmasi peninjau",
-        fix: "Tambahkan HSTS dengan max-age ≥ 31536000 di gateway, lalu jalankan rencana uji ulang.",
-      },
-    },
-    cta: { title: "Validasi postur keamanan Anda — dengan aman.", body: "Masuk untuk mengelola aset, otorisasi, dan validation run.", button: "Buka konsol" },
-    footer: { rights: "© 2026 SecureScope", note: "Hanya untuk aset milik Anda atau yang telah diizinkan secara tertulis." },
+    nav: [
+      { href: "#procedure", label: "prosedur" },
+      { href: "#guarantees", label: "jaminan" },
+      { href: "#author", label: "pembuat" },
+    ],
+    signIn: "masuk",
+    docTitle: "Validasi Keamanan Terotorisasi",
+    name: "NAMA",
+    tagline: "pengujian keamanan terotorisasi yang menolak keluar dari cakupannya",
+    title: "Pengujian keamanan yang menolak keluar dari cakupannya.",
+    description:
+      "Double AA memastikan Anda pemilik aset, mengikat pengujian pada otorisasi tertulis, dan hanya menjalankan pengecekan aman di dalam cakupan yang disetujui. Temuan disajikan sebagai proof-of-risk yang tersamarkan dan dapat ditinjau, lengkap dengan langkah perbaikan dan rencana uji ulang.",
+    openConsole: "buka konsol",
+    readProcedure: "baca prosedur",
+    terminalHint: "Coba sendiri. Dalam simulasi ini hanya api.example-bank.test yang terotorisasi.",
+    terminalLabel: "simulasi scope gate · tanpa permintaan jaringan",
+    examples: "contoh",
+    run: "jalankan",
+    targetLabel: "Target pemindaian",
+    procedureTitle: "PROSEDUR",
+    procedureLead: "Setiap pengujian melewati empat langkah yang sama. Tidak ada yang dilewati dan tidak ada yang berjalan lebih awal.",
+    steps: [
+      { title: "Verifikasi kepemilikan", body: "Publikasikan record DNS TXT sekali pakai. Sebelum record itu terbaca, aset tidak dapat diuji." },
+      { title: "Otorisasi tertulis", body: "Catat otorisasi yang ditandatangani: cakupan, masa berlaku, tingkat risiko, dan batas laju." },
+      { title: "Validasi dalam cakupan", body: "Worker terisolasi menjalankan pengecekan pasif berdampak rendah dengan kredensial yang hanya berlaku untuk eksekusi ini. Kill switch dicek di antara setiap fase." },
+      { title: "Buktikan dan perbaiki", body: "Bukti disamarkan, dianalisis dengan bantuan AI, dan dikonfirmasi peninjau manusia sebelum menjadi temuan." },
+    ],
+    guaranteesTitle: "JAMINAN",
+    guaranteesLead: "Ditegakkan oleh platform. Tidak ada yang bergantung pada kedisiplinan operator.",
+    guarantees: [
+      { title: "Terkunci pada cakupan", body: "Target di luar cakupan yang terverifikasi dan terotorisasi ditolak sebelum satu permintaan pun dikirim." },
+      { title: "Kill switch", body: "Engagement apa pun dapat dihentikan seketika. Worker berhenti di antara fase dan kredensialnya dicabut." },
+      { title: "Kredensial satu eksekusi", body: "Worker menerima kredensial berumur pendek dengan hak minimum yang hanya berlaku untuk satu eksekusi." },
+      { title: "Pasif secara default", body: "Pengujian intrusif tetap nonaktif kecuali diaktifkan oleh kebijakan yang tercatat." },
+      { title: "Bukti tersamarkan", body: "Rahasia dan data pribadi disamarkan sebelum bukti mencapai model AI atau laporan." },
+      { title: "Jejak audit", body: "Setiap keputusan tercatat: siapa yang bertindak, terhadap apa, dan kapan." },
+    ],
+    nonGoalsTitle: "BATASAN",
+    nonGoalsLead: "Double AA tidak, dan tidak akan:",
+    nonGoals: ["mengeksploitasi target secara otomatis", "melakukan denial of service", "mengambil kredensial", "mengekstrak data secara massal"],
+    authorTitle: "PEMBUAT",
+    author: "Dirancang, dibangun, dan dioperasikan oleh seorang founder tunggal.",
+    authorCta: "Akses hanya melalui undangan. Masuk dengan akun yang dibuat administrator Anda.",
   },
 } satisfies Record<Locale, unknown>;
 
-const STEP_ICONS = [Fingerprint, FileCheck2, ScanSearch, ClipboardList];
-const SAFETY_ICONS = [Target, OctagonX, KeyRound, Waves, ShieldCheck, ListChecks];
+const ARTIFACTS = [
+  `; publish this record, then press "Verify" in the console
+_doubleaa-verification.api.example-bank.test.  300  IN  TXT
+  "doubleaa-verification=k3J9wQ…x2Lm"`,
+  `authorization: AUTH-0142
+valid: 2026-10-01 → 2026-11-01  (Asia/Jakarta)
+maximum_risk_tier: tier_1_safe
+production_testing_allowed: false
+scope:
+  - asset: api.example-bank.test
+    maximum_requests_per_minute: 60
+    maximum_concurrency: 5
+authorization_document_sha256: 9f2c…e41a`,
+  `09:41:02  gate    api.example-bank.test in scope (AUTH-0142)
+09:41:02  worker  credential issued · single execution
+09:41:05  check   http security headers ....... 1 finding
+09:41:09  check   tls configuration ........... ok
+09:41:09  gate    kill switch polled .......... clear
+09:41:10  worker  credential revoked · run finished`,
+  `finding   F-01 · moderate · confirmed by reviewer
+title     Strict-Transport-Security header missing
+target    api.example-bank.test
+fix       add HSTS (max-age >= 31536000) at the gateway
+retest    scheduled after fix
+evidence  redacted · audit trail attached`,
+];
 
-const FOCUS_RING = "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-400";
-const PRIMARY_BUTTON = `inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-cyan-400 px-5 text-sm font-semibold text-slate-950 transition-colors hover:bg-cyan-300 ${FOCUS_RING}`;
-const SECONDARY_BUTTON = `inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-white/15 px-5 text-sm font-semibold text-slate-100 transition-colors hover:bg-white/5 ${FOCUS_RING}`;
+const FOCUS_RING = "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7EE787]";
+const PRIMARY_BUTTON = `inline-flex h-11 items-center justify-center gap-2 rounded-md bg-[#7EE787] px-5 font-mono text-sm font-bold text-[#0B0D10] transition-colors hover:bg-[#9BEFA2] ${FOCUS_RING}`;
+const LINK_BUTTON = `inline-flex h-11 items-center justify-center gap-2 rounded-md border border-dashed border-white/20 px-5 font-mono text-sm text-[#C8CDD3] transition-colors hover:border-white/40 hover:text-white ${FOCUS_RING}`;
 
 export function LandingPage() {
   const go = useApp((state) => state.go);
@@ -175,208 +138,245 @@ export function LandingPage() {
   const openConsole = () => go("login");
 
   return (
-    <div className="min-h-screen bg-[#070A12] text-slate-300 antialiased">
-      <header className="sticky top-0 z-30 border-b border-white/5 bg-[#070A12]/80 backdrop-blur">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
-          <a href="#top" className={`flex items-center gap-2.5 rounded-md ${FOCUS_RING}`}>
-            <span className="grid size-8 place-items-center rounded-lg bg-cyan-400/10 ring-1 ring-cyan-400/30">
-              <ShieldCheck className="size-4.5 text-cyan-300" aria-hidden />
-            </span>
-            <span className="text-base font-semibold tracking-tight text-white">SecureScope</span>
+    <div className="min-h-screen bg-[#0B0D10] font-sans text-[#C8CDD3] antialiased selection:bg-[#7EE787]/25">
+      <header className="sticky top-0 z-30 border-b border-dashed border-white/10 bg-[#0B0D10]/90 backdrop-blur">
+        <div className="mx-auto flex h-16 max-w-5xl items-center justify-between gap-4 px-4 sm:px-6">
+          <a href="#top" className={`rounded-md ${FOCUS_RING}`} aria-label="Double AA">
+            <BrandLogo />
           </a>
-          <nav aria-label="Primary" className="hidden items-center gap-7 text-sm md:flex">
-            <a href="#how" className={`rounded text-slate-400 transition-colors hover:text-white ${FOCUS_RING}`}>{t.nav.how}</a>
-            <a href="#safety" className={`rounded text-slate-400 transition-colors hover:text-white ${FOCUS_RING}`}>{t.nav.safety}</a>
-            <a href="#ai" className={`rounded text-slate-400 transition-colors hover:text-white ${FOCUS_RING}`}>{t.nav.ai}</a>
+          <nav aria-label="Primary" className="hidden items-center gap-6 font-mono text-sm md:flex">
+            {t.nav.map((item, index) => (
+              <a key={item.href} href={item.href} className={`rounded text-[#8B949E] transition-colors hover:text-white ${FOCUS_RING}`}>
+                <span className="text-[#7EE787]/70">§{index + 1}</span> {item.label}
+              </a>
+            ))}
           </nav>
           <div className="flex items-center gap-2 sm:gap-3">
             <LocaleToggle />
-            <button type="button" onClick={openConsole} className={`${SECONDARY_BUTTON} h-9 px-3.5`}>
-              {t.nav.signIn}
+            <button type="button" onClick={openConsole} className={`${LINK_BUTTON} h-9 whitespace-nowrap px-3`}>
+              {t.signIn} <span aria-hidden className="hidden sm:inline">→</span>
             </button>
           </div>
         </div>
       </header>
 
-      <main id="top">
-        {/* Hero */}
-        <section className="relative overflow-hidden">
-          <div aria-hidden className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_45%_at_50%_0%,rgba(34,211,238,0.12),transparent)]" />
-          <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-4 pb-20 pt-16 sm:px-6 lg:grid-cols-[1.1fr_1fr] lg:pt-24">
-            <div>
-              <p className="inline-flex items-center gap-2 rounded-full border border-cyan-400/25 bg-cyan-400/5 px-3 py-1 text-xs font-medium text-cyan-200">
-                <BadgeCheck className="size-3.5" aria-hidden />
-                {t.hero.eyebrow}
-              </p>
-              <h1 className="mt-5 text-4xl font-semibold tracking-tight text-balance text-white sm:text-5xl lg:text-[3.4rem] lg:leading-[1.08]">
-                {t.hero.title}
-              </h1>
-              <p className="mt-5 max-w-xl text-base leading-relaxed text-slate-400 sm:text-lg">{t.hero.body}</p>
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <button type="button" onClick={openConsole} className={PRIMARY_BUTTON}>
-                  {t.hero.primary}
-                  <ArrowRight className="size-4" aria-hidden />
-                </button>
-                <a href="#how" className={SECONDARY_BUTTON}>{t.hero.secondary}</a>
-              </div>
-              <p className="mt-8 text-sm text-slate-500">{t.hero.audience}</p>
-            </div>
-            <RunPreview copy={t.preview} />
-          </div>
-        </section>
-
-        {/* How it works */}
-        <section id="how" aria-labelledby="how-title" className="scroll-mt-16 border-t border-white/5 py-20">
-          <div className="mx-auto max-w-6xl px-4 sm:px-6">
-            <h2 id="how-title" className="max-w-2xl text-3xl font-semibold tracking-tight text-balance text-white">{t.how.title}</h2>
-            <ol className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {t.how.steps.map((step, index) => {
-                const Icon = STEP_ICONS[index];
-                return (
-                  <li key={step.title} className="rounded-xl border border-white/8 bg-white/[0.02] p-5">
-                    <div className="flex items-center justify-between">
-                      <Icon className="size-5 text-cyan-300" aria-hidden />
-                      <span className="font-mono text-xs text-slate-500">0{index + 1}</span>
-                    </div>
-                    <h3 className="mt-4 text-base font-semibold text-white">{step.title}</h3>
-                    <p className="mt-2 text-sm leading-relaxed text-slate-400">{step.body}</p>
-                  </li>
-                );
-              })}
-            </ol>
-          </div>
-        </section>
-
-        {/* Guardrails */}
-        <section id="safety" aria-labelledby="safety-title" className="scroll-mt-16 border-t border-white/5 bg-white/[0.015] py-20">
-          <div className="mx-auto max-w-6xl px-4 sm:px-6">
-            <h2 id="safety-title" className="text-3xl font-semibold tracking-tight text-white">{t.safety.title}</h2>
-            <p className="mt-3 max-w-2xl text-base text-slate-400">{t.safety.body}</p>
-            <ul className="mt-10 grid gap-x-8 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
-              {t.safety.items.map((item, index) => {
-                const Icon = SAFETY_ICONS[index];
-                return (
-                  <li key={item.title} className="flex gap-4">
-                    <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-emerald-400/10 ring-1 ring-emerald-400/25">
-                      <Icon className="size-4.5 text-emerald-300" aria-hidden />
-                    </span>
-                    <div>
-                      <h3 className="text-base font-semibold text-white">{item.title}</h3>
-                      <p className="mt-1.5 text-sm leading-relaxed text-slate-400">{item.body}</p>
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
-            <div className="mt-12 rounded-xl border border-red-400/20 bg-red-400/[0.04] p-5">
-              <p className="flex items-center gap-2 text-sm font-semibold text-red-200">
-                <Ban className="size-4" aria-hidden />
-                {t.safety.neverLabel}
-              </p>
-              <ul className="mt-3 flex flex-wrap gap-2">
-                {t.safety.never.map((item) => (
-                  <li key={item} className="rounded-md border border-red-400/20 px-2.5 py-1 text-sm text-red-100/90">{item}</li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </section>
-
-        {/* Human + AI */}
-        <section id="ai" aria-labelledby="ai-title" className="scroll-mt-16 border-t border-white/5 py-20">
-          <div className="mx-auto grid max-w-6xl items-center gap-12 px-4 sm:px-6 lg:grid-cols-2">
-            <div>
-              <p className="flex items-center gap-2 text-sm font-medium text-cyan-300">
-                <BrainCircuit className="size-4" aria-hidden />
-                {t.ai.eyebrow}
-              </p>
-              <h2 id="ai-title" className="mt-3 text-3xl font-semibold tracking-tight text-white">{t.ai.title}</h2>
-              <p className="mt-3 text-base leading-relaxed text-slate-400">{t.ai.body}</p>
-              <ul className="mt-6 space-y-3">
-                {t.ai.points.map((point) => (
-                  <li key={point} className="flex gap-3 text-sm text-slate-300">
-                    <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-cyan-300" aria-hidden />
-                    {point}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <article className="rounded-2xl border border-white/10 bg-[#0B1120] p-6 shadow-2xl shadow-black/40">
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-medium uppercase tracking-wider text-slate-500">{t.ai.card.label}</span>
-                <span className="rounded-full bg-amber-400/10 px-2.5 py-1 font-medium text-amber-200 ring-1 ring-amber-400/25">{t.ai.card.severity}</span>
-              </div>
-              <h3 className="mt-4 text-lg font-semibold text-white">{t.ai.card.title}</h3>
-              <p className="mt-1 font-mono text-xs text-slate-500">api.example-bank.test</p>
-              <p className="mt-5 rounded-lg border border-white/8 bg-white/[0.02] p-4 text-sm leading-relaxed text-slate-300">{t.ai.card.fix}</p>
-              <p className="mt-5 flex items-center gap-2 text-sm text-emerald-300">
-                <BadgeCheck className="size-4" aria-hidden />
-                {t.ai.card.status}
-              </p>
-            </article>
-          </div>
-        </section>
-
-        {/* Call to action */}
-        <section className="border-t border-white/5 py-20">
-          <div className="mx-auto max-w-6xl px-4 sm:px-6">
-            <div className="rounded-2xl border border-cyan-400/20 bg-[radial-gradient(80%_120%_at_50%_0%,rgba(34,211,238,0.1),transparent)] px-6 py-12 text-center">
-              <h2 className="text-3xl font-semibold tracking-tight text-balance text-white">{t.cta.title}</h2>
-              <p className="mx-auto mt-3 max-w-lg text-base text-slate-400">{t.cta.body}</p>
-              <button type="button" onClick={openConsole} className={`${PRIMARY_BUTTON} mt-8`}>
-                {t.cta.button}
-                <ArrowRight className="size-4" aria-hidden />
-              </button>
-            </div>
-          </div>
-        </section>
-      </main>
-
-      <footer className="border-t border-white/5">
-        <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-8 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-          <span>{t.footer.rights}</span>
-          <span>{t.footer.note}</span>
+      <main id="top" className="mx-auto max-w-5xl px-4 sm:px-6">
+        {/* Man-page header line */}
+        <div className="flex justify-between border-b border-dashed border-white/10 py-3 font-mono text-xs text-[#8B949E]" aria-hidden>
+          <span>DOUBLE-AA(1)</span>
+          <span className="hidden sm:inline">{t.docTitle}</span>
+          <span>DOUBLE-AA(1)</span>
         </div>
-      </footer>
+
+        <section className="py-14 sm:py-20" aria-labelledby="hero-title">
+          <p className="font-mono text-xs font-bold tracking-widest text-[#8B949E]">{t.name}</p>
+          <p className="mt-2 font-mono text-sm text-[#C8CDD3]">
+            <span className="text-white">double-aa</span> - {t.tagline}
+          </p>
+          <h1 id="hero-title" className="mt-8 max-w-3xl font-mono text-3xl font-bold leading-tight tracking-tight text-balance text-white sm:text-5xl">
+            {t.title}
+          </h1>
+          <p className="mt-6 max-w-2xl text-base leading-relaxed sm:text-lg">{t.description}</p>
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <button type="button" onClick={openConsole} className={PRIMARY_BUTTON}>
+              $ {t.openConsole}
+            </button>
+            <a href="#procedure" className={LINK_BUTTON}>{t.readProcedure} ↓</a>
+          </div>
+
+          <ScopeTerminal copy={t} />
+        </section>
+
+        <DocSection id="procedure" index={1} title={t.procedureTitle} lead={t.procedureLead}>
+          <ol className="space-y-12">
+            {t.steps.map((step, index) => (
+              <li key={step.title} className="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:gap-10">
+                <div>
+                  <h3 className="font-mono text-base font-bold text-white">
+                    <span className="text-[#7EE787]">1.{index + 1}</span> {step.title}
+                  </h3>
+                  <p className="mt-2 text-[15px] leading-relaxed">{step.body}</p>
+                </div>
+                <pre className="overflow-x-auto rounded-md [font-variant-ligatures:none] border border-white/10 bg-[#0F1216] p-4 font-mono text-[13px] leading-relaxed text-[#C8CDD3]">
+                  <code>{ARTIFACTS[index]}</code>
+                </pre>
+              </li>
+            ))}
+          </ol>
+        </DocSection>
+
+        <DocSection id="guarantees" index={2} title={t.guaranteesTitle} lead={t.guaranteesLead}>
+          <dl className="grid gap-x-10 gap-y-6 sm:grid-cols-2">
+            {t.guarantees.map((item, index) => (
+              <div key={item.title} className="border-l-2 border-[#7EE787]/40 pl-4">
+                <dt className="font-mono text-[15px] font-bold text-white">
+                  <span className="text-[#7EE787]">G{index + 1}</span> {item.title}
+                </dt>
+                <dd className="mt-1.5 text-[15px] leading-relaxed">{item.body}</dd>
+              </div>
+            ))}
+          </dl>
+          <div className="mt-12">
+            <h3 className="font-mono text-xs font-bold tracking-widest text-[#8B949E]">{t.nonGoalsTitle}</h3>
+            <p className="mt-2 text-[15px]">{t.nonGoalsLead}</p>
+            <ul className="mt-3 space-y-1.5 font-mono text-sm">
+              {t.nonGoals.map((item) => (
+                <li key={item}>
+                  <span className="text-[#FF7B72]" aria-hidden>✗ </span>
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </DocSection>
+
+        <DocSection id="author" index={3} title={t.authorTitle}>
+          <p className="text-base">{t.author}</p>
+          <p className="mt-2 text-[15px] text-[#8B949E]">{t.authorCta}</p>
+          <button type="button" onClick={openConsole} className={`${PRIMARY_BUTTON} mt-8`}>
+            $ {t.openConsole}
+          </button>
+        </DocSection>
+
+        <footer className="flex justify-between border-t border-dashed border-white/10 py-6 font-mono text-xs text-[#8B949E]">
+          <span>double-aa 2026.10</span>
+          <span className="hidden sm:inline">© 2026 Double AA</span>
+          <span>DOUBLE-AA(1)</span>
+        </footer>
+      </main>
     </div>
   );
 }
 
-function RunPreview({ copy }: { copy: (typeof COPY)[Locale]["preview"] }) {
+function DocSection({
+  id,
+  index,
+  title,
+  lead,
+  children,
+}: {
+  id: string;
+  index: number;
+  title: string;
+  lead?: string;
+  children: React.ReactNode;
+}) {
   return (
-    <figure className="rounded-2xl border border-white/10 bg-[#0B1120]/90 p-5 shadow-2xl shadow-cyan-950/30 sm:p-6">
-      <figcaption className="flex items-center justify-between gap-3">
-        <div>
-          <p className="text-sm font-semibold text-white">{copy.title}</p>
-          <p className="mt-0.5 font-mono text-xs text-slate-500">
-            <span className="whitespace-nowrap">RUN-0142 ·</span> <span className="whitespace-nowrap">api.example-bank.test</span>
-          </p>
+    <section id={id} aria-labelledby={`${id}-title`} className="scroll-mt-16 border-t border-dashed border-white/10 py-16">
+      <h2 id={`${id}-title`} className="font-mono text-sm font-bold tracking-widest text-white">
+        <span className="text-[#7EE787]">§{index}</span> {title}
+      </h2>
+      {lead && <p className="mt-3 max-w-2xl text-[15px] text-[#8B949E]">{lead}</p>}
+      <div className="mt-10">{children}</div>
+    </section>
+  );
+}
+
+// Client-side simulation of the real scope gate. It never sends a request;
+// the refusal text mirrors the backend's 403 detail for out-of-scope targets.
+const AUTHORIZED_DEMO_TARGET = "api.example-bank.test";
+const EXAMPLE_TARGETS = [AUTHORIZED_DEMO_TARGET, "admin.example-bank.test", "api.unknown-corp.test"];
+const HOSTNAME = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$/;
+
+type TerminalLine = { tone: "info" | "ok" | "fail" | "dim"; text: string };
+
+function simulateScan(rawTarget: string): TerminalLine[] {
+  const target = rawTarget.trim().toLowerCase();
+  if (!HOSTNAME.test(target)) {
+    return [{ tone: "fail", text: `✗ invalid target: ${rawTarget.trim() || "(empty)"}` }];
+  }
+  const lines: TerminalLine[] = [{ tone: "info", text: `→ resolving scope for ${target}` }];
+  if (target !== AUTHORIZED_DEMO_TARGET) {
+    return [
+      ...lines,
+      { tone: "fail", text: "✗ refused (403): target is not a verified non-production asset under an active authorization for this organization" },
+      { tone: "dim", text: "  no request was sent to the target." },
+    ];
+  }
+  return [
+    ...lines,
+    { tone: "ok", text: "✓ asset ownership verified (dns txt)" },
+    { tone: "ok", text: "✓ authorization AUTH-0142 active · 29 days left" },
+    { tone: "ok", text: "✓ target inside approved scope · 60 req/min · kill switch armed" },
+    { tone: "info", text: "● passive checks: http headers, tls configuration" },
+    { tone: "ok", text: "✓ done · 2 findings (0 critical) · evidence redacted" },
+  ];
+}
+
+const LINE_TONE: Record<TerminalLine["tone"], string> = {
+  info: "text-[#79C0FF]",
+  ok: "text-[#7EE787]",
+  fail: "text-[#FF7B72]",
+  dim: "text-[#8B949E]",
+};
+
+function ScopeTerminal({ copy }: { copy: (typeof COPY)[Locale] }) {
+  const [target, setTarget] = React.useState("api.unknown-corp.test");
+  const [history, setHistory] = React.useState<{ command: string; lines: TerminalLine[] }[]>([]);
+
+  const run = (value: string) => {
+    setTarget(value);
+    // Keep the last few runs so the panel never grows without bound.
+    setHistory((previous) => [...previous, { command: value.trim(), lines: simulateScan(value) }].slice(-3));
+  };
+
+  return (
+    <div className="mt-14">
+      <p className="mb-3 text-[15px] text-[#8B949E]">{copy.terminalHint}</p>
+      <div className="overflow-hidden rounded-md border border-white/10 bg-[#0F1216]">
+        <div className="flex min-w-0 items-center justify-between gap-3 border-b border-white/10 px-4 py-2 font-mono text-xs text-[#8B949E]">
+          <span className="shrink-0">aa · zsh</span>
+          <span className="truncate">{copy.terminalLabel}</span>
         </div>
-        <span className="rounded-full border border-white/10 px-2.5 py-1 text-xs text-slate-400">{copy.example}</span>
-      </figcaption>
-      <ul className="mt-5 space-y-2.5">
-        {copy.checks.map((check) => (
-          <li key={check} className="flex items-center gap-2.5 text-sm text-slate-300">
-            <CheckCircle2 className="size-4 shrink-0 text-emerald-400" aria-hidden />
-            {check}
-          </li>
-        ))}
-      </ul>
-      <ol className="mt-6 grid grid-cols-4 gap-1.5" aria-label="Phases">
-        {copy.phases.map((phase, index) => (
-          <li key={phase}>
-            <div className={`h-1.5 rounded-full ${index < 3 ? "bg-cyan-400" : "bg-cyan-400/25"}`} />
-            <p className="mt-2 text-xs text-slate-500">{phase}</p>
-          </li>
-        ))}
-      </ol>
-      <div className="mt-6 flex flex-col gap-2 border-t border-white/8 pt-4 text-sm sm:flex-row sm:items-center sm:justify-between">
-        <span className="font-medium text-amber-200">{copy.findings}</span>
-        <span className="flex items-center gap-1.5 text-slate-400">
-          <ShieldCheck className="size-4 text-emerald-400" aria-hidden />
-          {copy.redacted}
-        </span>
+        <div role="log" aria-live="polite" className="space-y-3 px-4 pt-4 font-mono text-[13px] leading-relaxed">
+          {history.map((entry, index) => (
+            <div key={index}>
+              <p className="text-white">
+                <span className="text-[#7EE787]">$</span> aa scan {entry.command}
+              </p>
+              {entry.lines.map((line) => (
+                <p key={line.text} className={`break-words ${LINE_TONE[line.tone]}`}>{line.text}</p>
+              ))}
+            </div>
+          ))}
+        </div>
+        <form
+          className="flex items-center gap-2 px-4 py-4 font-mono text-[13px]"
+          onSubmit={(event) => {
+            event.preventDefault();
+            run(target);
+          }}
+        >
+          <span className="text-[#7EE787]" aria-hidden>$</span>
+          <span className="shrink-0 text-white" aria-hidden>aa scan</span>
+          <label htmlFor="scan-target" className="sr-only">{copy.targetLabel}</label>
+          <input
+            id="scan-target"
+            value={target}
+            onChange={(event) => setTarget(event.target.value)}
+            spellCheck={false}
+            autoCapitalize="none"
+            autoComplete="off"
+            className="min-w-0 flex-1 bg-transparent text-white caret-[#7EE787] outline-none"
+          />
+          <button type="submit" className={`rounded border border-white/15 px-2.5 py-1 text-xs text-[#C8CDD3] hover:border-white/40 ${FOCUS_RING}`}>
+            {copy.run} ⏎
+          </button>
+        </form>
+        <div className="flex flex-wrap items-center gap-2 border-t border-dashed border-white/10 px-4 py-3 font-mono text-xs">
+          <span className="text-[#8B949E]">{copy.examples}:</span>
+          {EXAMPLE_TARGETS.map((example) => (
+            <button
+              key={example}
+              type="button"
+              onClick={() => run(example)}
+              className={`rounded border border-white/10 px-2 py-1 text-[#C8CDD3] transition-colors hover:border-white/30 hover:text-white ${FOCUS_RING}`}
+            >
+              {example}
+            </button>
+          ))}
+        </div>
       </div>
-    </figure>
+    </div>
   );
 }

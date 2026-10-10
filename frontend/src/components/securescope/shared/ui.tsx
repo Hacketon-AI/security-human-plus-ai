@@ -301,3 +301,28 @@ export function LocaleToggle({ className }: { className?: string }) {
     </div>
   );
 }
+
+// ============================================================
+// Brand — Double AA monogram: two A's sharing one crossbar,
+// the "scope line" that binds them. Mirrors public/doubleaa-mark.svg.
+// ============================================================
+
+export function BrandMark({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 32 32" aria-hidden className={cn("size-8 shrink-0", className)}>
+      <rect x="1" y="1" width="30" height="30" rx="7" fill="#0B0D10" />
+      <rect x="1.5" y="1.5" width="29" height="29" rx="6.5" fill="none" stroke="#7EE787" strokeOpacity=".35" />
+      <path d="M5.5 23 11 9l5 14 5-14 5.5 14" fill="none" stroke="#7EE787" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M7.6 18h16.8" stroke="#7EE787" strokeWidth="2.4" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+export function BrandLogo({ className }: { className?: string }) {
+  return (
+    <span className={cn("inline-flex items-center gap-2.5", className)}>
+      <BrandMark />
+      <span className="whitespace-nowrap font-mono text-[15px] font-bold tracking-tight text-white">double-aa</span>
+    </span>
+  );
+}

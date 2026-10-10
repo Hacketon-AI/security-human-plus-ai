@@ -61,7 +61,7 @@ export function CredentialStateCard({
 
       <div className="p-4 space-y-3">
         <AlertBanner tone="info" title="Credential is issued per-execution and never displayed.">
-          SecureScope does not expose raw tokens. Revocation is automatic on execution finish, manual kill switch, or expiry.
+          Double AA does not expose raw tokens. Revocation is automatic on execution finish, manual kill switch, or expiry.
         </AlertBanner>
 
         <div className="grid grid-cols-2 gap-x-6 gap-y-0">
@@ -91,7 +91,7 @@ export function CredentialStateCard({
 
         <MaskedField
           label="Raw Token"
-          note="SecureScope policy: raw worker token is never stored client-side, never logged, never displayed. Revocation is enforced server-side via credential state."
+          note="Double AA policy: raw worker token is never stored client-side, never logged, never displayed. Revocation is enforced server-side via credential state."
         />
 
         <div>

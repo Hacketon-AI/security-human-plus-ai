@@ -201,7 +201,7 @@ export function SettingsPage() {
                 </div>
                 <h2 className="text-base font-semibold text-slate-100 mb-3">Secrets exposure policy</h2>
                 <p className="text-xs text-slate-400 mb-4">
-                  SecureScope enforces a strict no-exposure policy for sensitive material. The following are never stored client-side, never logged, and never displayed in the UI.
+                  Double AA enforces a strict no-exposure policy for sensitive material. The following are never stored client-side, never logged, and never displayed in the UI.
                 </p>
                 <div className="space-y-2">
                   {[

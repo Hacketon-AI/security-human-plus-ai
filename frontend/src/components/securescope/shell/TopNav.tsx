@@ -6,7 +6,6 @@ import {
   Search,
   Bell,
   ChevronDown,
-  Shield,
   Activity,
   Server,
   Radio,
@@ -17,6 +16,7 @@ import {
   Command,
 } from "lucide-react";
 import { useApp, NAV_ITEMS } from "@/lib/securescope/store";
+import { BrandLogo } from "../shared/ui";
 import type { RouteKey } from "@/lib/securescope/types";
 
 // ============================================================
@@ -36,27 +36,6 @@ function activeModule(route: RouteKey): string {
   if (route === "audit") return "Audit";
   if (route === "settings") return "Settings";
   return "Dashboard";
-}
-
-function SecureScopeMark() {
-  return (
-    <div className="flex items-center gap-2.5 select-none">
-      <div className="relative">
-        <div className="w-7 h-7 border border-cyan-400/50 bg-cyan-500/10 rounded-sm flex items-center justify-center ss-glow-cyan">
-          <Shield className="w-3.5 h-3.5 text-cyan-300" />
-        </div>
-        <div className="absolute -bottom-0.5 -right-0.5 w-1.5 h-1.5 bg-emerald-400 rounded-full ss-pulse-green" />
-      </div>
-      <div className="leading-none">
-        <div className="text-[15px] font-semibold tracking-tight text-slate-100">
-          Secure<span className="text-cyan-300">Scope</span>
-        </div>
-        <div className="text-[9px] uppercase tracking-[0.22em] text-slate-500 mt-0.5">
-          Validation Control
-        </div>
-      </div>
-    </div>
-  );
 }
 
 function EnvironmentBadge() {
@@ -193,7 +172,7 @@ export function TopNavCommandBar() {
       <div className="h-full flex items-center gap-4 px-4">
         {/* Left: mark */}
         <button onClick={() => go("dashboard")} className="shrink-0 pr-4 border-r border-(--ss-hairline) h-full flex items-center">
-          <SecureScopeMark />
+          <BrandLogo className="select-none" />
         </button>
 
         {/* Center: nav */}

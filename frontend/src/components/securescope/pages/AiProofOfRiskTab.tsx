@@ -90,7 +90,7 @@ export function AiProofOfRiskTab({ exec, isDomainScan }: AiProofOfRiskTabProps) 
 
         {!isDomainScan && (
           <AlertBanner tone="info" title="Security Boundary Notice" className="mb-4">
-            SecureScope analyzes validated execution evidence only. It does not accept arbitrary target URLs or raw evidence from the UI.
+            Double AA analyzes validated execution evidence only. It does not accept arbitrary target URLs or raw evidence from the UI.
           </AlertBanner>
         )}
 

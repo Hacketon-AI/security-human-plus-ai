@@ -508,7 +508,7 @@ export function AuthorizedDomainScanPanel() {
             </label>
 
             <div className="text-[10px] text-slate-500 italic mt-1 pb-2">
-              SecureScope performs non-destructive authorized validation only. This demo does not exploit production systems.
+              Double AA performs non-destructive authorized validation only. This demo does not exploit production systems.
             </div>
 
             {error && (
