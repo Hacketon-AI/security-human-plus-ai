@@ -29,6 +29,8 @@ dependencies = [
     "opentelemetry-api>=1.25",
     # JWT authentication tokens
     "pyjwt>=2.8",
+    # Claude reasoning provider for AI Proof-of-Risk (structured outputs).
+    "anthropic>=1.13,<2",
     # Email validation for auth schemas
     "email-validator==2.3.0",
     "opentelemetry-sdk>=1.25",

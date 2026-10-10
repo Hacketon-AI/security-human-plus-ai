@@ -121,6 +121,10 @@ class Settings(BaseSettings):
     worker_shared_token_fallback_enabled: bool = False
 
     # AI Proof-of-Risk Fireworks config
+    # Claude (Anthropic API) — preferred deep-reasoning provider in hybrid mode.
+    anthropic_api_key: SecretStr | None = None
+    anthropic_model: str = "claude-opus-5"
+    ai_claude_timeout_seconds: float = 120.0
     fireworks_api_key: SecretStr | None = None
     fireworks_base_url: str = "https://api.fireworks.ai/inference/v1"
     fireworks_model_name: str | None = None

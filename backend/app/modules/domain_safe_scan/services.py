@@ -1,3 +1,4 @@
+import asyncio
 import ipaddress
 import socket
 from typing import Any
@@ -239,7 +240,10 @@ class DomainSafeScanService:
             ai_service = AIProofOfRiskService(evidence_provider=provider)
 
             try:
-                ai_resp = ai_service.analyze_execution(dummy_id, ai_req)
+                # Remote AI calls block for seconds; keep them off the event loop.
+                ai_resp = await asyncio.to_thread(
+                    ai_service.analyze_execution, dummy_id, ai_req
+                )
                 resp.ai_analysis_summary = ai_resp.executive_summary
                 resp.routing_trace = ai_resp.model_routing_trace
                 resp.attack_graph = ai_resp.attack_surface_graph

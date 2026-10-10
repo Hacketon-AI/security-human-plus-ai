@@ -3,7 +3,8 @@
 Routes sanitized findings to the cheapest sufficient AI provider:
 - ``rule_only`` for simple, well-known security header findings.
 - ``local_amd_model`` for medium-complexity classification tasks.
-- ``fireworks_gemma`` for complex report generation / reasoning.
+- ``claude`` (preferred) or ``fireworks_gemma`` for complex report generation
+  and reasoning.
 - ``deterministic_fallback`` when all providers are unavailable.
 
 The router never makes live model calls. It selects a provider based on finding
@@ -36,6 +37,7 @@ _ESTIMATED_TOKENS: dict[AIRoute, tuple[int, int]] = {
     # (remote_tokens, local_tokens)
     AIRoute.rule_only: (0, 0),
     AIRoute.local_amd_model: (0, 512),
+    AIRoute.claude: (2048, 0),
     AIRoute.fireworks_gemma: (2048, 0),
     AIRoute.deterministic_fallback: (0, 0),
 }
@@ -76,10 +78,13 @@ def route_finding(
             providers=providers,
         )
 
-    amd = providers.get("local_amd_model")
-    fw = providers.get("fireworks_gemma")
-    local_avail = bool(amd and amd.health().status is ProviderStatus.available)
-    remote_avail = bool(fw and fw.health().status is ProviderStatus.available)
+    local_avail = _available(providers, "local_amd_model")
+    claude_avail = _available(providers, "claude")
+    remote_avail = _available(providers, "fireworks_gemma")
+    needs_remote = requires_deep_reasoning or request.complexity in (
+        FindingComplexity.medium,
+        FindingComplexity.complex,
+    )
 
     if request.ai_router_mode in ("hybrid", "local_only"):
         if (
@@ -93,11 +98,15 @@ def route_finding(
                     providers=providers,
                 )
 
+    if request.ai_router_mode == "hybrid" and needs_remote and claude_avail:
+        return _decision(
+            route=AIRoute.claude,
+            reason="Complex finding routed to Claude.",
+            providers=providers,
+        )
+
     if request.ai_router_mode in ("hybrid", "fireworks_only"):
-        if requires_deep_reasoning or request.complexity in (
-            FindingComplexity.medium,
-            FindingComplexity.complex,
-        ):
+        if needs_remote:
             if remote_avail:
                 return _decision(
                     route=AIRoute.fireworks_gemma,
@@ -125,13 +134,13 @@ def _decision(
     provider_name = provider.provider_name if provider else route.value
     model_name = provider.model_name if provider else "none"
 
-    amd = providers.get("local_amd_model")
-    fw = providers.get("fireworks_gemma")
-    local_avail = bool(amd and amd.health().status is ProviderStatus.available)
-    remote_avail = bool(fw and fw.health().status is ProviderStatus.available)
+    local_avail = _available(providers, "local_amd_model")
+    remote_avail = _available(providers, "claude") or _available(
+        providers, "fireworks_gemma"
+    )
 
     attempted_local = route is AIRoute.local_amd_model
-    attempted_remote = route is AIRoute.fireworks_gemma
+    attempted_remote = route in (AIRoute.claude, AIRoute.fireworks_gemma)
     avoided_remote = route in (
         AIRoute.rule_only,
         AIRoute.local_amd_model,
@@ -165,3 +174,8 @@ def _decision(
         local_provider_latency_ms=None,
         remote_provider_latency_ms=None,
     )
+
+
+def _available(providers: dict[str, AIProvider], key: str) -> bool:
+    provider = providers.get(key)
+    return bool(provider and provider.health().status is ProviderStatus.available)

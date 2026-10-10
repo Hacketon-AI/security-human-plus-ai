@@ -34,7 +34,7 @@ const COPY = {
       { title: "Verify ownership", body: "Publish a one-time DNS TXT record. Until it resolves, the asset cannot be tested." },
       { title: "Authorize in writing", body: "Record the signed authorization: scope, validity window, risk tier, and rate limits." },
       { title: "Validate within scope", body: "An isolated worker runs passive, low-impact checks with a credential valid for this execution only. The kill switch is polled between phases." },
-      { title: "Prove and remediate", body: "Evidence is redacted, analysed with AI assistance, and confirmed by a human reviewer before it becomes a finding." },
+      { title: "Prove and remediate", body: "Evidence is redacted, then analysed by Claude into a risk verdict, fix, and retest plan. A human reviewer confirms it before it becomes a finding." },
     ],
     guaranteesTitle: "GUARANTEES",
     guaranteesLead: "Enforced by the platform. None of these depend on operator discipline.",
@@ -79,7 +79,7 @@ const COPY = {
       { title: "Verifikasi kepemilikan", body: "Publikasikan record DNS TXT sekali pakai. Sebelum record itu terbaca, aset tidak dapat diuji." },
       { title: "Otorisasi tertulis", body: "Catat otorisasi yang ditandatangani: cakupan, masa berlaku, tingkat risiko, dan batas laju." },
       { title: "Validasi dalam cakupan", body: "Worker terisolasi menjalankan pengecekan pasif berdampak rendah dengan kredensial yang hanya berlaku untuk eksekusi ini. Kill switch dicek di antara setiap fase." },
-      { title: "Buktikan dan perbaiki", body: "Bukti disamarkan, dianalisis dengan bantuan AI, dan dikonfirmasi peninjau manusia sebelum menjadi temuan." },
+      { title: "Buktikan dan perbaiki", body: "Bukti disamarkan, lalu dianalisis oleh Claude menjadi putusan risiko, perbaikan, dan rencana uji ulang. Peninjau manusia mengonfirmasinya sebelum menjadi temuan." },
     ],
     guaranteesTitle: "JAMINAN",
     guaranteesLead: "Ditegakkan oleh platform. Tidak ada yang bergantung pada kedisiplinan operator.",
@@ -124,6 +124,7 @@ title     Strict-Transport-Security header missing
 target    api.example-bank.test
 fix       add HSTS (max-age >= 31536000) at the gateway
 retest    scheduled after fix
+analysis  claude · redacted evidence only
 evidence  redacted · audit trail attached`,
 ];
 

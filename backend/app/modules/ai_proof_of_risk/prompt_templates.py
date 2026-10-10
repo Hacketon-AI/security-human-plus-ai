@@ -89,6 +89,7 @@ Remediation: {remediation}"""
 _TEMPLATES: dict[AIRoute, str] = {
     AIRoute.rule_only: _RULE_ONLY_TEMPLATE,
     AIRoute.local_amd_model: _CLASSIFICATION_TEMPLATE,
+    AIRoute.claude: _REASONING_TEMPLATE,
     AIRoute.fireworks_gemma: _REASONING_TEMPLATE,
     AIRoute.deterministic_fallback: _RULE_ONLY_TEMPLATE,
 }

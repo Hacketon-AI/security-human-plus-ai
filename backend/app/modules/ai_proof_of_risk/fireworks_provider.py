@@ -46,6 +46,41 @@ class DefaultHTTPClient:
             return cast(dict[str, Any], json.loads(response.read().decode("utf-8")))
 
 
+def is_safe_model_output(parsed: Any) -> bool:
+    """Reject unsafe content (shell commands, payloads, etc)."""
+    text = json.dumps(parsed).lower()
+    unsafe_keywords = [
+        "curl ",
+        "wget ",
+        "nc -e",
+        "/bin/sh",
+        "/bin/bash",
+        "exploit.py",
+        "sqlmap",
+        "nmap ",
+        "msfconsole",
+        "password=",
+        "secret=",
+        "harvest",
+        "exfiltrate",
+        "drop table",
+        "delete from",
+        "rm -rf",
+    ]
+
+    for keyword in unsafe_keywords:
+        if keyword in text:
+            return False
+
+    # heuristic for long tokens indicating potential dumped memory
+    tokens = text.split()
+    for token in tokens:
+        if len(token) > 1000:
+            return False
+
+    return True
+
+
 class FireworksConfig(BaseModel):
     fireworks_api_key: SecretStr | None = None
     fireworks_base_url: str = "https://api.fireworks.ai/inference/v1"
@@ -168,38 +203,7 @@ class FireworksGemmaReasoningProvider:
         return parsed
 
     def _is_safe_json(self, parsed: Any) -> bool:
-        """Reject unsafe content (shell commands, payloads, etc)."""
-        text = json.dumps(parsed).lower()
-        unsafe_keywords = [
-            "curl ",
-            "wget ",
-            "nc -e",
-            "/bin/sh",
-            "/bin/bash",
-            "exploit.py",
-            "sqlmap",
-            "nmap ",
-            "msfconsole",
-            "password=",
-            "secret=",
-            "harvest",
-            "exfiltrate",
-            "drop table",
-            "delete from",
-            "rm -rf",
-        ]
-
-        for keyword in unsafe_keywords:
-            if keyword in text:
-                return False
-
-        # heuristic for long tokens indicating potential dumped memory
-        tokens = text.split()
-        for token in tokens:
-            if len(token) > 1000:
-                return False
-
-        return True
+        return is_safe_model_output(parsed)
 
     def generate_risk_tribunal(
         self,

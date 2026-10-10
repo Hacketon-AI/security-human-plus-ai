@@ -5,7 +5,7 @@ data redaction, and strict API-to-sandbox isolation.
 """
 
 from datetime import UTC, datetime
-from typing import Any
+from typing import TYPE_CHECKING, Any
 from uuid import UUID
 
 from pydantic import BaseModel
@@ -42,6 +42,9 @@ from app.modules.ai_proof_of_risk.schemas import (
 )
 from app.modules.ai_proof_of_risk.security_router import route_finding
 
+if TYPE_CHECKING:
+    from app.config import Settings
+
 
 class ServiceConfig(BaseModel):
     """Configuration for AI Proof-of-Risk Service."""
@@ -51,6 +54,16 @@ class ServiceConfig(BaseModel):
     ai_sandbox_base_url: str | None = None
     ai_router_mode: str = "deterministic"
     ai_max_remote_tokens: int = 4000
+
+    @classmethod
+    def from_settings(cls, settings: "Settings") -> "ServiceConfig":
+        """Build from application settings so SECURESCOPE_AI_* env vars apply."""
+        return cls(
+            ai_proof_of_risk_enabled=settings.ai_proof_of_risk_enabled,
+            ai_sandbox_simulation_enabled=settings.ai_sandbox_simulation_enabled,
+            ai_router_mode=settings.ai_router_mode,
+            ai_max_remote_tokens=settings.ai_max_remote_tokens,
+        )
 
 
 class AIProofOfRiskService:
@@ -63,9 +76,12 @@ class AIProofOfRiskService:
         providers: dict[str, Any] | None = None,
     ) -> None:
         self.evidence_provider = evidence_provider
-        self.config = config or ServiceConfig()
 
         from app.config import get_settings
+        from app.modules.ai_proof_of_risk.claude_provider import (
+            ClaudeConfig,
+            ClaudeReasoningProvider,
+        )
         from app.modules.ai_proof_of_risk.fireworks_provider import (
             DefaultHTTPClient,
             FireworksConfig,
@@ -76,6 +92,7 @@ class AIProofOfRiskService:
         )
 
         settings = get_settings()
+        self.config = config or ServiceConfig.from_settings(settings)
         fireworks_config = FireworksConfig(
             fireworks_api_key=settings.fireworks_api_key,
             fireworks_base_url=settings.fireworks_base_url,
@@ -87,7 +104,14 @@ class AIProofOfRiskService:
         )
 
         if providers is None:
-            self.providers = {
+            self.providers: dict[str, Any] = {
+                "claude": ClaudeReasoningProvider(
+                    ClaudeConfig(
+                        anthropic_api_key=settings.anthropic_api_key,
+                        anthropic_model=settings.anthropic_model,
+                        timeout_seconds=settings.ai_claude_timeout_seconds,
+                    )
+                ),
                 "fireworks_gemma": FireworksGemmaReasoningProvider(
                     config=fireworks_config,
                     http_client=DefaultHTTPClient(),
@@ -244,14 +268,16 @@ class AIProofOfRiskService:
                         logger = logging.getLogger(__name__)
                         logger.error(f"Sandbox runner failed: {e}")
 
-        # Fireworks provider integration
-        use_fireworks = (
-            route is not None
-            and route.selected_route == AIRoute.fireworks_gemma
+        # Remote reasoning provider (Claude preferred, Fireworks alternative)
+        remote_routes = (AIRoute.claude, AIRoute.fireworks_gemma)
+        fw_provider = (
+            self.providers.get(route.selected_route.value)
+            if route is not None
+            and route.selected_route in remote_routes
             and self.config.ai_router_mode != "deterministic"
-            and "fireworks_gemma" in self.providers
+            else None
         )
-        fw_provider = self.providers.get("fireworks_gemma") if use_fireworks else None
+        use_fireworks = fw_provider is not None
 
         # Prepare inputs for Fireworks if needed
         safe_evidence = normalized_findings[0].evidence if normalized_findings else {}
@@ -269,7 +295,7 @@ class AIProofOfRiskService:
         tribunal_verdict = None
         if digital_twin_scenarios:
             if use_fireworks and fw_provider:
-                tribunal_verdict = fw_provider.generate_risk_tribunal(  # type: ignore
+                tribunal_verdict = fw_provider.generate_risk_tribunal(
                     sanitized_evidence=safe_evidence,
                     attack_graph_summary=graph_summary,
                     digital_twin_scenario_summary=scenario_summary,
@@ -285,7 +311,7 @@ class AIProofOfRiskService:
         retest_plan = None
         if digital_twin_scenarios:
             if use_fireworks and fw_provider:
-                remediation_plan = fw_provider.generate_remediation_plan(  # type: ignore
+                remediation_plan = fw_provider.generate_remediation_plan(
                     sanitized_evidence=safe_evidence,
                     attack_graph_summary=graph_summary,
                     digital_twin_scenario_summary=scenario_summary,
@@ -301,7 +327,7 @@ class AIProofOfRiskService:
         # 13. Generate Report Summary
         report_data = None
         if use_fireworks and fw_provider:
-            report_data = fw_provider.generate_executive_report(  # type: ignore
+            report_data = fw_provider.generate_executive_report(
                 sanitized_evidence=safe_evidence,
                 attack_graph_summary=graph_summary,
                 digital_twin_scenario_summary=scenario_summary,

@@ -18,6 +18,7 @@ class AIRoute(StrEnum):
 
     rule_only = "rule_only"
     local_amd_model = "local_amd_model"
+    claude = "claude"
     fireworks_gemma = "fireworks_gemma"
     deterministic_fallback = "deterministic_fallback"
 

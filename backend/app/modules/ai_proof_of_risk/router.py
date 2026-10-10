@@ -5,6 +5,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
+from app.config import get_settings
 from app.modules.ai_proof_of_risk.errors import (
     MissingExecutionError,
     UnverifiedAssetError,
@@ -31,7 +32,7 @@ def get_evidence_provider() -> ExecutionEvidenceProvider:
 
 def get_service_config() -> ServiceConfig:
     """Dependency injection for service configuration."""
-    return ServiceConfig()
+    return ServiceConfig.from_settings(get_settings())
 
 
 @router.post(
